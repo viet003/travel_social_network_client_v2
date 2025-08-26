@@ -8,24 +8,8 @@ import { path } from '../../utilities/path';
 import { formatLastActiveTime } from '../../utilities/helper';
 import { apiGetUserGroupsService } from '../../services/chatService';
 
-interface Contact {
-  id: string;
-  name: string;
-  avatar: string;
-  lastMessage: string;
-  time: string;
-  color: string;
-}
-
-interface Message {
-  id: string;
-  sender: string;
-  content: string;
-  time: string;
-  isOwn: boolean;
-}
-
-interface GroupChatResponse {
+// Interface cho group chat từ API
+interface GroupChat {
   groupChatId: string;
   groupChatName: string;
   groupChatAvatar: string;
@@ -34,109 +18,71 @@ interface GroupChatResponse {
   lastActiveAt: string;
 }
 
+// Interface cho tin nhắn
+interface Message {
+  id: string;
+  sender: string;
+  content: string;
+  time: string;
+  isOwn: boolean;
+}
+
 const MainPage: React.FC = () => {
-  const [selectedContact, setSelectedContact] = useState<string | null>(null);
-  const [message, setMessage] = useState<string>('');
-  const [groups, setGroups] = useState<GroupChatResponse[]>([]);
-  const [contacts, setContacts] = useState<Contact[]>([]);
+  // State chính để quản lý dữ liệu
+  const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
+  const [messageInput, setMessageInput] = useState<string>('');
+  const [groupChats, setGroupChats] = useState<GroupChat[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [page, setPage] = useState<number>(0);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  
   const { userId } = useSelector((state: any) => state.auth);
 
-  // Fetch user groups from API
-  const fetchUserGroups = async () => {
+  // Fetch danh sách group chats từ API
+  const fetchGroupChats = async () => {
     try {
       setLoading(true);
       setError(null);
-      
-      // Replace with your actual API endpoint
-      const response = await fetch('/api/user/groupchats', {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`, // Adjust based on your auth method
-          'Content-Type': 'application/json',
-        },
-      });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      const res = await apiGetUserGroupsService(userId, 0, 20);
+      if(res?.success) {
+        setGroupChats(res?.data?.content);
       }
 
-      const data = await response.json();
-      const groupChats: GroupChatResponse[] = data.data || data || []; // Adjust based on your API response structure
-      setGroups(groupChats);
-      
-      // Convert group chats to contacts format
-      if (groupChats && groupChats.length > 0) {
-        const groupContacts: Contact[] = groupChats.map((group: GroupChatResponse, index: number) => ({
-          id: group.groupChatId,
-          name: group.groupChatName,
-          avatar: group.groupChatAvatar || group.groupChatName.charAt(0).toUpperCase(),
-          lastMessage: group.lastMessage || 'No messages yet',
-          time: formatLastActiveTime(group.lastActiveAt),
-          color: getGroupColor(index)
-        }));
-        
-        setContacts(groupContacts);
-        // Auto select first group if available
-        setSelectedContact(groupContacts[0].id);
+      // Tự động chọn group đầu tiên nếu có
+      if (res && res.length > 0) {
+        setSelectedGroupId(res[0].groupChatId);
       } else {
-        setContacts([]);
-        setSelectedContact(null);
+        setSelectedGroupId(null);
       }
     } catch (err) {
-      console.error('Error fetching user group chats:', err);
-      setError(err instanceof Error ? err.message : 'Failed to fetch group chats');
-      setContacts([]);
-      setSelectedContact(null);
+      console.error("Error fetching group chats:", err);
+      setError(err instanceof Error ? err.message : "Failed to fetch group chats");
+      setGroupChats([]);
+      setSelectedGroupId(null);
     } finally {
       setLoading(false);
     }
   };
 
+  // Load group chats khi component mount
   useEffect(() => {
-    const fetchGroups = async () => {
-      try {
-        const res = await apiGetUserGroupsService(userId, page, 10);
-        setGroups(res?.data || []); // tuỳ vào cấu trúc trả về của API
-      } catch (err) {
-        setGroups([]);
-      }
-    };
-    if (userId) fetchGroups();
+    if (userId) {
+      fetchGroupChats();
+    }
   }, [userId]);
 
-  // Helper function to get group color
-  const getGroupColor = (index: number): string => {
+  // Helper function để lấy màu cho avatar group
+  const getGroupAvatarColor = (index: number): string => {
     const colors = [
-      'bg-blue-500',
-      'bg-green-500', 
-      'bg-purple-500',
-      'bg-pink-500',
-      'bg-orange-500',
-      'bg-red-500',
-      'bg-yellow-500',
-      'bg-indigo-500',
-      'bg-gray-500'
+      'bg-blue-500', 'bg-green-500', 'bg-purple-500', 'bg-pink-500',
+      'bg-orange-500', 'bg-red-500', 'bg-yellow-500', 'bg-indigo-500', 'bg-gray-500'
     ];
     return colors[index % colors.length];
   };
 
-  // Load groups on component mount
-  useEffect(() => {
-    fetchUserGroups();
-  }, []);
-
-  // Messages data for each contact (you might want to fetch this from API too)
-  const allMessages: { [key: string]: Message[] } = {
-    // This would be populated from API calls when a contact is selected
-  };
-
+  // Danh sách menu items
   const menuItems = [
     { icon: BarChart3, label: 'Dashboard', active: false },
     { icon: User, label: 'Your Profile', active: false },
@@ -147,39 +93,36 @@ const MainPage: React.FC = () => {
     { icon: HelpCircle, label: 'Help Center', active: false }
   ];
 
+  // Xử lý gửi tin nhắn
   const handleSendMessage = () => {
-    if (message.trim() && selectedContact) {
-      // Here you would typically send the message to your backend
-      console.log('Sending message:', message, 'to group:', selectedContact);
-      setMessage('');
+    if (messageInput.trim() && selectedGroupId) {
+      console.log('Sending message:', messageInput, 'to group:', selectedGroupId);
+      setMessageInput('');
     }
   };
 
+  // Xử lý logout
   const handleLogout = () => {
     dispatch(logout());
     navigate(path.LANDING);
   };
 
-  const handleRefreshGroups = () => {
-    fetchUserGroups();
-  };
-
-  // Get current messages for selected contact
-  const currentMessages = selectedContact ? allMessages[selectedContact] || [] : [];
+  // Messages mẫu - sẽ được thay thế bằng API call thực tế
+  const currentMessages: Message[] = [];
 
   return (
     <div className="fixed inset-0 flex flex-col bg-gray-50">
-      {/* Top Header */}
+      {/* Header */}
       <div className="bg-white border-b border-gray-200 px-4 py-2 flex-shrink-0">
         <div className="flex items-center justify-between">
-          {/* Left side - Window controls */}
+          {/* Window controls */}
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 bg-red-500 rounded-full cursor-pointer transition-all duration-200 hover:scale-110"></div>
             <div className="w-3 h-3 bg-yellow-500 rounded-full cursor-pointer transition-all duration-200 hover:scale-110"></div>
             <div className="w-3 h-3 bg-green-500 rounded-full cursor-pointer transition-all duration-200 hover:scale-110"></div>
           </div>
 
-          {/* Center - Search */}
+          {/* Search bar */}
           <div className="flex-1 max-w-sm mx-4">
             <div className="relative">
               <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
@@ -191,7 +134,7 @@ const MainPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Right side - Notifications and Profile */}
+          {/* User actions */}
           <div className="flex items-center gap-3">
             <button className="relative p-1.5 text-gray-600 hover:text-gray-800 cursor-pointer transition-all duration-200 hover:bg-gray-100 rounded-lg">
               <Bell size={16} />
@@ -218,7 +161,7 @@ const MainPage: React.FC = () => {
 
       {/* Main Content */}
       <div className="flex flex-1 min-h-0">
-        {/* Sidebar */}
+        {/* Sidebar Menu */}
         <div className="w-56 bg-white border-r border-gray-200 flex flex-col flex-shrink-0">
           {/* Create New Button */}
           <div className="p-3">
@@ -228,7 +171,7 @@ const MainPage: React.FC = () => {
             </button>
           </div>
 
-          {/* Menu Items */}
+          {/* Navigation Menu */}
           <nav className="flex-1 px-3 overflow-y-auto">
             {menuItems.map((item, index) => (
               <div
@@ -245,7 +188,7 @@ const MainPage: React.FC = () => {
             ))}
           </nav>
 
-          {/* Bottom Menu */}
+          {/* Bottom Actions */}
           <div className="p-3 border-t border-gray-200 flex-shrink-0">
             <div className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg cursor-pointer text-gray-600 hover:bg-gray-50 hover:text-gray-800 mb-1 transition-all duration-200">
               <Settings size={16} className="transition-transform duration-200 hover:rotate-90" />
@@ -261,9 +204,9 @@ const MainPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Contacts List */}
+        {/* Group Chats List */}
         <div className="w-72 bg-white border-r border-gray-200 flex flex-col flex-shrink-0">
-          {/* Search Header */}
+          {/* Search Group Chats */}
           <div className="p-3 border-b border-gray-200 flex-shrink-0">
             <div className="flex items-center gap-2">
               <div className="relative flex-1">
@@ -275,7 +218,7 @@ const MainPage: React.FC = () => {
                 />
               </div>
               <button
-                onClick={handleRefreshGroups}
+                onClick={fetchGroupChats}
                 className="p-1.5 text-gray-400 hover:text-gray-600 cursor-pointer transition-all duration-200 hover:bg-gray-100 rounded-lg"
                 title="Refresh group chats"
               >
@@ -300,7 +243,7 @@ const MainPage: React.FC = () => {
               <div className="text-center">
                 <p className="text-red-500 text-sm mb-2">Failed to load group chats</p>
                 <button
-                  onClick={handleRefreshGroups}
+                  onClick={fetchGroupChats}
                   className="px-3 py-1.5 bg-blue-500 text-white rounded-lg text-sm hover:bg-blue-600 transition-colors"
                 >
                   Try Again
@@ -310,7 +253,7 @@ const MainPage: React.FC = () => {
           )}
 
           {/* Empty State */}
-          {!loading && !error && contacts.length === 0 && (
+          {!loading && !error && groupChats.length === 0 && (
             <div className="flex-1 flex items-center justify-center p-4">
               <div className="text-center">
                 <MessageCircle className="mx-auto mb-3 text-gray-300" size={48} />
@@ -320,48 +263,53 @@ const MainPage: React.FC = () => {
             </div>
           )}
 
-          {/* Contacts */}
-          {/* {!loading && !error && contacts.length > 0 && (
+          {/* Group Chats List */}
+          {!loading && !error && groupChats.length > 0 && (
             <div className="flex-1 overflow-y-auto">
-              {contacts.map((contact) => (
+              {groupChats.map((group, index) => (
                 <div
-                  key={contact.id}
+                  key={group.groupChatId}
                   className={`p-3 border-b border-gray-100 cursor-pointer hover:bg-gray-50 transition-all duration-200 ${
-                    selectedContact === contact.id ? 'bg-blue-50 border-l-4 border-l-blue-500' : ''
+                    selectedGroupId === group.groupChatId ? 'bg-blue-50 border-l-4 border-l-blue-500' : ''
                   }`}
-                  onClick={() => setSelectedContact(contact.id)}
+                  onClick={() => setSelectedGroupId(group.groupChatId)}
                 >
                   <div className="flex items-center gap-2.5">
-                    <div className={`w-10 h-10 rounded-full ${contact.color} flex items-center justify-center text-white font-bold text-base transition-transform duration-200 hover:scale-110 overflow-hidden`}>
-                      {contact.avatar.startsWith('http') ? (
+                    {/* Group Avatar */}
+                    <div className={`w-10 h-10 rounded-full ${getGroupAvatarColor(index)} flex items-center justify-center text-white font-bold text-base transition-transform duration-200 hover:scale-110 overflow-hidden`}>
+                      {group.groupChatAvatar && group.groupChatAvatar.startsWith('http') ? (
                         <img 
-                          src={contact.avatar} 
-                          alt={contact.name}
+                          src={group.groupChatAvatar} 
+                          alt={group.groupChatName}
                           className="w-full h-full object-cover"
                         />
                       ) : (
-                        contact.avatar
+                        group.groupChatName.charAt(0).toUpperCase()
                       )}
                     </div>
+                    
+                    {/* Group Info */}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between">
-                        <h3 className="text-base font-medium text-gray-900 truncate">{contact.name}</h3>
-                        <span className="text-sm text-gray-500">{contact.time}</span>
+                        <h3 className="text-base font-medium text-gray-900 truncate">{group.groupChatName}</h3>
+                        <span className="text-sm text-gray-500">{formatLastActiveTime(group.lastActiveAt)}</span>
                       </div>
-                      <p className="text-sm text-gray-500 truncate mt-0.5">{contact.lastMessage}</p>
+                      <p className="text-sm text-gray-500 truncate mt-0.5">
+                        {group.lastMessage || "No messages yet"}
+                      </p>
                     </div>
                   </div>
                 </div>
               ))}
             </div>
-          )} */}
+          )}
         </div>
 
         {/* Chat Area */}
         <div className="flex-1 flex flex-col min-w-0">
-          {selectedContact ? (
+          {selectedGroupId ? (
             <>
-              <ChatMessages selectedContact={selectedContact} messages={currentMessages} />
+              <ChatMessages selectedContact={selectedGroupId} messages={currentMessages} />
               
               {/* Message Input */}
               <div className="bg-white border-t border-gray-200 p-3 flex-shrink-0">
@@ -372,8 +320,8 @@ const MainPage: React.FC = () => {
                   <div className="flex-1 relative">
                     <input
                       type="text"
-                      value={message}
-                      onChange={(e) => setMessage(e.target.value)}
+                      value={messageInput}
+                      onChange={(e) => setMessageInput(e.target.value)}
                       onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
                       placeholder="Write a message"
                       className="w-full px-3 py-2 border border-gray-200 rounded-full focus:outline-none focus:border-blue-500 text-base transition-all duration-200 hover:bg-gray-50"
@@ -392,13 +340,13 @@ const MainPage: React.FC = () => {
               </div>
             </>
           ) : (
-            // No messages state
+            // No Group Selected State
             <div className="flex-1 flex items-center justify-center bg-gray-50">
               <div className="text-center max-w-md px-4">
                 <MessageCircle className="mx-auto mb-6 text-gray-300" size={80} />
                 <h3 className="text-xl font-semibold text-gray-700 mb-2">No conversation selected</h3>
                 <p className="text-gray-500">
-                  {contacts.length > 0 
+                  {groupChats.length > 0 
                     ? "Choose a group chat from the sidebar to start messaging"
                     : "You don't have any messages yet. Join a group chat to start chatting!"
                   }
