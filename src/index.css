@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import './styles/travel-colors.css';
 
 @layer base {
   * {
@@ -7,17 +8,23 @@
 
   /* Global scrollbar - chỉ áp dụng cho elements không có class scrollbar-hide */
   :not(.scrollbar-hide)::-webkit-scrollbar {
-      @apply w-1 h-6
+      width: 4px;
+      height: 6px;
   }
 
-  :not(.scrollbar-hide)::-webkit-scrollbar-track {}
+  :not(.scrollbar-hide)::-webkit-scrollbar-track {
+    background: transparent;
+  }
 
   :not(.scrollbar-hide)::-webkit-scrollbar-thumb {
-      @apply rounded-full bg-gray-300  h-2
+      border-radius: 4px;
+      background: #cbd5e0;
+      height: 6px;
   }
 
   .active {
-      @apply text-black bg-white
+      color: black;
+      background-color: white;
   }
 }
 

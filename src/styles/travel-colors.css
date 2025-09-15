@@ -46,21 +46,24 @@
 }
 
 /* Utility classes for easy use */
-.bg-travel-gradient {
-  background: var(--travel-gradient);
-}
+@layer utilities {
+  .bg-travel-gradient {
+    background: var(--travel-gradient);
+  }
 
-.bg-travel-gradient-light {
-  background: var(--travel-gradient-light);
-}
+  .bg-travel-gradient-light {
+    background: var(--travel-gradient-light);
+  }
 
-.bg-travel-gradient-dark {
-  background: var(--travel-gradient-dark);
-}
+  .bg-travel-gradient-dark {
+    background: var(--travel-gradient-dark);
+  }
 
-.text-travel-gradient {
-  background: var(--travel-gradient);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
+  .text-travel-gradient {
+    background: var(--travel-gradient);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: var(--travel-primary-500); /* Fallback color */
+  }
 }

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { path } from '../../utilities/path';
@@ -10,7 +10,7 @@ interface ProtectedRouteProps {
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, isPublic = false }) => {
   const authState = useSelector((state: any) => state.auth);
-  const { token, isLoggedIn } = authState;
+  const { token } = authState;
 
   // useEffect(() => {
   //   console.log('🔐 ProtectedRoute - Auth State Changed:', authState);

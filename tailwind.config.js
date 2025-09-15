@@ -4,6 +4,22 @@ export default {
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
+  safelist: [
+    'text-travel-primary-600',
+    'hover:text-travel-primary-700',
+    'bg-travel-primary-50',
+    'bg-travel-primary-100',
+    'bg-travel-primary-500',
+    'bg-travel-primary-600',
+    'bg-travel-primary-700',
+    'border-travel-primary-500',
+    'focus:ring-travel-primary-500',
+    'text-travel-gradient',
+    'bg-travel-gradient',
+    'bg-travel-gradient-light',
+    'bg-travel-gradient-dark',
+    'hover:bg-travel-gradient-dark',
+  ],
   theme: {
     extend: {
       colors: {
@@ -56,5 +72,17 @@ export default {
       }
     },
   },
-  plugins: [],
+  plugins: [
+    function({ addUtilities }) {
+      addUtilities({
+        '.text-travel-gradient': {
+          'background': 'var(--travel-gradient)',
+          '-webkit-background-clip': 'text',
+          'background-clip': 'text',
+          '-webkit-text-fill-color': 'transparent',
+          'color': 'var(--travel-primary-500)', // Fallback color
+        }
+      })
+    }
+  ],
 }
