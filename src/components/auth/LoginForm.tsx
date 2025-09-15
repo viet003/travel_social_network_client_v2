@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 
 const LoginForm = () => {
   const [email, setEmail] = useState('');
@@ -15,7 +16,7 @@ const LoginForm = () => {
       </h1>
 
       <p className="text-gray-600 text-base sm:text-lg max-w-md">
-        Với Travel Social Network, bạn có thể kết nối với những người cùng đam mê du lịch, chia sẻ kinh nghiệm và tạo ra những kỷ niệm không thể quên.
+        Với TravelNest, bạn có thể kết nối với những người cùng đam mê du lịch, chia sẻ kinh nghiệm và tạo ra những kỷ niệm không thể quên.
       </p>
 
       {/* Login Form */}
@@ -25,7 +26,7 @@ const LoginForm = () => {
           placeholder="Email hoặc số điện thoại"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:border-gray-500"
+          className="w-full px-3 py-2 text-sm text-gray-500 border border-gray-300 rounded-md focus:outline-none focus:border-gray-500"
         />
 
         <input
@@ -33,15 +34,15 @@ const LoginForm = () => {
           placeholder="Mật khẩu"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:border-gray-500"
+          className="w-full px-3 py-2 text-sm text-gray-500 border border-gray-300 rounded-md focus:outline-none focus:border-gray-500"
         />
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0">
           <button className="bg-travel-gradient text-white px-6 py-2 text-sm rounded-md font-medium hover:bg-travel-gradient-dark hover:scale-105 hover:shadow-lg transition-all duration-300 w-full sm:w-auto cursor-pointer transform">
             Đăng nhập
           </button>
-          <a href="/forgot-pass" className="text-travel-primary-600 hover:text-travel-primary-700 hover:underline hover:decoration-travel-primary-700 hover:underline-offset-2 text-xs text-center sm:text-right cursor-pointer transition-all duration-200">
+          <Link to="/forgot-pass" className="text-gray-500 text-xs text-center sm:text-right font-medium cursor-pointer hover:underline decoration-2 decoration-[var(--travel-primary-600)] hover:underline-offset-4 hover:text-[var(--travel-primary-700)]">
             Bạn quên mật khẩu?
-          </a>
+          </Link>
         </div>
 
         <div className="flex items-center space-x-2">
@@ -50,7 +51,7 @@ const LoginForm = () => {
             id="keepLoggedIn"
             checked={keepLoggedIn}
             onChange={(e) => setKeepLoggedIn(e.target.checked)}
-            className="w-3 h-3 text-travel-primary-600 border-gray-300 rounded focus:ring-travel-primary-500"
+            className="w-3 h-3 accent-travel-primary-600 border-gray-300 rounded focus:ring-travel-primary-500"
           />
           <label htmlFor="keepLoggedIn" className="text-xs text-gray-600">
             Duy trì đăng nhập
@@ -81,9 +82,9 @@ const LoginForm = () => {
         <div className="text-center">
           <p className="text-xs text-gray-500">
             Chưa có tài khoản?{' '}
-            <a href="/signup" className="text-travel-primary-600 hover:underline cursor-pointer">
+            <Link to="/signup" className="mt-3 text-[var(--travel-primary-600)] font-medium cursor-pointer transition-all duration-200 hover:underline decoration-2 decoration-[var(--travel-primary-600)] hover:underline-offset-4">
               Đăng ký ngay
-            </a>
+            </Link>
           </p>
         </div>
       </div>

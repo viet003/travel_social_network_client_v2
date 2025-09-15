@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 
 const ForgotPasswordForm = () => {
   const [email, setEmail] = useState('');
@@ -38,7 +39,7 @@ const ForgotPasswordForm = () => {
           
           <p className="text-center text-xs text-gray-500">
             Không nhận được email? Kiểm tra thư mục spam hoặc{' '}
-            <a href="#" className="text-travel-primary-600 hover:underline cursor-pointer">
+            <a href="#" className="font-medium cursor-pointer transition-all duration-200 hover:underline decoration-2 decoration-[var(--travel-primary-600)] hover:underline-offset-4">
               liên hệ hỗ trợ
             </a>
           </p>
@@ -88,7 +89,7 @@ const ForgotPasswordForm = () => {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
-          className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:border-gray-500"
+          className="w-full px-3 py-2 text-sm text-gray-500 border border-gray-300 rounded-md focus:outline-none focus:border-gray-500"
         />
 
         <button 
@@ -122,15 +123,9 @@ const ForgotPasswordForm = () => {
         <div className="text-center space-y-2">
           <p className="text-xs text-gray-500">
             Nhớ lại mật khẩu?{' '}
-            <a href="/" className="text-travel-primary-600 hover:underline cursor-pointer">
+            <Link to="/" className="mt-3 text-[var(--travel-primary-600)] font-medium cursor-pointer transition-all duration-200 hover:underline decoration-2 decoration-[var(--travel-primary-600)] hover:underline-offset-4">
               Đăng nhập ngay
-            </a>
-          </p>
-          <p className="text-xs text-gray-500">
-            Chưa có tài khoản?{' '}
-            <a href="/signup" className="text-travel-primary-600 hover:underline cursor-pointer">
-              Đăng ký ngay
-            </a>
+            </Link>
           </p>
         </div>
       </form>

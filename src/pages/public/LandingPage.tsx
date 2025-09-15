@@ -1,5 +1,13 @@
 import { useState, useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
+import { 
+  Zap, 
+  Shield, 
+  Monitor, 
+  Code, 
+  HelpCircle, 
+  ChevronRight 
+} from 'lucide-react';
 import background from '../../assets/images/background.png';
 
 const LandingPage = () => {
@@ -8,7 +16,7 @@ const LandingPage = () => {
 
   useEffect(() => {
     let ticking = false;
-    
+
     const handleScroll = () => {
       if (!ticking) {
         requestAnimationFrame(() => {
@@ -55,11 +63,24 @@ const LandingPage = () => {
             {/* <span className="text-xl font-bold text-gray-900">Social Network</span> */}
           </div>
           <div className="hidden md:flex items-center space-x-8 text-base text-gray-700">
-            <a href="#" className="hover:text-travel-primary-600 hover:underline hover:decoration-travel-primary-600 hover:underline-offset-4 font-medium cursor-pointer transition-all duration-200">Tính năng ▼</a>
-            <a href="#" className="hover:text-travel-primary-600 hover:underline hover:decoration-travel-primary-600 hover:underline-offset-4 font-medium cursor-pointer transition-all duration-200">Quyền riêng tư và an toàn</a>
-            <a href="#" className="hover:text-travel-primary-600 hover:underline hover:decoration-travel-primary-600 hover:underline-offset-4 font-medium cursor-pointer transition-all duration-200">Ứng dụng dành cho máy tính</a>
-            <a href="#" className="hover:text-travel-primary-600 hover:underline hover:decoration-travel-primary-600 hover:underline-offset-4 font-medium cursor-pointer transition-all duration-200">Dành cho nhà phát triển</a>
-            <a href="#" className="hover:text-travel-primary-600 hover:underline hover:decoration-travel-primary-600 hover:underline-offset-4 font-medium cursor-pointer transition-all duration-200">Trung tâm trợ giúp</a>
+            {[
+              "Tính năng ▼",
+              "Quyền riêng tư và an toàn",
+              "Ứng dụng dành cho máy tính",
+              "Dành cho nhà phát triển",
+              "Trung tâm trợ giúp",
+            ].map((text, i) => (
+              <a
+                key={i}
+                href="#"
+                className="font-medium cursor-pointer transition-all duration-200 
+                 hover:underline decoration-2 
+                 decoration-[var(--travel-primary-600)] 
+                 hover:underline-offset-4"
+              >
+                {text}
+              </a>
+            ))}
           </div>
           {/* Mobile menu button */}
           <button
@@ -82,19 +103,23 @@ const LandingPage = () => {
         ></div>
 
         {/* Side Menu */}
-        <div className={`absolute left-0 top-0 h-full w-80 bg-white shadow-2xl transform transition-transform duration-300 ease-in-out ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
-          <div className="flex items-center justify-between p-4 border-b border-gray-200">
+        <div className={`absolute left-0 top-0 h-full w-80 bg-white shadow-2xl transform transition-transform duration-300 ease-in-out flex flex-col ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+          {/* Header */}
+          <div className="flex items-center justify-between p-6 border-b border-gray-100 bg-gradient-to-r from-travel-primary-50 to-travel-secondary-50">
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-travel-gradient rounded-full flex items-center justify-center">
-                <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+              <div className="w-12 h-12 bg-travel-gradient rounded-full flex items-center justify-center shadow-lg">
+                <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
                 </svg>
               </div>
-              {/* <span className="text-lg font-bold text-gray-900">Social Network</span> */}
+              <div>
+                <h2 className="text-lg font-bold text-gray-900">TravelNest</h2>
+                <p className="text-xs text-gray-500">Kết nối du lịch</p>
+              </div>
             </div>
             <button
               onClick={() => setIsMobileMenuOpen(false)}
-              className="p-2 text-gray-500 hover:text-travel-primary-600 cursor-pointer transition-colors duration-200"
+              className="p-2 text-gray-400 hover:text-travel-primary-600 hover:bg-travel-primary-50 rounded-full cursor-pointer transition-all duration-200"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -102,12 +127,63 @@ const LandingPage = () => {
             </button>
           </div>
 
-          <div className="px-4 py-6 space-y-2">
-            <a href="#" className="block text-gray-700 hover:text-travel-primary-600 hover:underline hover:decoration-travel-primary-600 hover:underline-offset-2 font-medium py-3 px-3 rounded-lg hover:bg-travel-primary-50 cursor-pointer transition-all duration-200">Tính năng</a>
-            <a href="#" className="block text-gray-700 hover:text-travel-primary-600 hover:underline hover:decoration-travel-primary-600 hover:underline-offset-2 font-medium py-3 px-3 rounded-lg hover:bg-travel-primary-50 cursor-pointer transition-all duration-200">Quyền riêng tư và an toàn</a>
-            <a href="#" className="block text-gray-700 hover:text-travel-primary-600 hover:underline hover:decoration-travel-primary-600 hover:underline-offset-2 font-medium py-3 px-3 rounded-lg hover:bg-travel-primary-50 cursor-pointer transition-all duration-200">Ứng dụng dành cho máy tính</a>
-            <a href="#" className="block text-gray-700 hover:text-travel-primary-600 hover:underline hover:decoration-travel-primary-600 hover:underline-offset-2 font-medium py-3 px-3 rounded-lg hover:bg-travel-primary-50 cursor-pointer transition-all duration-200">Dành cho nhà phát triển</a>
-            <a href="#" className="block text-gray-700 hover:text-travel-primary-600 hover:underline hover:decoration-travel-primary-600 hover:underline-offset-2 font-medium py-3 px-3 rounded-lg hover:bg-travel-primary-50 cursor-pointer transition-all duration-200">Trung tâm trợ giúp</a>
+          {/* Navigation Menu */}
+          <div className="px-6 py-6 flex-1">
+            <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">Menu</h3>
+            <div className="space-y-1">
+              {[
+                { text: "Tính năng", icon: Zap, hasSubmenu: true },
+                { text: "Quyền riêng tư và an toàn", icon: Shield },
+                { text: "Ứng dụng dành cho máy tính", icon: Monitor },
+                { text: "Dành cho nhà phát triển", icon: Code },
+                { text: "Trung tâm trợ giúp", icon: HelpCircle },
+              ].map((item, i) => {
+                const IconComponent = item.icon;
+                return (
+                  <a
+                    key={i}
+                    href="#"
+                    className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:text-travel-primary-600 hover:bg-travel-primary-50 rounded-lg cursor-pointer transition-all duration-200 group"
+                  >
+                    <IconComponent className="w-5 h-5 text-gray-600 group-hover:text-travel-primary-600 transition-colors duration-200" />
+                    <span className="flex-1 font-medium cursor-pointer transition-all duration-200 
+                    hover:underline decoration-2 
+                    decoration-[var(--travel-primary-600)] 
+                    hover:underline-offset-4">{item.text}</span>
+                    {item.hasSubmenu && (
+                      <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-travel-primary-600 transition-colors duration-200" />
+                    )}
+                  </a>
+                );
+              })}
+            </div>
+          </div>
+          
+          {/* Footer Info */}
+          <div className="px-6 py-4 border-t border-gray-100 mt-auto">
+            <div className="text-center">
+              <p className="text-xs text-gray-400 mb-2">© TravelNest Network 2025</p>
+              <div className="flex justify-center space-x-4 text-xs">
+                {[
+                  "Chính sách",
+                  "Điều khoản", 
+                  "Hỗ trợ",
+                ].map((text, i) => (
+                  <a
+                    key={i}
+                    href="#"
+                    className="font-medium
+                    text-gray-400
+                    cursor-pointer transition-all duration-200 
+                    hover:underline decoration-2 
+                    decoration-[var(--travel-primary-600)] 
+                    hover:underline-offset-4"
+                  >
+                    {text}
+                  </a>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -142,12 +218,25 @@ const LandingPage = () => {
       <footer className="bg-white py-6 sm:py-8 mt-auto">
         <div className="max-w-7xl mx-auto px-2 sm:px-4">
           <div className="flex flex-col lg:flex-row justify-between items-center text-xs sm:text-sm text-gray-600 space-y-4 lg:space-y-0">
-            <div className="text-gray-400 order-3 lg:order-1">© Travel Social Network 2025</div>
+            <div className="text-gray-400 order-3 lg:order-1">© TravelNest 2025</div>
             <div className="flex flex-wrap justify-center gap-4 sm:gap-6 lg:gap-8 order-2">
-              <a href="#" className="hover:text-travel-primary-600 hover:underline hover:decoration-travel-primary-600 hover:underline-offset-4 cursor-pointer transition-all duration-200">Chính sách quyền riêng tư</a>
-              <a href="#" className="hover:text-travel-primary-600 hover:underline hover:decoration-travel-primary-600 hover:underline-offset-4 cursor-pointer transition-all duration-200">Chính sách cookie</a>
-              <a href="#" className="hover:text-travel-primary-600 hover:underline hover:decoration-travel-primary-600 hover:underline-offset-4 cursor-pointer transition-all duration-200">Điều khoản</a>
-              <a href="#" className="hover:text-travel-primary-600 hover:underline hover:decoration-travel-primary-600 hover:underline-offset-4 cursor-pointer transition-all duration-200">Tiếng Việt ▼</a>
+              {[
+                "Chính sách quyền riêng tư",
+                "Chính sách cookie",
+                "Điều khoản",
+                "Tiếng Việt ▼",
+              ].map((text, i) => (
+                <a
+                  key={i}
+                  href="#"
+                  className="font-medium cursor-pointer transition-all duration-200 
+                  hover:underline decoration-2 
+                  decoration-[var(--travel-primary-600)] 
+                  hover:underline-offset-4"
+                >
+                  {text}
+                </a>
+              ))}
             </div>
             <div className="flex items-center space-x-2 text-gray-400 order-1 lg:order-3">
               <span>Made with</span>

@@ -1,11 +1,15 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 
 const SignUpForm = () => {
+  const [userName, setUserName] = useState('');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [dateOfBirth, setDateOfBirth] = useState('');
+  const [gender, setGender] = useState('');
   const [agreeToTerms, setAgreeToTerms] = useState(false);
 
   return (
@@ -23,46 +27,95 @@ const SignUpForm = () => {
 
       {/* Sign Up Form */}
       <div className="space-y-3 w-full max-w-md">
+        {/* Username - Required */}
+        <input
+          type="text"
+          placeholder="Tên đăng nhập *"
+          value={userName}
+          onChange={(e) => setUserName(e.target.value)}
+          required
+          className="w-full px-3 py-2 text-sm text-gray-500 border border-gray-300 rounded-md focus:outline-none focus:border-gray-500"
+        />
+
+        {/* First Name & Last Name */}
         <div className="grid grid-cols-2 gap-3">
           <input
             type="text"
             placeholder="Họ"
             value={firstName}
             onChange={(e) => setFirstName(e.target.value)}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:border-gray-500"
+            maxLength={50}
+            className="w-full px-3 py-2 text-sm text-gray-500 border border-gray-300 rounded-md focus:outline-none focus:border-gray-500"
           />
           <input
             type="text"
             placeholder="Tên"
             value={lastName}
             onChange={(e) => setLastName(e.target.value)}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:border-gray-500"
+            maxLength={50}
+            className="w-full px-3 py-2 text-sm text-gray-500 border border-gray-300 rounded-md focus:outline-none focus:border-gray-500"
           />
         </div>
 
+        {/* Email - Required */}
         <input
           type="email"
-          placeholder="Email hoặc số điện thoại"
+          placeholder="Email *"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:border-gray-500"
+          required
+          className="w-full px-3 py-2 text-sm text-gray-500 border border-gray-300 rounded-md focus:outline-none focus:border-gray-500"
         />
 
-        <input
-          type="password"
-          placeholder="Mật khẩu"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:border-gray-500"
-        />
+        {/* Password - Required with validation */}
+        <div className="space-y-1">
+          <input
+            type="password"
+            placeholder="Mật khẩu * (8-15 ký tự)"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            minLength={8}
+            maxLength={15}
+            className="w-full px-3 py-2 text-sm text-gray-500 border border-gray-300 rounded-md focus:outline-none focus:border-gray-500"
+          />
+          {password && (password.length < 8 || password.length > 15) && (
+            <p className="text-xs text-red-500">Mật khẩu phải có từ 8-15 ký tự</p>
+          )}
+        </div>
 
+        {/* Confirm Password */}
         <input
           type="password"
           placeholder="Xác nhận mật khẩu"
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
-          className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:border-gray-500"
+          className="w-full px-3 py-2 text-sm text-gray-500 border border-gray-300 rounded-md focus:outline-none focus:border-gray-500"
         />
+        {confirmPassword && password !== confirmPassword && (
+          <p className="text-xs text-red-500">Mật khẩu xác nhận không khớp</p>
+        )}
+
+        {/* Date of Birth */}
+        <input
+          type="date"
+          placeholder="Ngày sinh"
+          value={dateOfBirth}
+          onChange={(e) => setDateOfBirth(e.target.value)}
+          className="w-full px-3 py-2 text-sm text-gray-500 border border-gray-300 rounded-md focus:outline-none focus:border-gray-500"
+        />
+
+        {/* Gender */}
+        <select
+          value={gender}
+          onChange={(e) => setGender(e.target.value)}
+          className="w-full px-3 py-2 text-sm text-gray-500 border border-gray-300 rounded-md focus:outline-none focus:border-gray-500"
+        >
+          <option value="">Chọn giới tính</option>
+          <option value="male">Nam</option>
+          <option value="female">Nữ</option>
+          <option value="other">Khác</option>
+        </select>
 
         <button className="bg-travel-gradient text-white px-6 py-2 text-sm rounded-md font-medium hover:bg-travel-gradient-dark hover:scale-105 hover:shadow-lg transition-all duration-300 w-full cursor-pointer transform">
           Tạo tài khoản
@@ -74,15 +127,15 @@ const SignUpForm = () => {
             id="agreeToTerms"
             checked={agreeToTerms}
             onChange={(e) => setAgreeToTerms(e.target.checked)}
-            className="w-3 h-3 text-travel-primary-600 border-gray-300 rounded focus:ring-travel-primary-500 mt-0.5"
+            className="w-3 h-3 accent-travel-primary-600 border-gray-300 rounded focus:ring-travel-primary-500 mt-0.5"
           />
           <label htmlFor="agreeToTerms" className="text-xs text-gray-500 leading-relaxed">
             Tôi đồng ý với{' '}
-            <a href="#" className="text-travel-primary-600 hover:underline cursor-pointer">
+            <a href="#" className="text-[var(--travel-primary-600)] font-medium cursor-pointer transition-all duration-200 hover:underline decoration-2 decoration-[var(--travel-primary-600)] hover:underline-offset-4">
               Điều khoản dịch vụ
             </a>{' '}
             và{' '}
-            <a href="#" className="text-travel-primary-600 hover:underline cursor-pointer">
+            <a href="#" className="text-[var(--travel-primary-600)] font-medium cursor-pointer transition-all duration-200 hover:underline decoration-2 decoration-[var(--travel-primary-600)] hover:underline-offset-4">
               Chính sách quyền riêng tư
             </a>
           </label>
@@ -112,9 +165,9 @@ const SignUpForm = () => {
         <div className="text-center">
           <p className="text-xs text-gray-500">
             Đã có tài khoản?{' '}
-            <a href="/" className="text-travel-primary-600 hover:underline cursor-pointer">
+            <Link to="/" className="text-[var(--travel-primary-600)] font-medium cursor-pointer transition-all duration-200 hover:underline decoration-2 decoration-[var(--travel-primary-600)] hover:underline-offset-4">
               Đăng nhập ngay
-            </a>
+            </Link>
           </p>
         </div>
       </div>
