@@ -5,9 +5,5 @@ export const path = {
     LANDING: "/",
     SIGNUP: "/signup",
     USER: "/user/:userId",
-    GROUP: "/group",
-    CHAT: "/chat",
-    GROUP_DETAIL: "/group/:groupId",
-    SEARCH: "/search",
     STAR: "*"
 }
