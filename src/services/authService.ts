@@ -1,4 +1,4 @@
-import axiosConfig from "../config/axiosConfig";
+import axiosConfig from "../configurations/axiosConfig";
 
 interface AuthPayload {
     email: string;
