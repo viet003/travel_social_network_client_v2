@@ -1,14 +1,17 @@
 import { useState, useEffect } from 'react';
-import { Outlet } from 'react-router-dom';
-import { 
-  Zap, 
-  Shield, 
-  Monitor, 
-  Code, 
-  HelpCircle, 
-  ChevronRight 
+import { Outlet, Link } from 'react-router-dom';
+import {
+  Zap,
+  Shield,
+  Monitor,
+  Code,
+  HelpCircle,
+  ChevronRight
 } from 'lucide-react';
 import background from '../../assets/images/background.png';
+import logo from '../../assets/images/logo.png';
+import sublogo from '../../assets/images/sublogo.png';
+import { path } from '../../utilities/path';
 
 const LandingPage = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -53,33 +56,37 @@ const LandingPage = () => {
         ? 'backdrop-blur-lg bg-white/95 border-b border-gray-200'
         : 'bg-transparent'
         }`}>
-        <nav className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+        <nav className="max-w-7xl mx-auto px-4 py-6 flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-travel-gradient rounded-full flex items-center justify-center">
-              <svg className="w-5 h-5 sm:w-7 sm:h-7 text-white" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-              </svg>
+            <div className="w-[50px] h-[50px] sm:w-14 sm:h-14 rounded-full flex items-center justify-center overflow-hidden">
+              <Link to={path.LANDING}>
+                <img
+                  src={logo}
+                  alt="TravelNest Logo"
+                  className="w-full h-full object-cover cursor-pointer hover:opacity-80 transition-opacity duration-200"
+                />
+              </Link>
             </div>
             {/* <span className="text-xl font-bold text-gray-900">Social Network</span> */}
           </div>
-          <div className="hidden md:flex items-center space-x-8 text-base text-gray-700">
+          <div className="hidden md:flex items-center space-x-8 text-[15px] text-gray-900 font-semibold">
             {[
-              "Tính năng ▼",
-              "Quyền riêng tư và an toàn",
-              "Ứng dụng dành cho máy tính",
-              "Dành cho nhà phát triển",
-              "Trung tâm trợ giúp",
-            ].map((text, i) => (
-              <a
-                key={i}
-                href="#"
+              { text: "Tính năng ▼", to: path.ABOUT },
+              { text: "Quyền riêng tư và an toàn", to: null },
+              { text: "Ứng dụng dành cho máy tính", to: null },
+              { text: "Dành cho nhà phát triển", to: null },
+              { text: "Trung tâm trợ giúp", to: null },
+            ].map((item, index) => (
+              <Link
+                key={index}
+                to={item?.to  || path.LANDING}
                 className="font-medium cursor-pointer transition-all duration-200 
-                 hover:underline decoration-2 
+                 hover:underline decoration-3 
                  decoration-[var(--travel-primary-600)] 
                  hover:underline-offset-4"
               >
-                {text}
-              </a>
+                {item.text}
+              </Link>
             ))}
           </div>
           {/* Mobile menu button */}
@@ -107,10 +114,14 @@ const LandingPage = () => {
           {/* Header */}
           <div className="flex items-center justify-between p-6 border-b border-gray-100 bg-gradient-to-r from-travel-primary-50 to-travel-secondary-50">
             <div className="flex items-center space-x-3">
-              <div className="w-12 h-12 bg-travel-gradient rounded-full flex items-center justify-center shadow-lg">
-                <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                </svg>
+              <div className="w-14 h-14 rounded-full flex items-center justify-center overflow-hidden">
+                <Link to={path.LANDING}>
+                  <img
+                    src={logo}
+                    alt="TravelNest Logo"
+                    className="w-full h-full object-cover cursor-pointer hover:opacity-80 transition-opacity duration-200"
+                  />
+                </Link>
               </div>
               <div>
                 <h2 className="text-lg font-bold text-gray-900">TravelNest</h2>
@@ -131,47 +142,54 @@ const LandingPage = () => {
           <div className="px-6 py-6 flex-1">
             <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">Menu</h3>
             <div className="space-y-1">
+              <Link
+                to={path.ABOUT}
+                className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:text-travel-primary-600 hover:bg-travel-primary-50 rounded-xl cursor-pointer transition-all duration-200 group"
+              >
+                <Zap className="w-5 h-5 text-gray-600 group-hover:text-travel-primary-600 transition-colors duration-200" />
+                <span className="flex-1 font-medium cursor-pointer transition-all duration-200 
+                hover:underline decoration-2 
+                decoration-[var(--travel-primary-600)] 
+                hover:underline-offset-4">Tính năng</span>
+                <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-travel-primary-600 transition-colors duration-200" />
+              </Link>
               {[
-                { text: "Tính năng", icon: Zap, hasSubmenu: true },
-                { text: "Quyền riêng tư và an toàn", icon: Shield },
-                { text: "Ứng dụng dành cho máy tính", icon: Monitor },
-                { text: "Dành cho nhà phát triển", icon: Code },
-                { text: "Trung tâm trợ giúp", icon: HelpCircle },
+                { text: "Quyền riêng tư và an toàn", icon: Shield, to: null },
+                { text: "Ứng dụng dành cho máy tính", icon: Monitor, to: null },
+                { text: "Dành cho nhà phát triển", icon: Code, to: null },
+                { text: "Trung tâm trợ giúp", icon: HelpCircle, to: null },
               ].map((item, i) => {
                 const IconComponent = item.icon;
                 return (
-                  <a
+                  <Link
                     key={i}
-                    href="#"
-                    className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:text-travel-primary-600 hover:bg-travel-primary-50 rounded-lg cursor-pointer transition-all duration-200 group"
+                    to={item?.to  || path.LANDING}
+                    className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:text-travel-primary-600 hover:bg-travel-primary-50 rounded-xl cursor-pointer transition-all duration-200 group"
                   >
                     <IconComponent className="w-5 h-5 text-gray-600 group-hover:text-travel-primary-600 transition-colors duration-200" />
                     <span className="flex-1 font-medium cursor-pointer transition-all duration-200 
                     hover:underline decoration-2 
                     decoration-[var(--travel-primary-600)] 
                     hover:underline-offset-4">{item.text}</span>
-                    {item.hasSubmenu && (
-                      <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-travel-primary-600 transition-colors duration-200" />
-                    )}
-                  </a>
+                  </Link>
                 );
               })}
             </div>
           </div>
-          
+
           {/* Footer Info */}
           <div className="px-6 py-4 border-t border-gray-100 mt-auto">
             <div className="text-center">
               <p className="text-xs text-gray-400 mb-2">© TravelNest Network 2025</p>
               <div className="flex justify-center space-x-4 text-xs">
                 {[
-                  "Chính sách",
-                  "Điều khoản", 
-                  "Hỗ trợ",
-                ].map((text, i) => (
-                  <a
+                  { text: "Chính sách", to: null },
+                  { text: "Điều khoản", to: null },
+                  { text: "Hỗ trợ", to: null },
+                ].map((item, i) => (
+                  <Link
                     key={i}
-                    href="#"
+                    to={item?.to  || path.LANDING}
                     className="font-medium
                     text-gray-400
                     cursor-pointer transition-all duration-200 
@@ -179,8 +197,8 @@ const LandingPage = () => {
                     decoration-[var(--travel-primary-600)] 
                     hover:underline-offset-4"
                   >
-                    {text}
-                  </a>
+                    {item.text}
+                  </Link>
                 ))}
               </div>
             </div>
@@ -189,7 +207,7 @@ const LandingPage = () => {
       </div>
 
       {/* Main Content */}
-      <main className="mt-20 flex items-center justify-center px-2 sm:px-4 py-8 sm:py-12 lg:py-16 min-h-screen">
+      <main className="mt-24 flex items-center justify-center px-2 sm:px-4 py-8 sm:py-12 lg:py-16 min-h-screen">
         <div className="w-full max-w-7xl">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 xl:gap-16 items-center min-h-[60vh]">
             {/* Left Side - Content */}
@@ -221,29 +239,29 @@ const LandingPage = () => {
             <div className="text-gray-400 order-3 lg:order-1">© TravelNest 2025</div>
             <div className="flex flex-wrap justify-center gap-4 sm:gap-6 lg:gap-8 order-2">
               {[
-                "Chính sách quyền riêng tư",
-                "Chính sách cookie",
-                "Điều khoản",
-                "Tiếng Việt ▼",
-              ].map((text, i) => (
-                <a
+                { text: "Chính sách quyền riêng tư", to: null },
+                { text: "Chính sách cookie", to: null },
+                { text: "Điều khoản", to: null },
+                { text: "Tiếng Việt ▼", to: null },
+              ].map((item, i) => (
+                <Link
                   key={i}
-                  href="#"
+                  to={item?.to  || path.LANDING}
                   className="font-medium cursor-pointer transition-all duration-200 
                   hover:underline decoration-2 
                   decoration-[var(--travel-primary-600)] 
                   hover:underline-offset-4"
                 >
-                  {text}
-                </a>
+                  {item.text}
+                </Link>
               ))}
             </div>
             <div className="flex items-center space-x-2 text-gray-400 order-1 lg:order-3">
-              <span>Made with</span>
-              <svg className="w-4 h-4 text-red-500" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
-              </svg>
-              <span>for travelers</span>
+              <img
+                src={sublogo}
+                alt="TravelNest Sub Logo"
+                className="w-[200px] object-contain"
+              />
             </div>
           </div>
         </div>
