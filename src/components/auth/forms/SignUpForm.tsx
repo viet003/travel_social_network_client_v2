@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
-import { authAction } from '../../stores/actions';
-import { path } from '../../utilities/path';
-import GoogleLoginButton from './GoogleLoginButton';
+import { authAction } from '../../../stores/actions';
+import { path } from '../../../utilities/path';
+import { GoogleLoginButton, FacebookLoginButton } from '../buttons';
 
 const SignUpForm = () => {
   const [userName, setUserName] = useState('');
@@ -21,7 +21,7 @@ const SignUpForm = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const handleGoogleError = (error: string) => {
+  const handleSocialError = (error: string) => {
     setError(error);
   };
 
@@ -68,14 +68,14 @@ const SignUpForm = () => {
 
   return (
     <div className="space-y-6 lg:space-y-8 w-full flex flex-col items-center lg:items-start text-center lg:text-left">
-      <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-travel-gradient leading-tight">
+      <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-bold text-travel-gradient leading-tight">
         Tham gia cộng đồng
         du lịch
         và tạo ra những
         kỷ niệm đáng nhớ
       </h1>
 
-      <p className="text-gray-600 text-base sm:text-lg max-w-md">
+      <p className="text-base sm:text-lg max-w-md font-[400] text-gray-500 space-y-2">
         Tạo tài khoản miễn phí và bắt đầu hành trình khám phá thế giới cùng những người bạn đồng hành tuyệt vời.
       </p>
 
@@ -93,7 +93,7 @@ const SignUpForm = () => {
           value={userName}
           onChange={(e) => setUserName(e.target.value)}
           required
-          className="w-full px-3 py-2 text-sm text-gray-500 border border-gray-300 rounded-xl focus:outline-none focus:border-gray-500"
+          className="w-full px-3 py-2 text-sm text-gray-500 bg-gray-100 border-none rounded-xl focus:outline-1 focus:outline-[var(--travel-primary-600)] placeholder:text-gray-400"
         />
 
         {/* First Name & Last Name */}
@@ -104,7 +104,7 @@ const SignUpForm = () => {
             value={firstName}
             onChange={(e) => setFirstName(e.target.value)}
             maxLength={50}
-            className="w-full px-3 py-2 text-sm text-gray-500 border border-gray-300 rounded-xl focus:outline-none focus:border-gray-500"
+            className="w-full px-3 py-2 text-sm text-gray-500 bg-gray-100 border-none rounded-xl focus:outline-1 focus:outline-[var(--travel-primary-600)] placeholder:text-gray-400"
           />
           <input
             type="text"
@@ -112,7 +112,7 @@ const SignUpForm = () => {
             value={lastName}
             onChange={(e) => setLastName(e.target.value)}
             maxLength={50}
-            className="w-full px-3 py-2 text-sm text-gray-500 border border-gray-300 rounded-xl focus:outline-none focus:border-gray-500"
+            className="w-full px-3 py-2 text-sm text-gray-500 bg-gray-100 border-none rounded-xl focus:outline-1 focus:outline-[var(--travel-primary-600)] placeholder:text-gray-400"
           />
         </div>
 
@@ -123,7 +123,7 @@ const SignUpForm = () => {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
-          className="w-full px-3 py-2 text-sm text-gray-500 border border-gray-300 rounded-xl focus:outline-none focus:border-gray-500"
+          className="w-full px-3 py-2 text-sm text-gray-500 bg-gray-100 border-none rounded-xl focus:outline-1 focus:outline-[var(--travel-primary-600)] placeholder:text-gray-400"
         />
 
         {/* Password - Required with validation */}
@@ -136,7 +136,7 @@ const SignUpForm = () => {
             required
             minLength={8}
             maxLength={15}
-            className="w-full px-3 py-2 text-sm text-gray-500 border border-gray-300 rounded-xl focus:outline-none focus:border-gray-500"
+            className="w-full px-3 py-2 text-sm text-gray-500 bg-gray-100 border-none rounded-xl focus:outline-1 focus:outline-[var(--travel-primary-600)] placeholder:text-gray-400"
           />
           {password && (password.length < 8 || password.length > 15) && (
             <p className="text-xs text-red-500">Mật khẩu phải có từ 8-15 ký tự</p>
@@ -149,7 +149,7 @@ const SignUpForm = () => {
           placeholder="Xác nhận mật khẩu"
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
-          className="w-full px-3 py-2 text-sm text-gray-500 border border-gray-300 rounded-xl focus:outline-none focus:border-gray-500"
+          className="w-full px-3 py-2 text-sm text-gray-500 bg-gray-100 border-none rounded-xl focus:outline-1 focus:outline-[var(--travel-primary-600)] placeholder:text-gray-400"
         />
         {confirmPassword && password !== confirmPassword && (
           <p className="text-xs text-red-500">Mật khẩu xác nhận không khớp</p>
@@ -161,14 +161,14 @@ const SignUpForm = () => {
           placeholder="Ngày sinh"
           value={dateOfBirth}
           onChange={(e) => setDateOfBirth(e.target.value)}
-          className="w-full px-3 py-2 text-sm text-gray-500 border border-gray-300 rounded-xl focus:outline-none focus:border-gray-500"
+          className="w-full px-3 py-2 text-sm text-gray-500 bg-gray-100 border-none rounded-xl focus:outline-1 focus:outline-[var(--travel-primary-600)] placeholder:text-gray-400"
         />
 
         {/* Gender */}
         <select
           value={gender}
           onChange={(e) => setGender(e.target.value)}
-          className="w-full px-3 py-2 text-sm text-gray-500 border border-gray-300 rounded-xl focus:outline-none focus:border-gray-500"
+          className="w-full px-3 py-2 text-sm text-gray-500 bg-gray-100 border-none rounded-xl focus:outline-1 focus:outline-[var(--travel-primary-600)] placeholder:text-gray-400"
         >
           <option value="">Chọn giới tính</option>
           <option value="male">Nam</option>
@@ -214,12 +214,19 @@ const SignUpForm = () => {
           </div>
         </div>
 
-        {/* Google Sign Up */}
-        <GoogleLoginButton 
-          onError={handleGoogleError} 
-          buttonText="Tiếp tục bằng Google"
-          loadingText="Đang tạo tài khoản..."
-        />
+        {/* Social Sign Up Buttons */}
+        <div className="space-y-3">
+          <GoogleLoginButton 
+            onError={handleSocialError} 
+            buttonText="Tiếp tục bằng Google"
+            loadingText="Đang tạo tài khoản..."
+          />
+          <FacebookLoginButton 
+            onError={handleSocialError} 
+            buttonText="Tiếp tục bằng Facebook"
+            loadingText="Đang tạo tài khoản..."
+          />
+        </div>
 
         <div className="text-center">
           <p className="text-xs text-gray-500">

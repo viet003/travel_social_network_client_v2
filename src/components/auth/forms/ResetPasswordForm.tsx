@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react';
+  import { useState, useEffect } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { apiResetPasswordService } from '../../services/authService';
-import { path } from '../../utilities/path';
+import { apiResetPasswordService } from '../../../services/authService';
+import { path } from '../../../utilities/path';
+import { GoogleLoginButton, FacebookLoginButton } from '../buttons';
 
 const ResetPasswordForm = () => {
   const [newPassword, setNewPassword] = useState('');
@@ -13,6 +14,10 @@ const ResetPasswordForm = () => {
   const token = searchParams.get('token');
 
   const navigate = useNavigate();
+
+  const handleSocialError = (error: string) => {
+    setError(error);
+  };
 
   useEffect(() => {
     if (!token) {
@@ -80,7 +85,7 @@ const ResetPasswordForm = () => {
           </h1>
         </div>
 
-        <p className="text-gray-600 text-base sm:text-lg max-w-md">
+        <p className="text-base sm:text-lg max-w-md font-[400] text-gray-500 space-y-2">
           Mật khẩu của bạn đã được đặt lại thành công. Bạn sẽ được chuyển hướng đến trang đăng nhập trong vài giây.
         </p>
 
@@ -102,7 +107,7 @@ const ResetPasswordForm = () => {
         Đặt lại mật khẩu
       </h1>
 
-      <p className="text-gray-600 text-base sm:text-lg max-w-md">
+      <p className="text-base sm:text-lg max-w-md font-[400] text-gray-500 space-y-2">
         Nhập mật khẩu mới của bạn để hoàn tất quá trình đặt lại mật khẩu.
       </p>
 
@@ -122,7 +127,7 @@ const ResetPasswordForm = () => {
           required
           minLength={8}
           maxLength={15}
-          className="w-full px-3 py-2 text-sm text-gray-500 border border-gray-300 rounded-xl focus:outline-none focus:border-gray-500"
+          className="w-full px-3 py-2 text-sm text-gray-500 bg-gray-100 border-none rounded-xl focus:outline-1 focus:outline-[var(--travel-primary-600)] placeholder:text-gray-400"
         />
 
         <input
@@ -133,7 +138,7 @@ const ResetPasswordForm = () => {
           required
           minLength={8}
           maxLength={15}
-          className="w-full px-3 py-2 text-sm text-gray-500 border border-gray-300 rounded-xl focus:outline-none focus:border-gray-500"
+          className="w-full px-3 py-2 text-sm text-gray-500 bg-gray-100 border-none rounded-xl focus:outline-1 focus:outline-[var(--travel-primary-600)] placeholder:text-gray-400"
         />
 
         {confirmPassword && newPassword !== confirmPassword && (
@@ -147,6 +152,30 @@ const ResetPasswordForm = () => {
         >
           {isLoading ? 'Đang xử lý...' : 'Đặt lại mật khẩu'}
         </button>
+
+        {/* Divider */}
+        <div className="relative my-4">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-gray-300"></div>
+          </div>
+          <div className="relative flex justify-center text-sm">
+            <span className="px-2 bg-white text-gray-500">Hoặc</span>
+          </div>
+        </div>
+
+        {/* Social Login Buttons */}
+        <div className="space-y-3">
+          <GoogleLoginButton 
+            onError={handleSocialError} 
+            buttonText="Đăng nhập bằng Google"
+            loadingText="Đang xử lý..."
+          />
+          <FacebookLoginButton 
+            onError={handleSocialError} 
+            buttonText="Đăng nhập bằng Facebook"
+            loadingText="Đang xử lý..."
+          />
+        </div>
 
         <div className="text-center">
           <p className="text-xs text-gray-500">

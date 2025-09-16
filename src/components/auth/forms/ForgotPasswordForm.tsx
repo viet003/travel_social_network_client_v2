@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { apiForgotPassWordService } from '../../services/authService';
-import { path } from '../../utilities/path';
-import GoogleLoginButton from './GoogleLoginButton';
+import { apiForgotPassWordService } from '../../../services/authService';
+import { path } from '../../../utilities/path';
+import { GoogleLoginButton, FacebookLoginButton } from '../buttons';
 
 const ForgotPasswordForm = () => {
   const [email, setEmail] = useState('');
@@ -10,7 +10,7 @@ const ForgotPasswordForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const handleGoogleError = (error: string) => {
+  const handleSocialError = (error: string) => {
     setError(error);
   };
 
@@ -51,7 +51,7 @@ const ForgotPasswordForm = () => {
         </div>
 
         {/* Success Message */}
-        <p className="text-gray-600 text-base sm:text-lg max-w-md">
+        <p className="text-base sm:text-lg max-w-md font-[400] text-gray-500 space-y-2">
           Chúng tôi đã gửi hướng dẫn khôi phục mật khẩu đến địa chỉ email của bạn.
           Vui lòng kiểm tra hộp thư và làm theo hướng dẫn.
         </p>
@@ -100,11 +100,11 @@ const ForgotPasswordForm = () => {
 
   return (
     <div className="space-y-6 lg:space-y-8 w-full flex flex-col items-center lg:items-start text-center lg:text-left">
-      <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-travel-gradient leading-tight">
+      <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-bold text-travel-gradient leading-tight">
         Quên mật khẩu?
       </h1>
 
-      <p className="text-gray-600 text-base sm:text-lg max-w-md">
+      <p className="text-base sm:text-lg max-w-md font-[400] text-gray-500 space-y-2">
         Đừng lo lắng! Nhập địa chỉ email của bạn và chúng tôi sẽ gửi hướng dẫn khôi phục mật khẩu.
       </p>
 
@@ -122,7 +122,7 @@ const ForgotPasswordForm = () => {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
-          className="w-full px-3 py-2 text-sm text-gray-500 border border-gray-300 rounded-xl focus:outline-none focus:border-gray-500"
+          className="w-full px-3 py-2 text-sm text-gray-500 bg-gray-100 border-none rounded-xl focus:outline-1 focus:outline-[var(--travel-primary-600)] placeholder:text-gray-400"
         />
 
         <button
@@ -143,12 +143,19 @@ const ForgotPasswordForm = () => {
           </div>
         </div>
 
-        {/* Google Login */}
-        <GoogleLoginButton 
-          onError={handleGoogleError} 
-          buttonText="Đăng nhập bằng Google"
-          loadingText="Đang xử lý..."
-        />
+        {/* Social Login Buttons */}
+        <div className="space-y-3">
+          <GoogleLoginButton 
+            onError={handleSocialError} 
+            buttonText="Đăng nhập bằng Google"
+            loadingText="Đang xử lý..."
+          />
+          <FacebookLoginButton 
+            onError={handleSocialError} 
+            buttonText="Đăng nhập bằng Facebook"
+            loadingText="Đang xử lý..."
+          />
+        </div>
 
         <div className="text-center space-y-2">
           <p className="text-xs text-gray-500">

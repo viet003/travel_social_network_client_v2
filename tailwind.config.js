@@ -80,7 +80,7 @@ export default {
           '-webkit-background-clip': 'text',
           'background-clip': 'text',
           '-webkit-text-fill-color': 'transparent',
-          'color': 'var(--travel-primary-500)', // Fallback color
+          'color': 'var(--travel-primary-500)', 
         }
       })
     }

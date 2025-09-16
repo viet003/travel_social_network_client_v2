@@ -1,5 +1,4 @@
 import axiosConfig from "../configurations/axiosConfig";
-import { GOOGLE_CONFIG } from "../configurations/googleConfig";
 
 interface LoginPayload {
     email: string;
@@ -86,6 +85,19 @@ export const apiGoogleLoginService = async (accessToken: string): Promise<any> =
     const response: ApiResponse = await axiosConfig({
       method: 'POST',
       url: '/auth/google/login',
+      data: { accessToken }
+    });
+    return response.data;
+  } catch (error: any) {
+    throw error.response ? error.response.data : error;
+  }
+};
+
+export const apiFacebookLoginService = async (accessToken: string): Promise<any> => {
+  try {
+    const response: ApiResponse = await axiosConfig({
+      method: 'POST',
+      url: '/auth/facebook/login',
       data: { accessToken }
     });
     return response.data;

@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { authAction } from '../../stores/actions';
-import { path } from '../../utilities/path';
-import { GOOGLE_CONFIG } from '../../configurations/googleConfig';
+import { authAction } from '../../../stores/actions';
+import { path } from '../../../utilities/path';
+import { GOOGLE_CONFIG } from '../../../configurations/googleConfig';
 
 interface GoogleLoginButtonProps {
   onError?: (error: string) => void;
