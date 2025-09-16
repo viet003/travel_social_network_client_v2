@@ -1,0 +1,64 @@
+@import "tailwindcss";
+@import './styles/travel-colors.css';
+
+@layer base {
+  * {
+      font-family: Helvetica, Arial, sans-serif;
+  }
+
+  /* Global scrollbar - chỉ áp dụng cho elements không có class scrollbar-hide */
+  :not(.scrollbar-hide)::-webkit-scrollbar {
+      width: 4px;
+      height: 6px;
+  }
+
+  :not(.scrollbar-hide)::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  :not(.scrollbar-hide)::-webkit-scrollbar-thumb {
+      border-radius: 4px;
+      background: #cbd5e0;
+      height: 6px;
+  }
+
+  .active {
+      color: black;
+      background-color: white;
+  }
+}
+
+/* Custom scrollbar styles */
+.scrollbar-hide {
+-ms-overflow-style: none;  /* IE and Edge */
+scrollbar-width: none;  /* Firefox */
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+display: none;  /* Chrome, Safari and Opera */
+}
+
+/* Khi hover, hiển thị scrollbar */
+.scrollbar-hide:hover {
+-ms-overflow-style: auto;
+scrollbar-width: auto;
+}
+
+.scrollbar-hide:hover::-webkit-scrollbar {
+display: block;
+width: 4px;
+height: 6px;
+}
+
+.scrollbar-hide:hover::-webkit-scrollbar-track {
+background: transparent;
+}
+
+.scrollbar-hide:hover::-webkit-scrollbar-thumb {
+background: #cbd5e0;
+border-radius: 4px;
+}
+
+.scrollbar-hide:hover::-webkit-scrollbar-thumb:hover {
+background: #a0aec0;
+}
