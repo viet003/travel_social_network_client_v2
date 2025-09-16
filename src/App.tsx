@@ -1,11 +1,13 @@
 
-import { Route, Routes } from 'react-router-dom';
+import { Route, Routes, Navigate } from 'react-router-dom';
 import { path } from './utilities/path';
 import MainPage from './pages/public/MainPage';
+import HomePage from './pages/public/HomePage';
 import LandingPage from './pages/public/LandingPage';
-import { LoginForm, SignUpForm, ForgotPasswordForm } from './components/auth';
+import AboutPage from './pages/public/AboutPage';
+import { LoginForm, SignUpForm, ForgotPasswordForm, ResetPasswordForm } from './components/auth';
 import { ToastContainer } from 'react-toastify';
-import { ProtectedRoute } from './components/index';
+import { ProtectedRoute, ProtectedResetRoute } from './components/index';
 import './index.css'
 
 function App() {
@@ -13,24 +15,28 @@ function App() {
     <>
       <Routes>
         {/* Landing page with nested routes */}
-        <Route 
-          path="/" 
+        <Route
+          path="/"
           element={
             <ProtectedRoute isPublic={true}>
               <LandingPage />
             </ProtectedRoute>
-          } 
+          }
         >
-          {/* Default route - Login */}
           <Route index element={<LoginForm />} />
-          {/* Sign Up route */}
           <Route path={path.SIGNUP} element={<SignUpForm />} />
-          {/* Forgot Password route */}
           <Route path={path.FORGOTPASS} element={<ForgotPasswordForm />} />
+          <Route path={path.ABOUT} element={<AboutPage />} />
+          <Route
+            path={path.RESETPASS}
+            element={
+              <ProtectedResetRoute>
+                <ResetPasswordForm />
+              </ProtectedResetRoute>
+            }
+          />
         </Route>
-        
-        {/* Protected routes - require authentication */}
-        <Route 
+        <Route
           path={path.HOME}
           element={
             <ProtectedRoute isPublic={false}>
@@ -38,15 +44,9 @@ function App() {
             </ProtectedRoute>
           }
         >
-          <Route index element={<div className="flex-1 flex items-center justify-center"><h1>Welcome to Travel Social Network!</h1></div>} />
+          <Route index element={<HomePage />} />
         </Route>
-        
-        {/* Catch all other routes and redirect to landing */}
-        <Route path="*" element={
-          <ProtectedRoute isPublic={true}>
-            <LandingPage />
-          </ProtectedRoute>
-        } />
+        <Route path={path.STAR} element={<Navigate to="/" replace />} />
       </Routes>
       <ToastContainer />
     </>

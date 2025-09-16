@@ -1,9 +1,24 @@
 import axiosConfig from "../configurations/axiosConfig";
+import { GOOGLE_CONFIG } from "../configurations/googleConfig";
 
-interface AuthPayload {
+interface LoginPayload {
     email: string;
     password: string;
-    [key: string]: any; // Thêm nếu có các trường khác
+}
+
+interface RegisterPayload {
+    userName: string;
+    email: string;
+    password: string;
+    firstName?: string;
+    lastName?: string;
+    dateOfBirth?: string;
+    gender?: string;
+}
+
+interface ResetPasswordPayload {
+    newPassword: string;
+    newPasswordConfirm: string;
 }
 
 interface ApiResponse<T = any> {
@@ -11,11 +26,11 @@ interface ApiResponse<T = any> {
     [key: string]: any;
 }
 
-export const apiLoginService = async (payload: AuthPayload): Promise<any> => {
+export const apiLoginService = async (payload: LoginPayload): Promise<any> => {
     try {
         const response: ApiResponse = await axiosConfig({
             method: 'POST',
-            url: '/auth/login',
+            url: '/auth/local/login',
             data: payload
         });
         return response.data;
@@ -24,11 +39,11 @@ export const apiLoginService = async (payload: AuthPayload): Promise<any> => {
     }
 };
 
-export const apiSignupService = async (payload: AuthPayload): Promise<any> => {
+export const apiSignupService = async (payload: RegisterPayload): Promise<any> => {
     try {
         const response: ApiResponse = await axiosConfig({
             method: 'POST',
-            url: '/auth/register',
+            url: '/auth/local/register',
             data: payload
         });
         return response.data;
@@ -36,12 +51,42 @@ export const apiSignupService = async (payload: AuthPayload): Promise<any> => {
         throw error.response ? error.response.data : error;
     }
 };
+
 export const apiForgotPassWordService = async (email: string): Promise<any> => {
   try {
     const response: ApiResponse = await axiosConfig({
       method: 'POST',
-      url: '/auth/forgot-password',
+      url: '/auth/local/forgot-password',
       params: { email }   
+    });
+    return response.data;
+  } catch (error: any) {
+    throw error.response ? error.response.data : error;
+  }
+};
+
+export const apiResetPasswordService = async (token: string, payload: ResetPasswordPayload): Promise<any> => {
+  try {
+    const response: ApiResponse = await axiosConfig({
+      method: 'POST',
+      url: '/auth/local/reset-password',
+      params: { token },
+      data: payload
+    });
+    return response.data;
+  } catch (error: any) {
+    throw error.response ? error.response.data : error;
+  }
+};
+
+// Google OAuth Service - chỉ chứa API calls
+
+export const apiGoogleLoginService = async (accessToken: string): Promise<any> => {
+  try {
+    const response: ApiResponse = await axiosConfig({
+      method: 'POST',
+      url: '/auth/google/login',
+      data: { accessToken }
     });
     return response.data;
   } catch (error: any) {
