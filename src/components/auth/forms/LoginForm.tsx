@@ -22,7 +22,6 @@ const LoginForm = () => {
 
     try {
       const response = await dispatch(authAction.login({ email, password }) as any);
-
       if (response?.success) {
         navigate(path.HOME);
       } else {
