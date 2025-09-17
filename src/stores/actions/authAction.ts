@@ -1,22 +1,32 @@
 import actionTypes from "../types/actionTypes";
-import { apiLoginService } from "../../services/authService";
+import { apiLoginService, apiSignupService, apiGoogleLoginService, apiFacebookLoginService } from "../../services/authService";
 
 interface LoginPayload {
     email: string;
     password: string;
-    [key: string]: any;
 }
 
-interface LoginResponse {
-    status: string;
+interface RegisterPayload {
+    userName: string;
+    email: string;
+    password: string;
+    firstName?: string;
+    lastName?: string;
+    dateOfBirth?: string;
+    gender?: string;
+}
+
+
+interface ApiResponse {
+    success: boolean;
     message?: string;
     data?: any;
     [key: string]: any;
 }
 
-export const login = (payload: LoginPayload) => async (dispatch: any): Promise<LoginResponse | undefined> => {
+export const login = (payload: LoginPayload) => async (dispatch: any): Promise<ApiResponse | undefined> => {
     try {
-        const response: LoginResponse = await apiLoginService(payload);
+        const response: ApiResponse = await apiLoginService(payload);
 
         if (response?.success) {
             dispatch({
@@ -78,8 +88,93 @@ export const updateAvatarImg = (imgUrl: string) => ({
     avatar: imgUrl,
 });
 
+export const register = (payload: RegisterPayload) => async (dispatch: any): Promise<ApiResponse | undefined> => {
+    try {
+        const response: ApiResponse = await apiSignupService(payload);
+
+        if (response?.success) {
+            dispatch({
+                type: actionTypes.LOGIN_SUCCESS,
+                data: response?.data
+            });
+        } else {
+            dispatch({
+                type: actionTypes.LOGIN_FAIL,
+                data: response?.data
+            });
+        }
+
+        console.log("Dispatched register action with response:", response?.data);
+        return response;
+    } catch (error: any) {
+        dispatch({
+            type: actionTypes.LOGIN_FAIL,
+            data: null
+        });
+        return error;
+    }
+};
+
+
 export const updateCoverImg = (imgUrl: string) => ({
     type: actionTypes.UPDATE_COVERIMG,
     cover: imgUrl,
 });
+
+// Google Login Action
+export const googleLogin = (credential: string) => async (dispatch: any): Promise<ApiResponse | undefined> => {
+    try {
+        const response: ApiResponse = await apiGoogleLoginService(credential);
+
+        if (response?.success) {
+            dispatch({
+                type: actionTypes.LOGIN_SUCCESS,
+                data: response?.data
+            });
+        } else {
+            dispatch({
+                type: actionTypes.LOGIN_FAIL,
+                data: response?.data
+            });
+        }
+
+        console.log("Dispatched Google login action with response:", response?.data);
+        return response;
+    } catch (error: any) {
+        dispatch({
+            type: actionTypes.LOGIN_FAIL,
+            data: null
+        });
+        return error;
+    }
+};
+
+// Facebook Login Action
+export const facebookLogin = (accessToken: string) => async (dispatch: any): Promise<ApiResponse | undefined> => {
+    try {
+        const response: ApiResponse = await apiFacebookLoginService(accessToken);
+
+        if (response?.success) {
+            dispatch({
+                type: actionTypes.LOGIN_SUCCESS,
+                data: response?.data
+            });
+        } else {
+            dispatch({
+                type: actionTypes.LOGIN_FAIL,
+                data: response?.data
+            });
+        }
+
+        console.log("Dispatched Facebook login action with response:", response?.data);
+        return response;
+    } catch (error: any) {
+        dispatch({
+            type: actionTypes.LOGIN_FAIL,
+            data: null
+        });
+        return error;
+    }
+};
+
 
