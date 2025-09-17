@@ -1,5 +1,5 @@
 import actionTypes from "../types/actionTypes";
-import { apiLoginService, apiSignupService, apiGoogleLoginService } from "../../services/authService";
+import { apiLoginService, apiSignupService, apiGoogleLoginService, apiFacebookLoginService } from "../../services/authService";
 
 interface LoginPayload {
     email: string;
@@ -149,3 +149,35 @@ export const googleLogin = (credential: string) => async (dispatch: any): Promis
     }
 };
 
+<<<<<<< HEAD
+// Facebook Login Action
+export const facebookLogin = (accessToken: string) => async (dispatch: any): Promise<ApiResponse | undefined> => {
+    try {
+        const response: ApiResponse = await apiFacebookLoginService(accessToken);
+
+        if (response?.success) {
+            dispatch({
+                type: actionTypes.LOGIN_SUCCESS,
+                data: response?.data
+            });
+        } else {
+            dispatch({
+                type: actionTypes.LOGIN_FAIL,
+                data: response?.data
+            });
+        }
+
+        console.log("Dispatched Facebook login action with response:", response?.data);
+        return response;
+    } catch (error: any) {
+        dispatch({
+            type: actionTypes.LOGIN_FAIL,
+            data: null
+        });
+        return error;
+    }
+};
+
+
+=======
+>>>>>>> develop

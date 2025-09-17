@@ -16,5 +16,6 @@ declare global {
         };
       };
     };
+    FB: any;
   }
 }

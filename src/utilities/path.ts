@@ -6,6 +6,10 @@ export const path = {
     LANDING: "/",
     SIGNUP: "/signup",
     ABOUT: "/about",
+    PRIVACY: "/privacy",
+    DESKTOP_APP: "/desktop-app",
+    DEVELOPER: "/developer",
+    HELP: "/help",
     USER: "/user/:userId",
     STAR: "*"
 }

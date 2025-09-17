@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
-import { authAction } from '../../stores/actions';
-import { path } from '../../utilities/path';
-import GoogleLoginButton from './GoogleLoginButton';
+import { authAction } from '../../../stores/actions';
+import { path } from '../../../utilities/path';
+import { GoogleLoginButton, FacebookLoginButton } from '../buttons';
 
 const LoginForm = () => {
   const [email, setEmail] = useState('');
@@ -22,7 +22,6 @@ const LoginForm = () => {
 
     try {
       const response = await dispatch(authAction.login({ email, password }) as any);
-      
       if (response?.success) {
         navigate(path.HOME);
       } else {
@@ -35,20 +34,20 @@ const LoginForm = () => {
     }
   };
 
-  const handleGoogleError = (error: string) => {
+  const handleSocialError = (error: string) => {
     setError(error);
   };
 
   return (
     <div className="space-y-6 lg:space-y-8 w-full flex flex-col items-center lg:items-start text-center lg:text-left">
-      <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-travel-gradient leading-tight">
-        Kết nối, khám phá<br />
+      <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-bold text-travel-gradient leading-tight">
+        Kết nối, khám phá
         và chia sẻ<br />
-        những chuyến đi<br />
-        đáng nhớ
+        những chuyến<br />
+        đi đáng nhớ
       </h1>
 
-      <p className="text-gray-600 text-base sm:text-lg max-w-md">
+      <p className="text-base sm:text-lg max-w-md font-[400] text-gray-500 space-y-2">
         Với TravelNest, bạn có thể kết nối với những người cùng đam mê du lịch, chia sẻ kinh nghiệm và tạo ra những kỷ niệm không thể quên.
       </p>
 
@@ -66,7 +65,7 @@ const LoginForm = () => {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
-          className="w-full px-3 py-2 text-sm text-gray-500 border border-gray-300 rounded-xl focus:outline-none focus:border-gray-500"
+          className="w-full px-3 py-2 text-sm text-gray-500 bg-gray-100 border-none rounded-xl focus:outline-1 focus:outline-[var(--travel-primary-600)] placeholder:text-gray-400"
         />
 
         <input
@@ -75,10 +74,10 @@ const LoginForm = () => {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
-          className="w-full px-3 py-2 text-sm text-gray-500 border border-gray-300 rounded-xl focus:outline-none focus:border-gray-500"
+          className="w-full px-3 py-2 text-sm text-gray-500 bg-gray-100 border-none rounded-xl focus:outline-1 focus:outline-[var(--travel-primary-600)] placeholder:text-gray-400"
         />
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0">
-          <button 
+          <button
             type="submit"
             disabled={isLoading}
             className="bg-travel-gradient text-white px-6 py-2 text-sm rounded-xl font-medium hover:bg-travel-gradient-dark hover:scale-105 hover:shadow-lg transition-all duration-300 w-full sm:w-auto cursor-pointer transform disabled:opacity-50 disabled:cursor-not-allowed"
@@ -113,8 +112,11 @@ const LoginForm = () => {
           </div>
         </div>
 
-        {/* Google Login */}
-        <GoogleLoginButton onError={handleGoogleError} />
+        {/* Social Login Buttons */}
+        <div className="space-y-3">
+          <GoogleLoginButton onError={handleSocialError} />
+          <FacebookLoginButton onError={handleSocialError} />
+        </div>
 
         <div className="text-center">
           <p className="text-xs text-gray-500">

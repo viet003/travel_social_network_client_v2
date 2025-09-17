@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
 import { Outlet, Link } from 'react-router-dom';
-import { 
-  Zap, 
-  Shield, 
-  Monitor, 
-  Code, 
-  HelpCircle, 
-  ChevronRight 
+import {
+  Zap,
+  Shield,
+  Monitor,
+  Code,
+  HelpCircle,
+  ChevronRight
 } from 'lucide-react';
 import background from '../../assets/images/background.png';
 import logo from '../../assets/images/logo.png';
@@ -56,65 +56,38 @@ const LandingPage = () => {
         ? 'backdrop-blur-lg bg-white/95 border-b border-gray-200'
         : 'bg-transparent'
         }`}>
-        <nav className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+        <nav className="max-w-7xl mx-auto px-4 py-6 flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center overflow-hidden">
+            <div className="w-[50px] h-[50px] sm:w-14 sm:h-14 rounded-full flex items-center justify-center overflow-hidden">
               <Link to={path.LANDING}>
-                <img 
-                  src={logo} 
-                  alt="TravelNest Logo" 
+                <img
+                  src={logo}
+                  alt="TravelNest Logo"
                   className="w-full h-full object-cover cursor-pointer hover:opacity-80 transition-opacity duration-200"
                 />
               </Link>
             </div>
             {/* <span className="text-xl font-bold text-gray-900">Social Network</span> */}
           </div>
-          <div className="hidden md:flex items-center space-x-8 text-base text-gray-700">
-            <Link
-              to={path.ABOUT}
-              className="font-medium cursor-pointer transition-all duration-200 
-               hover:underline decoration-2 
-               decoration-[var(--travel-primary-600)] 
-               hover:underline-offset-4"
-            >
-              Tính năng ▼
-            </Link>
-            <a
-              href="#"
-              className="font-medium cursor-pointer transition-all duration-200 
-               hover:underline decoration-2 
-               decoration-[var(--travel-primary-600)] 
-               hover:underline-offset-4"
-            >
-              Quyền riêng tư và an toàn
-            </a>
-            <a
-              href="#"
-              className="font-medium cursor-pointer transition-all duration-200 
-               hover:underline decoration-2 
-               decoration-[var(--travel-primary-600)] 
-               hover:underline-offset-4"
-            >
-              Ứng dụng dành cho máy tính
-            </a>
-            <a
-              href="#"
-              className="font-medium cursor-pointer transition-all duration-200 
-               hover:underline decoration-2 
-               decoration-[var(--travel-primary-600)] 
-               hover:underline-offset-4"
-            >
-              Dành cho nhà phát triển
-            </a>
-            <a
-              href="#"
-              className="font-medium cursor-pointer transition-all duration-200 
-               hover:underline decoration-2 
-               decoration-[var(--travel-primary-600)] 
-               hover:underline-offset-4"
-            >
-              Trung tâm trợ giúp
-            </a>
+          <div className="hidden md:flex items-center space-x-8 text-[15px] text-gray-900 font-semibold">
+            {[
+              { text: "Tính năng ▼", to: path.ABOUT },
+              { text: "Quyền riêng tư và an toàn", to: null },
+              { text: "Ứng dụng dành cho máy tính", to: null },
+              { text: "Dành cho nhà phát triển", to: null },
+              { text: "Trung tâm trợ giúp", to: null },
+            ].map((item, index) => (
+              <Link
+                key={index}
+                to={item?.to  || path.LANDING}
+                className="font-medium cursor-pointer transition-all duration-200 
+                 hover:underline decoration-3 
+                 decoration-[var(--travel-primary-600)] 
+                 hover:underline-offset-4"
+              >
+                {item.text}
+              </Link>
+            ))}
           </div>
           {/* Mobile menu button */}
           <button
@@ -141,11 +114,11 @@ const LandingPage = () => {
           {/* Header */}
           <div className="flex items-center justify-between p-6 border-b border-gray-100 bg-gradient-to-r from-travel-primary-50 to-travel-secondary-50">
             <div className="flex items-center space-x-3">
-              <div className="w-12 h-12 rounded-full flex items-center justify-center shadow-lg overflow-hidden">
+              <div className="w-14 h-14 rounded-full flex items-center justify-center overflow-hidden">
                 <Link to={path.LANDING}>
-                  <img 
-                    src={logo} 
-                    alt="TravelNest Logo" 
+                  <img
+                    src={logo}
+                    alt="TravelNest Logo"
                     className="w-full h-full object-cover cursor-pointer hover:opacity-80 transition-opacity duration-200"
                   />
                 </Link>
@@ -181,16 +154,16 @@ const LandingPage = () => {
                 <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-travel-primary-600 transition-colors duration-200" />
               </Link>
               {[
-                { text: "Quyền riêng tư và an toàn", icon: Shield },
-                { text: "Ứng dụng dành cho máy tính", icon: Monitor },
-                { text: "Dành cho nhà phát triển", icon: Code },
-                { text: "Trung tâm trợ giúp", icon: HelpCircle },
+                { text: "Quyền riêng tư và an toàn", icon: Shield, to: null },
+                { text: "Ứng dụng dành cho máy tính", icon: Monitor, to: null },
+                { text: "Dành cho nhà phát triển", icon: Code, to: null },
+                { text: "Trung tâm trợ giúp", icon: HelpCircle, to: null },
               ].map((item, i) => {
                 const IconComponent = item.icon;
                 return (
-                  <a
+                  <Link
                     key={i}
-                    href="#"
+                    to={item?.to  || path.LANDING}
                     className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:text-travel-primary-600 hover:bg-travel-primary-50 rounded-xl cursor-pointer transition-all duration-200 group"
                   >
                     <IconComponent className="w-5 h-5 text-gray-600 group-hover:text-travel-primary-600 transition-colors duration-200" />
@@ -198,25 +171,25 @@ const LandingPage = () => {
                     hover:underline decoration-2 
                     decoration-[var(--travel-primary-600)] 
                     hover:underline-offset-4">{item.text}</span>
-                  </a>
+                  </Link>
                 );
               })}
             </div>
           </div>
-          
+
           {/* Footer Info */}
           <div className="px-6 py-4 border-t border-gray-100 mt-auto">
             <div className="text-center">
               <p className="text-xs text-gray-400 mb-2">© TravelNest Network 2025</p>
               <div className="flex justify-center space-x-4 text-xs">
                 {[
-                  "Chính sách",
-                  "Điều khoản", 
-                  "Hỗ trợ",
-                ].map((text, i) => (
-                  <a
+                  { text: "Chính sách", to: null },
+                  { text: "Điều khoản", to: null },
+                  { text: "Hỗ trợ", to: null },
+                ].map((item, i) => (
+                  <Link
                     key={i}
-                    href="#"
+                    to={item?.to  || path.LANDING}
                     className="font-medium
                     text-gray-400
                     cursor-pointer transition-all duration-200 
@@ -224,8 +197,8 @@ const LandingPage = () => {
                     decoration-[var(--travel-primary-600)] 
                     hover:underline-offset-4"
                   >
-                    {text}
-                  </a>
+                    {item.text}
+                  </Link>
                 ))}
               </div>
             </div>
@@ -234,7 +207,7 @@ const LandingPage = () => {
       </div>
 
       {/* Main Content */}
-      <main className="mt-20 flex items-center justify-center px-2 sm:px-4 py-8 sm:py-12 lg:py-16 min-h-screen">
+      <main className="mt-24 flex items-center justify-center px-2 sm:px-4 py-8 sm:py-12 lg:py-16 min-h-screen">
         <div className="w-full max-w-7xl">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 xl:gap-16 items-center min-h-[60vh]">
             {/* Left Side - Content */}
@@ -266,27 +239,27 @@ const LandingPage = () => {
             <div className="text-gray-400 order-3 lg:order-1">© TravelNest 2025</div>
             <div className="flex flex-wrap justify-center gap-4 sm:gap-6 lg:gap-8 order-2">
               {[
-                "Chính sách quyền riêng tư",
-                "Chính sách cookie",
-                "Điều khoản",
-                "Tiếng Việt ▼",
-              ].map((text, i) => (
-                <a
+                { text: "Chính sách quyền riêng tư", to: null },
+                { text: "Chính sách cookie", to: null },
+                { text: "Điều khoản", to: null },
+                { text: "Tiếng Việt ▼", to: null },
+              ].map((item, i) => (
+                <Link
                   key={i}
-                  href="#"
+                  to={item?.to  || path.LANDING}
                   className="font-medium cursor-pointer transition-all duration-200 
                   hover:underline decoration-2 
                   decoration-[var(--travel-primary-600)] 
                   hover:underline-offset-4"
                 >
-                  {text}
-                </a>
+                  {item.text}
+                </Link>
               ))}
             </div>
             <div className="flex items-center space-x-2 text-gray-400 order-1 lg:order-3">
-              <img 
-                src={sublogo} 
-                alt="TravelNest Sub Logo" 
+              <img
+                src={sublogo}
+                alt="TravelNest Sub Logo"
                 className="w-[200px] object-contain"
               />
             </div>

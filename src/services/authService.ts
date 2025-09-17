@@ -93,3 +93,16 @@ export const apiGoogleLoginService = async (accessToken: string): Promise<any> =
     throw error.response ? error.response.data : error;
   }
 };
+
+export const apiFacebookLoginService = async (accessToken: string): Promise<any> => {
+  try {
+    const response: ApiResponse = await axiosConfig({
+      method: 'POST',
+      url: '/auth/facebook/login',
+      data: { accessToken }
+    });
+    return response.data;
+  } catch (error: any) {
+    throw error.response ? error.response.data : error;
+  }
+};
