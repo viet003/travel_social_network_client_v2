@@ -4,6 +4,7 @@ import { useDispatch } from 'react-redux';
 import { authAction } from '../../../stores/actions';
 import { path } from '../../../utilities/path';
 import { GoogleLoginButton, FacebookLoginButton } from '../buttons';
+import { TravelInput, TravelButton, TravelCheckbox } from '../../common/inputs';
 import background from '../../../assets/images/background.png';
 
 const LoginForm = () => {
@@ -54,82 +55,79 @@ const LoginForm = () => {
           Với TravelNest, bạn có thể kết nối với những người cùng đam mê du lịch, chia sẻ kinh nghiệm và tạo ra những kỷ niệm không thể quên.
         </p>
 
-      {/* Login Form */}
-      <form onSubmit={handleSubmit} className="space-y-3 w-full max-w-md">
-        {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-xl text-sm">
-            {error}
+        {/* Login Form */}
+        <form onSubmit={handleSubmit} className="space-y-8 w-full max-w-md">
+          {error && (
+            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-xl text-sm">
+              {error}
+            </div>
+          )}
+
+          <div className="flex flex-col gap-3">
+            <TravelInput
+              type="email"
+              placeholder="Email hoặc số điện thoại"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+
+            <TravelInput
+              type="password"
+              placeholder="Mật khẩu"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+
+            <div className="flex items-center space-x-2">
+              <TravelCheckbox
+                checked={keepLoggedIn}
+                onChange={(e) => setKeepLoggedIn(e.target.checked)}
+              >
+                Duy trì đăng nhập
+              </TravelCheckbox>
+            </div>
           </div>
-        )}
-
-        <input
-          type="email"
-          placeholder="Email hoặc số điện thoại"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-          className="w-full px-3 py-2 text-sm text-gray-500 bg-gray-100 border-none rounded-xl focus:outline-1 focus:outline-[var(--travel-primary-600)] placeholder:text-gray-400"
-        />
-
-        <input
-          type="password"
-          placeholder="Mật khẩu"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-          className="w-full px-3 py-2 text-sm text-gray-500 bg-gray-100 border-none rounded-xl focus:outline-1 focus:outline-[var(--travel-primary-600)] placeholder:text-gray-400"
-        />
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0">
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="bg-travel-gradient text-white px-6 py-2 text-sm rounded-xl font-medium hover:bg-travel-gradient-dark hover:scale-105 hover:shadow-lg transition-all duration-300 w-full sm:w-auto cursor-pointer transform disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {isLoading ? 'Đang đăng nhập...' : 'Đăng nhập'}
-          </button>
-          <Link to={path.FORGOTPASS} className="text-gray-500 text-xs text-center sm:text-right font-medium cursor-pointer hover:underline decoration-2 decoration-[var(--travel-primary-600)] hover:underline-offset-4 hover:text-[var(--travel-primary-700)]">
-            Bạn quên mật khẩu?
-          </Link>
-        </div>
-
-        <div className="flex items-center space-x-2">
-          <input
-            type="checkbox"
-            id="keepLoggedIn"
-            checked={keepLoggedIn}
-            onChange={(e) => setKeepLoggedIn(e.target.checked)}
-            className="w-3 h-3 accent-travel-primary-600 border-gray-300 rounded focus:ring-travel-primary-500"
-          />
-          <label htmlFor="keepLoggedIn" className="text-xs text-gray-600">
-            Duy trì đăng nhập
-          </label>
-        </div>
-
-        {/* Divider */}
-        <div className="relative my-4">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-gray-300"></div>
-          </div>
-          <div className="relative flex justify-center text-sm">
-            <span className="px-2 bg-white text-gray-500">Hoặc</span>
-          </div>
-        </div>
-
-        {/* Social Login Buttons */}
-        <div className="space-y-3">
-          <GoogleLoginButton onError={handleSocialError} />
-          <FacebookLoginButton onError={handleSocialError} />
-        </div>
-
-        <div className="text-center">
-          <p className="text-xs text-gray-500">
-            Chưa có tài khoản?{' '}
-            <Link to={path.SIGNUP} className="mt-3 text-[var(--travel-primary-600)] font-medium cursor-pointer transition-all duration-200 hover:underline decoration-2 decoration-[var(--travel-primary-600)] hover:underline-offset-4">
-              Đăng ký ngay
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0">
+            <TravelButton
+              type="primary"
+              htmlType="submit"
+              loading={isLoading}
+              disabled={isLoading}
+            >
+              {isLoading ? 'Đang đăng nhập...' : 'Đăng nhập'}
+            </TravelButton>
+            <Link to={path.FORGOTPASS} className="text-gray-500 text-xs text-center sm:text-right font-medium cursor-pointer hover:underline decoration-2 decoration-[var(--travel-primary-600)] hover:underline-offset-4 hover:text-[var(--travel-primary-700)]">
+              Bạn quên mật khẩu?
             </Link>
-          </p>
-        </div>
-      </form>
+          </div>
+
+          {/* Divider */}
+          <div className="relative my-4">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-300"></div>
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-2 bg-white text-gray-500">Hoặc</span>
+            </div>
+          </div>
+
+          {/* Social Login Buttons */}
+          <div className="space-y-3">
+            <GoogleLoginButton onError={handleSocialError} />
+            <FacebookLoginButton onError={handleSocialError} />
+          </div>
+
+          <div className="text-center">
+            <p className="text-xs text-gray-500">
+              Chưa có tài khoản?{' '}
+              <Link to={path.SIGNUP} className="mt-3 text-[var(--travel-primary-600)] font-medium cursor-pointer transition-all duration-200 hover:underline decoration-2 decoration-[var(--travel-primary-600)] hover:underline-offset-4">
+                Đăng ký ngay
+              </Link>
+            </p>
+          </div>
+        </form>
 
         {/* App Store Buttons */}
         <div className="flex flex-col sm:flex-row gap-3 w-full max-w-md">
