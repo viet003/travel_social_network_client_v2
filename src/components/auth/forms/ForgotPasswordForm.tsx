@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { apiForgotPassWordService } from '../../../services/authService';
 import { path } from '../../../utilities/path';
 import { GoogleLoginButton, FacebookLoginButton } from '../buttons';
+import { TravelInput, TravelButton } from '../../common/inputs';
 import background from '../../../assets/images/background.png';
 
 const ForgotPasswordForm = () => {
@@ -58,21 +59,21 @@ const ForgotPasswordForm = () => {
             Vui lòng kiểm tra hộp thư và làm theo hướng dẫn.
           </p>
 
-        <div className="space-y-4 w-full max-w-md">
-          <button
-            onClick={() => setIsEmailSent(false)}
-            className="bg-travel-gradient text-white px-6 py-2 text-sm rounded-xl font-medium hover:bg-travel-gradient-dark hover:scale-105 hover:shadow-lg transition-all duration-300 w-full cursor-pointer transform"
-          >
-            Gửi lại email
-          </button>
+          <div className="space-y-4 w-full max-w-md">
+            <TravelButton
+              type="primary"
+              onClick={() => setIsEmailSent(false)}
+            >
+              Gửi lại email
+            </TravelButton>
 
-          <p className="text-center text-xs text-gray-500">
-            Không nhận được email? Kiểm tra thư mục spam hoặc{' '}
-            <a href="#" className="text-[var(--travel-primary-600)] font-medium cursor-pointer transition-all duration-200 hover:underline decoration-2 decoration-[var(--travel-primary-600)] hover:underline-offset-4">
-              liên hệ hỗ trợ
-            </a>
-          </p>
-        </div>
+            <p className="text-center text-xs text-gray-500">
+              Không nhận được email? Kiểm tra thư mục spam hoặc{' '}
+              <a href="#" className="text-[var(--travel-primary-600)] font-medium cursor-pointer transition-all duration-200 hover:underline decoration-2 decoration-[var(--travel-primary-600)] hover:underline-offset-4">
+                liên hệ hỗ trợ
+              </a>
+            </p>
+          </div>
 
           {/* App Store Buttons */}
           <div className="flex flex-col sm:flex-row gap-3 w-full max-w-md">
@@ -129,64 +130,66 @@ const ForgotPasswordForm = () => {
           Đừng lo lắng! Nhập địa chỉ email của bạn và chúng tôi sẽ gửi hướng dẫn khôi phục mật khẩu.
         </p>
 
-      {/* Forgot Password Form */}
-      <form onSubmit={handleSubmit} className="space-y-3 w-full max-w-md">
-        {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-xl text-sm">
-            {error}
+        {/* Forgot Password Form */}
+        <form onSubmit={handleSubmit} className="space-y-4 w-full max-w-md">
+          {error && (
+            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-xl text-sm">
+              {error}
+            </div>
+          )}
+
+          <div className="flex flex-col gap-3">
+            <TravelInput
+              type="email"
+              placeholder="Email của bạn"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+
+            <TravelButton
+              type="primary"
+              htmlType="submit"
+              loading={isLoading}
+              disabled={isLoading}
+            >
+              {isLoading ? 'Đang gửi...' : 'Gửi hướng dẫn khôi phục'}
+            </TravelButton>
           </div>
-        )}
 
-        <input
-          type="email"
-          placeholder="Email của bạn"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-          className="w-full px-3 py-2 text-sm text-gray-500 bg-gray-100 border-none rounded-xl focus:outline-1 focus:outline-[var(--travel-primary-600)] placeholder:text-gray-400"
-        />
-
-        <button
-          type="submit"
-          disabled={isLoading}
-          className="bg-travel-gradient text-white px-6 py-2 text-sm rounded-xl font-medium hover:bg-travel-gradient-dark hover:scale-105 hover:shadow-lg transition-all duration-300 w-full cursor-pointer transform disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {isLoading ? 'Đang gửi...' : 'Gửi hướng dẫn khôi phục'}
-        </button>
-
-        {/* Divider */}
-        <div className="relative my-4">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-gray-300"></div>
+          {/* Divider */}
+          <div className="relative my-4">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-300"></div>
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-2 bg-white text-gray-500">Hoặc</span>
+            </div>
           </div>
-          <div className="relative flex justify-center text-sm">
-            <span className="px-2 bg-white text-gray-500">Hoặc</span>
+
+          {/* Social Login Buttons */}
+          <div className="space-y-3">
+            <GoogleLoginButton
+              onError={handleSocialError}
+              buttonText="Đăng nhập bằng Google"
+              loadingText="Đang xử lý..."
+            />
+            <FacebookLoginButton
+              onError={handleSocialError}
+              buttonText="Đăng nhập bằng Facebook"
+              loadingText="Đang xử lý..."
+            />
           </div>
-        </div>
 
-        {/* Social Login Buttons */}
-        <div className="space-y-3">
-          <GoogleLoginButton 
-            onError={handleSocialError} 
-            buttonText="Đăng nhập bằng Google"
-            loadingText="Đang xử lý..."
-          />
-          <FacebookLoginButton 
-            onError={handleSocialError} 
-            buttonText="Đăng nhập bằng Facebook"
-            loadingText="Đang xử lý..."
-          />
-        </div>
-
-        <div className="text-center space-y-2">
-          <p className="text-xs text-gray-500">
-            Nhớ lại mật khẩu?{' '}
-            <Link to={path.LANDING} className="mt-3 text-[var(--travel-primary-600)] font-medium cursor-pointer transition-all duration-200 hover:underline decoration-2 decoration-[var(--travel-primary-600)] hover:underline-offset-4">
-              Đăng nhập ngay
-            </Link>
-          </p>
-        </div>
-      </form>
+          <div className="text-center space-y-2">
+            <p className="text-xs text-gray-500">
+              Nhớ lại mật khẩu?{' '}
+              <Link to={path.LANDING} className="mt-3 text-[var(--travel-primary-600)] font-medium cursor-pointer transition-all duration-200 hover:underline decoration-2 decoration-[var(--travel-primary-600)] hover:underline-offset-4">
+                Đăng nhập ngay
+              </Link>
+            </p>
+          </div>
+        </form>
 
         {/* App Store Buttons */}
         <div className="flex flex-col sm:flex-row gap-3 w-full max-w-md">

@@ -62,3 +62,11 @@ border-radius: 4px;
 .scrollbar-hide:hover::-webkit-scrollbar-thumb:hover {
 background: #a0aec0;
 }
+
+.ant-select-focused .ant-select-selector,
+.ant-select-selector:focus,
+.ant-select-selector:active,
+.ant-select-open .ant-select-selector {
+  border-color: var(--travel-primary-600) !important;
+  box-shadow: none !important;
+}
