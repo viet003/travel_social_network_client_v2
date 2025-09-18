@@ -149,7 +149,6 @@ export const googleLogin = (credential: string) => async (dispatch: any): Promis
     }
 };
 
-<<<<<<< HEAD
 // Facebook Login Action
 export const facebookLogin = (accessToken: string) => async (dispatch: any): Promise<ApiResponse | undefined> => {
     try {
@@ -179,5 +178,3 @@ export const facebookLogin = (accessToken: string) => async (dispatch: any): Pro
 };
 
 
-=======
->>>>>>> develop

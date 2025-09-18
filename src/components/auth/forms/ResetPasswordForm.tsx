@@ -3,6 +3,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { apiResetPasswordService } from '../../../services/authService';
 import { path } from '../../../utilities/path';
 import { GoogleLoginButton, FacebookLoginButton } from '../buttons';
+import background from '../../../assets/images/background.png';
 
 const ResetPasswordForm = () => {
   const [newPassword, setNewPassword] = useState('');
@@ -72,44 +73,65 @@ const ResetPasswordForm = () => {
 
   if (success) {
     return (
-      <div className="space-y-6 lg:space-y-8 w-full flex flex-col items-center lg:items-start text-center lg:text-left">
-        {/* Success Icon and Title */}
-        <div className="flex items-center gap-4 mb-6">
-          <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
-            <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-            </svg>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 xl:gap-16 items-center w-full">
+        {/* Left Side - Content */}
+        <div className="space-y-6 lg:space-y-8 w-full flex flex-col items-center lg:items-start text-center lg:text-left">
+          {/* Success Icon and Title */}
+          <div className="flex items-center gap-4 mb-6">
+            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
+              <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-travel-gradient leading-tight">
+              Thành công!
+            </h1>
           </div>
-          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-travel-gradient leading-tight">
-            Thành công!
-          </h1>
+
+          <p className="text-base sm:text-lg max-w-md font-[400] text-gray-500 space-y-2">
+            Mật khẩu của bạn đã được đặt lại thành công. Bạn sẽ được chuyển hướng đến trang đăng nhập trong vài giây.
+          </p>
+
+          <div className="space-y-4 w-full max-w-md">
+            <Link 
+              to={path.LANDING}
+              className="bg-travel-gradient text-white px-6 py-2 text-sm rounded-xl font-medium hover:bg-travel-gradient-dark hover:scale-105 hover:shadow-lg transition-all duration-300 w-full cursor-pointer transform inline-block text-center"
+            >
+              Đăng nhập ngay
+            </Link>
+          </div>
         </div>
 
-        <p className="text-base sm:text-lg max-w-md font-[400] text-gray-500 space-y-2">
-          Mật khẩu của bạn đã được đặt lại thành công. Bạn sẽ được chuyển hướng đến trang đăng nhập trong vài giây.
-        </p>
+        {/* Right Side - Background Image */}
+        <div className="relative h-full order-first lg:order-last w-full flex justify-center">
+          <div className="relative z-10 rounded-3xl overflow-hidden w-full max-w-sm sm:max-w-md lg:max-w-lg">
+            <img
+              src={background}
+              alt="Social Network"
+              className="w-full h-auto rounded-3xl object-cover"
+            />
+          </div>
 
-        <div className="space-y-4 w-full max-w-md">
-          <Link 
-            to={path.LANDING}
-            className="bg-travel-gradient text-white px-6 py-2 text-sm rounded-xl font-medium hover:bg-travel-gradient-dark hover:scale-105 hover:shadow-lg transition-all duration-300 w-full cursor-pointer transform inline-block text-center"
-          >
-            Đăng nhập ngay
-          </Link>
+          {/* Background Decorative Elements */}
+          <div className="absolute -top-4 -right-4 w-20 h-20 bg-pink-400 rounded-full opacity-20"></div>
+          <div className="absolute -bottom-8 -left-8 w-32 h-32 bg-yellow-400 rounded-full opacity-20"></div>
+          <div className="absolute top-1/2 -right-12 w-16 h-16 bg-purple-400 rounded-full opacity-30"></div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6 lg:space-y-8 w-full flex flex-col items-center lg:items-start text-center lg:text-left">
-      <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-travel-gradient leading-tight">
-        Đặt lại mật khẩu
-      </h1>
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 xl:gap-16 items-center w-full">
+      {/* Left Side - Content */}
+      <div className="space-y-6 lg:space-y-8 w-full flex flex-col items-center lg:items-start text-center lg:text-left">
+        <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-travel-gradient leading-tight">
+          Đặt lại mật khẩu
+        </h1>
 
-      <p className="text-base sm:text-lg max-w-md font-[400] text-gray-500 space-y-2">
-        Nhập mật khẩu mới của bạn để hoàn tất quá trình đặt lại mật khẩu.
-      </p>
+        <p className="text-base sm:text-lg max-w-md font-[400] text-gray-500 space-y-2">
+          Nhập mật khẩu mới của bạn để hoàn tất quá trình đặt lại mật khẩu.
+        </p>
 
       {/* Reset Password Form */}
       <form onSubmit={handleSubmit} className="space-y-3 w-full max-w-md">
@@ -186,6 +208,23 @@ const ResetPasswordForm = () => {
           </p>
         </div>
       </form>
+      </div>
+
+      {/* Right Side - Background Image */}
+      <div className="relative h-full order-first lg:order-last w-full flex justify-center">
+        <div className="relative z-10 rounded-3xl overflow-hidden w-full max-w-sm sm:max-w-md lg:max-w-lg">
+          <img
+            src={background}
+            alt="Social Network"
+            className="w-full h-auto rounded-3xl object-cover"
+          />
+        </div>
+
+        {/* Background Decorative Elements */}
+        <div className="absolute -top-4 -right-4 w-20 h-20 bg-pink-400 rounded-full opacity-20"></div>
+        <div className="absolute -bottom-8 -left-8 w-32 h-32 bg-yellow-400 rounded-full opacity-20"></div>
+        <div className="absolute top-1/2 -right-12 w-16 h-16 bg-purple-400 rounded-full opacity-30"></div>
+      </div>
     </div>
   );
 };
