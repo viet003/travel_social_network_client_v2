@@ -73,7 +73,7 @@ const AboutPage = () => {
     <div className="space-y-12 lg:space-y-16 w-full">
       {/* Hero Section */}
       <div className="text-center space-y-6">
-        <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-travel-gradient leading-tight">
+        <h1 className="text-[70px] font-bold text-[var(--travel-primary-500)] leading-tight">
           Về TravelNest
         </h1>
         <p className="text-gray-600 text-lg sm:text-xl max-w-3xl mx-auto">
@@ -92,7 +92,7 @@ const AboutPage = () => {
             const IconComponent = feature.icon;
             return (
               <div key={index} className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-100">
-                <div className="w-12 h-12 bg-travel-gradient rounded-xl flex items-center justify-center mb-4">
+                <div className="w-12 h-12 bg-travel-primary-500 rounded-xl flex items-center justify-center mb-4">
                   <IconComponent className="w-6 h-6 text-white" />
                 </div>
                 <h3 className="text-xl font-semibold text-gray-900 mb-3">

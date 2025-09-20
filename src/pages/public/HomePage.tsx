@@ -19,7 +19,7 @@ const HomePage: React.FC = () => {
       <div className="container mx-auto px-4 py-8">
         {/* Welcome Section */}
         <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-6xl font-bold text-travel-gradient mb-4">
+          <h1 className="text-[70px] font-bold text-[var(--travel-primary-500)] mb-4">
             Chào mừng đến với TravelNest!
           </h1>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
@@ -31,7 +31,7 @@ const HomePage: React.FC = () => {
         <div className="bg-white rounded-2xl shadow-xl p-8 mb-8 max-w-2xl mx-auto">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center space-x-4">
-              <div className="w-16 h-16 bg-travel-gradient rounded-full flex items-center justify-center">
+              <div className="w-16 h-16 bg-travel-primary-500 rounded-full flex items-center justify-center">
                 <span className="text-2xl font-bold text-white">
                   {user?.firstName?.charAt(0) || user?.userName?.charAt(0) || 'U'}
                 </span>
@@ -94,7 +94,7 @@ const HomePage: React.FC = () => {
 
         {/* Call to Action */}
         <div className="text-center mt-12">
-          <button className="bg-travel-gradient text-white px-8 py-3 rounded-xl font-medium hover:bg-travel-gradient-dark hover:scale-105 hover:shadow-lg transition-all duration-300 transform">
+          <button className="bg-travel-primary-500 text-white px-8 py-3 rounded-xl font-medium hover:bg-travel-primary-700 hover:scale-105 hover:shadow-lg transition-all duration-300 transform">
             Bắt đầu khám phá ngay
           </button>
         </div>

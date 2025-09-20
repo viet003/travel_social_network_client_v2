@@ -57,7 +57,7 @@ const LandingPage = () => {
         }`}>
         <nav className="max-w-7xl mx-auto px-4 py-6 flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <div className="w-[50px] h-[50px] sm:w-14 sm:h-14 rounded-full flex items-center justify-center overflow-hidden">
+            <div className="w-[60px] h-[60px] sm:w-[70px] sm:h-[70px] md:w-[80px] md:h-[80px] lg:w-[90px] lg:h-[90px] rounded-full flex items-center justify-center overflow-hidden">
               <Link to={path.LANDING}>
                 <img
                   src={logo}
@@ -72,7 +72,7 @@ const LandingPage = () => {
             {[
               { text: "Tính năng ▼", to: path.FEATURES },
               { text: "Quyền riêng tư và an toàn", to: path.PRIVACY },
-              { text: "Ứng dụng dành cho máy tính", to: null },
+              { text: "Ứng dụng dành cho máy tính", to: path.DESKTOP_APP },
               { text: "Dành cho nhà phát triển", to: null },
               { text: "Trung tâm trợ giúp", to: null },
             ].map((item, index) => (
@@ -111,7 +111,7 @@ const LandingPage = () => {
         {/* Side Menu */}
         <div className={`absolute left-0 top-0 h-screen w-80 bg-white shadow-2xl transform transition-transform duration-300 ease-in-out flex flex-col ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
           {/* Header */}
-          <div className="flex items-center justify-between p-6 border-b border-gray-100 bg-gradient-to-r from-travel-primary-50 to-travel-secondary-50">
+          <div className="flex items-center justify-between p-6 border-b border-gray-100 bg-travel-primary-50">
             <div className="flex items-center space-x-3">
               <div className="w-14 h-14 rounded-full flex items-center justify-center overflow-hidden">
                 <Link to={path.LANDING}>
@@ -154,7 +154,7 @@ const LandingPage = () => {
               </Link>
               {[
                 { text: "Quyền riêng tư và an toàn", icon: Shield, to: path.PRIVACY },
-                { text: "Ứng dụng dành cho máy tính", icon: Monitor, to: null },
+                { text: "Ứng dụng dành cho máy tính", icon: Monitor, to: path.DESKTOP_APP },
                 { text: "Dành cho nhà phát triển", icon: Code, to: null },
                 { text: "Trung tâm trợ giúp", icon: HelpCircle, to: null },
               ].map((item, i) => {
@@ -207,7 +207,7 @@ const LandingPage = () => {
 
       {/* Main Content */}
       <main className="mt-32 w-full">
-        <div className="w-full max-w-7xl mx-auto px-4 py-6">
+        <div className="w-full max-w-7xl mx-auto sm:mt-[200px] px-4 py-6">
           {/* Main Content Area - Forms */}
           <div className="w-full">
             <Outlet />
@@ -218,8 +218,8 @@ const LandingPage = () => {
       {/* Footer */}
       <footer className="bg-white py-6 sm:py-8 mt-auto">
         <div className="max-w-7xl mx-auto px-2 sm:px-4">
-          <div className="flex flex-col lg:flex-row justify-between items-center text-xs sm:text-sm text-gray-600 space-y-4 lg:space-y-0">
-            <div className="text-gray-400 order-3 lg:order-1">© TravelNest 2025</div>
+          <div className="flex flex-col lg:flex-row justify-between items-center text-xs sm:text-sm text-gray-900 space-y-4 lg:space-y-0">
+            <div className="text-gray-900 order-3 lg:order-1">© TravelNest 2025</div>
             <div className="flex flex-wrap justify-center gap-4 sm:gap-6 lg:gap-8 order-2">
               {[
                 { text: "Chính sách quyền riêng tư", to: null },

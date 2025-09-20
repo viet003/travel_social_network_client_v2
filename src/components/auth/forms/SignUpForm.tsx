@@ -4,6 +4,7 @@ import { useDispatch } from 'react-redux';
 import { authAction } from '../../../stores/actions';
 import { path } from '../../../utilities/path';
 import { GoogleLoginButton, FacebookLoginButton } from '../buttons';
+import { TravelInput, TravelButton, TravelCheckbox, TravelSelect, TravelDatePicker } from '../../common/inputs';
 import background from '../../../assets/images/background.png';
 
 const SignUpForm = () => {
@@ -54,7 +55,7 @@ const SignUpForm = () => {
         dateOfBirth: dateOfBirth || undefined,
         gender: gender || undefined
       }) as any);
-      
+
       if (response?.success) {
         navigate('/main');
       } else {
@@ -70,176 +71,188 @@ const SignUpForm = () => {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 xl:gap-16 items-center w-full">
       {/* Left Side - Content */}
-      <div className="space-y-6 lg:space-y-8 w-full flex flex-col items-center lg:items-start text-center lg:text-left">
-        <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-travel-gradient leading-tight">
+      <div className="space-y-6 lg:space-y-8 w-full flex flex-col items-center lg:items-start text-center lg:text-left order-first">
+        <h1 className="text-6xl lg:text-[70px] font-bold text-[var(--travel-primary-500)] leading-tight">
           Tham gia cộng đồng
-          du lịch
+          du lịch<br/>
           và tạo ra những
           kỷ niệm đáng nhớ
         </h1>
 
-        <p className="text-base sm:text-lg max-w-md font-[400] text-gray-500 space-y-2">
+        <p className="text-base sm:text-md max-w-md font-[400] text-gray-500 space-y-2">
           Tạo tài khoản miễn phí và bắt đầu hành trình khám phá thế giới cùng những người bạn đồng hành tuyệt vời.
         </p>
 
-      {/* Sign Up Form */}
-      <form onSubmit={handleSubmit} className="space-y-3 w-full max-w-md">
-        {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-xl text-sm">
-            {error}
-          </div>
-        )}
-        {/* Username - Required */}
-        <input
-          type="text"
-          placeholder="Tên đăng nhập *"
-          value={userName}
-          onChange={(e) => setUserName(e.target.value)}
-          required
-          className="w-full px-3 py-2 text-sm text-gray-500 bg-gray-100 border-none rounded-xl focus:outline-1 focus:outline-[var(--travel-primary-600)] placeholder:text-gray-400"
-        />
-
-        {/* First Name & Last Name */}
-        <div className="grid grid-cols-2 gap-3">
-          <input
-            type="text"
-            placeholder="Họ"
-            value={firstName}
-            onChange={(e) => setFirstName(e.target.value)}
-            maxLength={50}
-            className="w-full px-3 py-2 text-sm text-gray-500 bg-gray-100 border-none rounded-xl focus:outline-1 focus:outline-[var(--travel-primary-600)] placeholder:text-gray-400"
-          />
-          <input
-            type="text"
-            placeholder="Tên"
-            value={lastName}
-            onChange={(e) => setLastName(e.target.value)}
-            maxLength={50}
-            className="w-full px-3 py-2 text-sm text-gray-500 bg-gray-100 border-none rounded-xl focus:outline-1 focus:outline-[var(--travel-primary-600)] placeholder:text-gray-400"
-          />
-        </div>
-
-        {/* Email - Required */}
-        <input
-          type="email"
-          placeholder="Email *"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-          className="w-full px-3 py-2 text-sm text-gray-500 bg-gray-100 border-none rounded-xl focus:outline-1 focus:outline-[var(--travel-primary-600)] placeholder:text-gray-400"
-        />
-
-        {/* Password - Required with validation */}
-        <div className="space-y-1">
-          <input
-            type="password"
-            placeholder="Mật khẩu * (8-15 ký tự)"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            minLength={8}
-            maxLength={15}
-            className="w-full px-3 py-2 text-sm text-gray-500 bg-gray-100 border-none rounded-xl focus:outline-1 focus:outline-[var(--travel-primary-600)] placeholder:text-gray-400"
-          />
-          {password && (password.length < 8 || password.length > 15) && (
-            <p className="text-xs text-red-500">Mật khẩu phải có từ 8-15 ký tự</p>
+        {/* Sign Up Form */}
+        <form onSubmit={handleSubmit} className="space-y-8 w-full max-w-md">
+          {error && (
+            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-xl text-sm">
+              {error}
+            </div>
           )}
-        </div>
 
-        {/* Confirm Password */}
-        <input
-          type="password"
-          placeholder="Xác nhận mật khẩu"
-          value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
-          className="w-full px-3 py-2 text-sm text-gray-500 bg-gray-100 border-none rounded-xl focus:outline-1 focus:outline-[var(--travel-primary-600)] placeholder:text-gray-400"
-        />
-        {confirmPassword && password !== confirmPassword && (
-          <p className="text-xs text-red-500">Mật khẩu xác nhận không khớp</p>
-        )}
+          <div className="flex flex-col gap-3">
+            {/* Username - Required */}
+            <TravelInput
+              type="text"
+              placeholder="Tên đăng nhập *"
+              value={userName}
+              onChange={(e) => setUserName(e.target.value)}
+              required
+            />
 
-        {/* Date of Birth */}
-        <input
-          type="date"
-          placeholder="Ngày sinh"
-          value={dateOfBirth}
-          onChange={(e) => setDateOfBirth(e.target.value)}
-          className="w-full px-3 py-2 text-sm text-gray-500 bg-gray-100 border-none rounded-xl focus:outline-1 focus:outline-[var(--travel-primary-600)] placeholder:text-gray-400"
-        />
+            {/* First Name & Last Name */}
+            <div className="grid grid-cols-2 gap-3">
+              <TravelInput
+                type="text"
+                placeholder="Họ"
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+                maxLength={50}
+              />
+              <TravelInput
+                type="text"
+                placeholder="Tên"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+                maxLength={50}
+              />
+            </div>
 
-        {/* Gender */}
-        <select
-          value={gender}
-          onChange={(e) => setGender(e.target.value)}
-          className="w-full px-3 py-2 text-sm text-gray-500 bg-gray-100 border-none rounded-xl focus:outline-1 focus:outline-[var(--travel-primary-600)] placeholder:text-gray-400"
-        >
-          <option value="">Chọn giới tính</option>
-          <option value="male">Nam</option>
-          <option value="female">Nữ</option>
-          <option value="other">Khác</option>
-        </select>
+            {/* Email - Required */}
+            <TravelInput
+              type="email"
+              placeholder="Email *"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
 
-        <button 
-          type="submit"
-          disabled={isLoading}
-          className="bg-travel-gradient text-white px-6 py-2 text-sm rounded-xl font-medium hover:bg-travel-gradient-dark hover:scale-105 hover:shadow-lg transition-all duration-300 w-full cursor-pointer transform disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {isLoading ? 'Đang tạo tài khoản...' : 'Tạo tài khoản'}
-        </button>
+            {/* Password - Required with validation */}
+            <div className="space-y-1">
+              <TravelInput
+                type="password"
+                placeholder="Mật khẩu * (8-15 ký tự)"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                minLength={8}
+                maxLength={15}
+              />
+              {password && (password.length < 8 || password.length > 15) && (
+                <p className="text-xs text-red-500">Mật khẩu phải có từ 8-15 ký tự</p>
+              )}
+            </div>
 
-        <div className="flex items-start space-x-2">
-          <input
-            type="checkbox"
-            id="agreeToTerms"
-            checked={agreeToTerms}
-            onChange={(e) => setAgreeToTerms(e.target.checked)}
-            className="w-3 h-3 accent-travel-primary-600 border-gray-300 rounded focus:ring-travel-primary-500 mt-0.5"
-          />
-          <label htmlFor="agreeToTerms" className="text-xs text-gray-500 leading-relaxed">
-            Tôi đồng ý với{' '}
-            <a href="#" className="text-[var(--travel-primary-600)] font-medium cursor-pointer transition-all duration-200 hover:underline decoration-2 decoration-[var(--travel-primary-600)] hover:underline-offset-4">
-              Điều khoản dịch vụ
-            </a>{' '}
-            và{' '}
-            <a href="#" className="text-[var(--travel-primary-600)] font-medium cursor-pointer transition-all duration-200 hover:underline decoration-2 decoration-[var(--travel-primary-600)] hover:underline-offset-4">
-              Chính sách quyền riêng tư
-            </a>
-          </label>
-        </div>
+            {/* Confirm Password */}
+            <div className="space-y-1">
+              <TravelInput
+                type="password"
+                placeholder="Xác nhận mật khẩu"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+              />
+              {confirmPassword && password !== confirmPassword && (
+                <p className="text-xs text-red-500">Mật khẩu xác nhận không khớp</p>
+              )}
+            </div>
 
-        {/* Divider */}
-        <div className="relative my-4">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-gray-300"></div>
+            {/* Date of Birth */}
+            <TravelDatePicker
+              placeholder="Ngày sinh"
+              value={dateOfBirth}
+              onChange={setDateOfBirth}
+            />
+
+            {/* Gender */}
+            <TravelSelect
+              placeholder="Chọn giới tính"
+              value={gender}
+              onChange={setGender}
+              options={[
+                { value: 'male', label: 'Nam' },
+                { value: 'female', label: 'Nữ' },
+                { value: 'other', label: 'Khác' }
+              ]}
+            />
+
+            <div className="flex items-start space-x-2">
+              <TravelCheckbox
+                checked={agreeToTerms}
+                onChange={(e) => setAgreeToTerms(e.target.checked)}
+              >
+                <span className="text-xs text-gray-500 leading-relaxed">
+                  Tôi đồng ý với{' '}
+                  <a href="#" className="text-[var(--travel-primary-600)] font-medium cursor-pointer transition-all duration-200 hover:underline decoration-2 decoration-[var(--travel-primary-600)] hover:underline-offset-4"
+                  style={{
+                    textDecoration: 'underline',
+                    color: 'var(--travel-primary-600)',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease',
+                  }}
+                  >
+                    Điều khoản dịch vụ
+                  </a>{' '}
+                  và{' '}
+                  <a href="#" className="text-[var(--travel-primary-600)] font-medium cursor-pointer transition-all duration-200 hover:underline decoration-2 decoration-[var(--travel-primary-600)] hover:underline-offset-4"
+                  style={{
+                    textDecoration: 'underline',
+                    color: 'var(--travel-primary-600)',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease',
+                  }}
+                  >
+                    Chính sách quyền riêng tư
+                  </a>
+                </span>
+              </TravelCheckbox>
+            </div>
           </div>
-          <div className="relative flex justify-center text-sm">
-            <span className="px-2 bg-white text-gray-500">Hoặc</span>
+
+          <TravelButton
+            type="primary"
+            htmlType="submit"
+            loading={isLoading}
+            disabled={isLoading}
+          >
+            {isLoading ? 'Đang tạo tài khoản...' : 'Tạo tài khoản'}
+          </TravelButton>
+
+          {/* Divider */}
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-300"></div>
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-2 bg-white text-gray-500">Hoặc</span>
+            </div>
           </div>
-        </div>
 
-        {/* Social Sign Up Buttons */}
-        <div className="space-y-3">
-          <GoogleLoginButton 
-            onError={handleSocialError} 
-            buttonText="Tiếp tục bằng Google"
-            loadingText="Đang tạo tài khoản..."
-          />
-          <FacebookLoginButton 
-            onError={handleSocialError} 
-            buttonText="Tiếp tục bằng Facebook"
-            loadingText="Đang tạo tài khoản..."
-          />
-        </div>
+          {/* Social Sign Up Buttons */}
+          <div className="space-y-3">
+            <GoogleLoginButton
+              onError={handleSocialError}
+              buttonText="Tiếp tục bằng Google"
+              loadingText="Đang tạo tài khoản..."
+            />
+            <FacebookLoginButton
+              onError={handleSocialError}
+              buttonText="Tiếp tục bằng Facebook"
+              loadingText="Đang tạo tài khoản..."
+            />
+          </div>
 
-        <div className="text-center">
-          <p className="text-xs text-gray-500">
-            Đã có tài khoản?{' '}
-            <Link to={path.LANDING} className="text-[var(--travel-primary-600)] font-medium cursor-pointer transition-all duration-200 hover:underline decoration-2 decoration-[var(--travel-primary-600)] hover:underline-offset-4">
-              Đăng nhập ngay
-            </Link>
-          </p>
-        </div>
-      </form>
+          <div className="text-center">
+            <p className="text-xs text-gray-500">
+              Đã có tài khoản?{' '}
+              <Link to={path.LANDING} className="text-[var(--travel-primary-600)] font-medium cursor-pointer transition-all duration-200 hover:underline decoration-2 decoration-[var(--travel-primary-600)] hover:underline-offset-4">
+                Đăng nhập ngay
+              </Link>
+            </p>
+          </div>
+        </form>
 
         {/* App Store Buttons */}
         <div className="flex flex-col sm:flex-row gap-3 w-full max-w-md">
@@ -266,7 +279,7 @@ const SignUpForm = () => {
       </div>
 
       {/* Right Side - Background Image */}
-      <div className="relative h-full order-first lg:order-last w-full flex justify-center">
+      <div className="relative h-full order-last w-full flex justify-center">
         <div className="relative z-10 rounded-3xl overflow-hidden w-full max-w-sm sm:max-w-md lg:max-w-lg">
           <img
             src={background}
@@ -276,9 +289,9 @@ const SignUpForm = () => {
         </div>
 
         {/* Background Decorative Elements */}
-        <div className="absolute -top-4 -right-4 w-20 h-20 bg-pink-400 rounded-full opacity-20"></div>
-        <div className="absolute -bottom-8 -left-8 w-32 h-32 bg-yellow-400 rounded-full opacity-20"></div>
-        <div className="absolute top-1/2 -right-12 w-16 h-16 bg-purple-400 rounded-full opacity-30"></div>
+        <div className="absolute -top-4 -right-4 w-20 h-20 bg-blue-400 rounded-full opacity-20"></div>
+        <div className="absolute -bottom-8 -left-8 w-32 h-32 bg-cyan-400 rounded-full opacity-20"></div>
+        <div className="absolute top-1/2 -right-12 w-16 h-16 bg-indigo-400 rounded-full opacity-30"></div>
       </div>
     </div>
   );

@@ -1,43 +1,43 @@
 /* Travel Social Network Custom Colors */
 :root {
-  /* Primary Colors - Pink/Pink-Red */
-  --travel-primary-50: #fdf2f8;
-  --travel-primary-100: #fce7f3;
-  --travel-primary-200: #fbcfe8;
-  --travel-primary-300: #f9a8d4;
-  --travel-primary-400: #f472b6;
-  --travel-primary-500: #ec4899;
-  --travel-primary-600: #db2777;
-  --travel-primary-700: #be185d;
-  --travel-primary-800: #9d174d;
-  --travel-primary-900: #831843;
-  --travel-primary-950: #500724;
+  /* Primary Colors - Blue (Facebook Blue) */
+  --travel-primary-50: #eff6ff;
+  --travel-primary-100: #dbeafe;
+  --travel-primary-200: #bfdbfe;
+  --travel-primary-300: #93c5fd;
+  --travel-primary-400: #60a5fa;
+  --travel-primary-500: #0866ff;
+  --travel-primary-600: #075ce6;
+  --travel-primary-700: #0648c2;
+  --travel-primary-800: #053a9e;
+  --travel-primary-900: #042f7a;
+  --travel-primary-950: #031f4d;
 
-  /* Secondary Colors - Red */
-  --travel-secondary-50: #fef2f2;
-  --travel-secondary-100: #fee2e2;
-  --travel-secondary-200: #fecaca;
-  --travel-secondary-300: #fca5a5;
-  --travel-secondary-400: #f87171;
-  --travel-secondary-500: #ef4444;
-  --travel-secondary-600: #dc2626;
-  --travel-secondary-700: #b91c1c;
-  --travel-secondary-800: #991b1b;
-  --travel-secondary-900: #7f1d1d;
-  --travel-secondary-950: #450a0a;
+  /* Secondary Colors - Cyan/Teal */
+  --travel-secondary-50: #f0fdfa;
+  --travel-secondary-100: #ccfbf1;
+  --travel-secondary-200: #99f6e4;
+  --travel-secondary-300: #5eead4;
+  --travel-secondary-400: #2dd4bf;
+  --travel-secondary-500: #14b8a6;
+  --travel-secondary-600: #0d9488;
+  --travel-secondary-700: #0f766e;
+  --travel-secondary-800: #115e59;
+  --travel-secondary-900: #134e4a;
+  --travel-secondary-950: #042f2e;
 
-  /* Accent Colors - Rose */
-  --travel-accent-50: #fff1f2;
-  --travel-accent-100: #ffe4e6;
-  --travel-accent-200: #fecdd3;
-  --travel-accent-300: #fda4af;
-  --travel-accent-400: #fb7185;
-  --travel-accent-500: #f43f5e;
-  --travel-accent-600: #e11d48;
-  --travel-accent-700: #be123c;
-  --travel-accent-800: #9f1239;
-  --travel-accent-900: #881337;
-  --travel-accent-950: #4c0519;
+  /* Accent Colors - Indigo */
+  --travel-accent-50: #eef2ff;
+  --travel-accent-100: #e0e7ff;
+  --travel-accent-200: #c7d2fe;
+  --travel-accent-300: #a5b4fc;
+  --travel-accent-400: #818cf8;
+  --travel-accent-500: #6366f1;
+  --travel-accent-600: #4f46e5;
+  --travel-accent-700: #4338ca;
+  --travel-accent-800: #3730a3;
+  --travel-accent-900: #312e81;
+  --travel-accent-950: #1e1b4b;
 
   /* Gradient Definitions */
   --travel-gradient: linear-gradient(135deg, var(--travel-primary-500) 0%, var(--travel-secondary-500) 100%);
