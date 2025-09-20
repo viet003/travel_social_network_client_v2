@@ -76,7 +76,7 @@ const ResetPasswordForm = () => {
     return (
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 xl:gap-16 items-center w-full">
         {/* Left Side - Content */}
-        <div className="space-y-6 lg:space-y-8 w-full flex flex-col items-center lg:items-start text-center lg:text-left">
+        <div className="space-y-6 lg:space-y-8 w-full flex flex-col items-center lg:items-start text-center lg:text-left order-first">
           {/* Success Icon and Title */}
           <div className="flex items-center gap-4 mb-6">
             <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
@@ -84,12 +84,12 @@ const ResetPasswordForm = () => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-travel-gradient leading-tight">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-[70px] font-bold text-[var(--travel-primary-500)] leading-tight">
               Thành công!
             </h1>
           </div>
 
-          <p className="text-base sm:text-lg max-w-md font-[400] text-gray-500 space-y-2">
+          <p className="text-base sm:text-md max-w-md font-[400] text-gray-500 space-y-2">
             Mật khẩu của bạn đã được đặt lại thành công. Bạn sẽ được chuyển hướng đến trang đăng nhập trong vài giây.
           </p>
 
@@ -103,7 +103,7 @@ const ResetPasswordForm = () => {
         </div>
 
         {/* Right Side - Background Image */}
-        <div className="relative h-full order-first lg:order-last w-full flex justify-center">
+        <div className="relative h-full order-last w-full flex justify-center">
           <div className="relative z-10 rounded-3xl overflow-hidden w-full max-w-sm sm:max-w-md lg:max-w-lg">
             <img
               src={background}
@@ -113,9 +113,9 @@ const ResetPasswordForm = () => {
           </div>
 
           {/* Background Decorative Elements */}
-          <div className="absolute -top-4 -right-4 w-20 h-20 bg-pink-400 rounded-full opacity-20"></div>
-          <div className="absolute -bottom-8 -left-8 w-32 h-32 bg-yellow-400 rounded-full opacity-20"></div>
-          <div className="absolute top-1/2 -right-12 w-16 h-16 bg-purple-400 rounded-full opacity-30"></div>
+          <div className="absolute -top-4 -right-4 w-20 h-20 bg-blue-400 rounded-full opacity-20"></div>
+          <div className="absolute -bottom-8 -left-8 w-32 h-32 bg-cyan-400 rounded-full opacity-20"></div>
+          <div className="absolute top-1/2 -right-12 w-16 h-16 bg-indigo-400 rounded-full opacity-30"></div>
         </div>
       </div>
     );
@@ -124,12 +124,12 @@ const ResetPasswordForm = () => {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 xl:gap-16 items-center w-full">
       {/* Left Side - Content */}
-      <div className="space-y-6 lg:space-y-8 w-full flex flex-col items-center lg:items-start text-center lg:text-left">
-        <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-travel-gradient leading-tight">
+      <div className="space-y-6 lg:space-y-8 w-full flex flex-col items-center lg:items-start text-center lg:text-left order-first">
+        <h1 className="text-6xl lg:text-[70px] font-bold text-[var(--travel-primary-500)] leading-tight">
           Đặt lại mật khẩu
         </h1>
 
-        <p className="text-base sm:text-lg max-w-md font-[400] text-gray-500 space-y-2">
+        <p className="text-base sm:text-md max-w-md font-[400] text-gray-500 space-y-2">
           Nhập mật khẩu mới của bạn để hoàn tất quá trình đặt lại mật khẩu.
         </p>
 
@@ -212,7 +212,7 @@ const ResetPasswordForm = () => {
       </div>
 
       {/* Right Side - Background Image */}
-      <div className="relative h-full order-first lg:order-last w-full flex justify-center">
+      <div className="relative h-full order-last w-full flex justify-center">
         <div className="relative z-10 rounded-3xl overflow-hidden w-full max-w-sm sm:max-w-md lg:max-w-lg">
           <img
             src={background}
@@ -222,9 +222,9 @@ const ResetPasswordForm = () => {
         </div>
 
         {/* Background Decorative Elements */}
-        <div className="absolute -top-4 -right-4 w-20 h-20 bg-pink-400 rounded-full opacity-20"></div>
-        <div className="absolute -bottom-8 -left-8 w-32 h-32 bg-yellow-400 rounded-full opacity-20"></div>
-        <div className="absolute top-1/2 -right-12 w-16 h-16 bg-purple-400 rounded-full opacity-30"></div>
+        <div className="absolute -top-4 -right-4 w-20 h-20 bg-blue-400 rounded-full opacity-20"></div>
+        <div className="absolute -bottom-8 -left-8 w-32 h-32 bg-cyan-400 rounded-full opacity-20"></div>
+        <div className="absolute top-1/2 -right-12 w-16 h-16 bg-indigo-400 rounded-full opacity-30"></div>
       </div>
     </div>
   );
