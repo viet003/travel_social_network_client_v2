@@ -75,19 +75,19 @@ const ResetPasswordForm = () => {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
             </svg>
           </div>
-          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-travel-gradient leading-tight">
+          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-[70px] font-bold text-[var(--travel-primary-500)] leading-tight">
             Thành công!
           </h1>
         </div>
 
-        <p className="text-gray-600 text-base sm:text-lg max-w-md">
+        <p className="text-gray-600 text-base sm:text-md max-w-md">
           Mật khẩu của bạn đã được đặt lại thành công. Bạn sẽ được chuyển hướng đến trang đăng nhập trong vài giây.
         </p>
 
         <div className="space-y-4 w-full max-w-md">
           <Link 
             to={path.LANDING}
-            className="bg-travel-gradient text-white px-6 py-2 text-sm rounded-xl font-medium hover:bg-travel-gradient-dark hover:scale-105 hover:shadow-lg transition-all duration-300 w-full cursor-pointer transform inline-block text-center"
+            className="bg-travel-primary-500 text-white px-6 py-2 text-sm rounded-xl font-medium hover:bg-travel-primary-500-dark hover:scale-105 hover:shadow-lg transition-all duration-300 w-full cursor-pointer transform inline-block text-center"
           >
             Đăng nhập ngay
           </Link>
@@ -98,11 +98,11 @@ const ResetPasswordForm = () => {
 
   return (
     <div className="space-y-6 lg:space-y-8 w-full flex flex-col items-center lg:items-start text-center lg:text-left">
-      <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-travel-gradient leading-tight">
+      <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-[70px] font-bold text-[var(--travel-primary-500)] leading-tight">
         Đặt lại mật khẩu
       </h1>
 
-      <p className="text-gray-600 text-base sm:text-lg max-w-md">
+      <p className="text-gray-600 text-base sm:text-md max-w-md">
         Nhập mật khẩu mới của bạn để hoàn tất quá trình đặt lại mật khẩu.
       </p>
 
@@ -143,7 +143,7 @@ const ResetPasswordForm = () => {
         <button 
           type="submit"
           disabled={isLoading || !token}
-          className="bg-travel-gradient text-white px-6 py-2 text-sm rounded-xl font-medium hover:bg-travel-gradient-dark hover:scale-105 hover:shadow-lg transition-all duration-300 w-full cursor-pointer transform disabled:opacity-50 disabled:cursor-not-allowed"
+          className="bg-travel-primary-500 text-white px-6 py-2 text-sm rounded-xl font-medium hover:bg-travel-primary-500-dark hover:scale-105 hover:shadow-lg transition-all duration-300 w-full cursor-pointer transform disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isLoading ? 'Đang xử lý...' : 'Đặt lại mật khẩu'}
         </button>

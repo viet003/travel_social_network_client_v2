@@ -71,15 +71,15 @@ const SignUpForm = () => {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 xl:gap-16 items-center w-full">
       {/* Left Side - Content */}
-      <div className="space-y-6 lg:space-y-8 w-full flex flex-col items-center lg:items-start text-center lg:text-left">
-        <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-travel-gradient leading-tight">
+      <div className="space-y-6 lg:space-y-8 w-full flex flex-col items-center lg:items-start text-center lg:text-left order-first">
+        <h1 className="text-6xl lg:text-[70px] font-bold text-[var(--travel-primary-500)] leading-tight">
           Tham gia cộng đồng
-          du lịch
+          du lịch<br/>
           và tạo ra những
           kỷ niệm đáng nhớ
         </h1>
 
-        <p className="text-base sm:text-lg max-w-md font-[400] text-gray-500 space-y-2">
+        <p className="text-base sm:text-md max-w-md font-[400] text-gray-500 space-y-2">
           Tạo tài khoản miễn phí và bắt đầu hành trình khám phá thế giới cùng những người bạn đồng hành tuyệt vời.
         </p>
 
@@ -183,11 +183,27 @@ const SignUpForm = () => {
               >
                 <span className="text-xs text-gray-500 leading-relaxed">
                   Tôi đồng ý với{' '}
-                  <a href="#" className="text-[var(--travel-primary-600)] font-medium cursor-pointer transition-all duration-200 hover:underline decoration-2 decoration-[var(--travel-primary-600)] hover:underline-offset-4">
+                  <a href="#" className="text-[var(--travel-primary-600)] font-medium cursor-pointer transition-all duration-200 hover:underline decoration-2 decoration-[var(--travel-primary-600)] hover:underline-offset-4"
+                  style={{
+                    textDecoration: 'underline',
+                    color: 'var(--travel-primary-600)',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease',
+                  }}
+                  >
                     Điều khoản dịch vụ
                   </a>{' '}
                   và{' '}
-                  <a href="#" className="text-[var(--travel-primary-600)] font-medium cursor-pointer transition-all duration-200 hover:underline decoration-2 decoration-[var(--travel-primary-600)] hover:underline-offset-4">
+                  <a href="#" className="text-[var(--travel-primary-600)] font-medium cursor-pointer transition-all duration-200 hover:underline decoration-2 decoration-[var(--travel-primary-600)] hover:underline-offset-4"
+                  style={{
+                    textDecoration: 'underline',
+                    color: 'var(--travel-primary-600)',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease',
+                  }}
+                  >
                     Chính sách quyền riêng tư
                   </a>
                 </span>
@@ -263,7 +279,7 @@ const SignUpForm = () => {
       </div>
 
       {/* Right Side - Background Image */}
-      <div className="relative h-full order-first lg:order-last w-full flex justify-center">
+      <div className="relative h-full order-last w-full flex justify-center">
         <div className="relative z-10 rounded-3xl overflow-hidden w-full max-w-sm sm:max-w-md lg:max-w-lg">
           <img
             src={background}
@@ -273,9 +289,9 @@ const SignUpForm = () => {
         </div>
 
         {/* Background Decorative Elements */}
-        <div className="absolute -top-4 -right-4 w-20 h-20 bg-pink-400 rounded-full opacity-20"></div>
-        <div className="absolute -bottom-8 -left-8 w-32 h-32 bg-yellow-400 rounded-full opacity-20"></div>
-        <div className="absolute top-1/2 -right-12 w-16 h-16 bg-purple-400 rounded-full opacity-30"></div>
+        <div className="absolute -top-4 -right-4 w-20 h-20 bg-blue-400 rounded-full opacity-20"></div>
+        <div className="absolute -bottom-8 -left-8 w-32 h-32 bg-cyan-400 rounded-full opacity-20"></div>
+        <div className="absolute top-1/2 -right-12 w-16 h-16 bg-indigo-400 rounded-full opacity-30"></div>
       </div>
     </div>
   );

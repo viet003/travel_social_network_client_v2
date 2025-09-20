@@ -59,7 +59,7 @@ const TravelButton: React.FC<TravelButtonProps> = ({
           if (!disabled && !loading) {
             if (type === 'primary') {
               e.currentTarget.style.transition = 'background 0.3s ease';
-              e.currentTarget.style.background = 'var(--travel-gradient-dark)';
+              e.currentTarget.style.background = 'var(--travel-primary-700)';
             }
           }
         }}
@@ -67,12 +67,12 @@ const TravelButton: React.FC<TravelButtonProps> = ({
           if (!disabled && !loading) {
             if (type === 'primary') {
               e.currentTarget.style.transition = 'background 0.3s ease';
-              e.currentTarget.style.background = 'var(--travel-gradient)';
+              e.currentTarget.style.background = 'var(--travel-primary-500)';
             }
           }
         }}
         style={{
-          background: type === 'primary' ? 'var(--travel-gradient)' : '#f3f4f6',
+          background: type === 'primary' ? 'var(--travel-primary-500)' : '#f3f4f6',
           border: 'none',
           borderRadius: '12px',
           height: '40px',
