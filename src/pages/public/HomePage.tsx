@@ -7,7 +7,7 @@ import { path } from '../../utilities/path';
 const HomePage: React.FC = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { user, token } = useSelector((state: any) => state.auth);
+  const { user } = useSelector((state: any) => state.auth);
 
   const handleLogout = () => {
     dispatch(authAction.logout());

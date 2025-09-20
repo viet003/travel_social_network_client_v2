@@ -1,5 +1,4 @@
 import axiosConfig from "../configurations/axiosConfig";
-import { GOOGLE_CONFIG } from "../configurations/googleConfig";
 
 interface LoginPayload {
     email: string;

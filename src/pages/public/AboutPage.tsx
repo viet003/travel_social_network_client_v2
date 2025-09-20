@@ -1,9 +1,4 @@
 import {
-  Zap,
-  Shield,
-  Monitor,
-  Code,
-  HelpCircle,
   Globe,
   Users,
   Camera,
@@ -43,29 +38,6 @@ const AboutPage = () => {
       icon: Globe,
       title: "Du lịch bền vững",
       description: "Khuyến khích du lịch có trách nhiệm và bảo vệ môi trường."
-    }
-  ];
-
-  const values = [
-    {
-      icon: Shield,
-      title: "Quyền riêng tư và an toàn",
-      description: "Chúng tôi cam kết bảo vệ thông tin cá nhân và tạo môi trường an toàn cho cộng đồng."
-    },
-    {
-      icon: Monitor,
-      title: "Ứng dụng đa nền tảng",
-      description: "Truy cập TravelNest trên mọi thiết bị - web, mobile app, desktop app."
-    },
-    {
-      icon: Code,
-      title: "Dành cho nhà phát triển",
-      description: "API mở và tài liệu đầy đủ cho các nhà phát triển muốn tích hợp với TravelNest."
-    },
-    {
-      icon: HelpCircle,
-      title: "Trung tâm trợ giúp",
-      description: "Hỗ trợ 24/7 và tài liệu hướng dẫn chi tiết để bạn có trải nghiệm tốt nhất."
     }
   ];
 
