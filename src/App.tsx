@@ -7,7 +7,7 @@ import LandingPage from './pages/public/LandingPage';
 import AboutPage from './pages/public/AboutPage';
 import FeaturesPage from './pages/public/FeaturesPage';
 import PrivacyPage from './pages/public/PrivacyPage';
-// import DesktopAppPage from './pages/public/DesktopAppPage';
+import DesktopAppPage from './pages/public/DesktopAppPage';
 import { LoginForm, SignUpForm, ForgotPasswordForm, ResetPasswordForm } from './components/auth';
 import { ToastContainer } from 'react-toastify';
 import { ProtectedRoute, ProtectedResetRoute } from './components/index';
@@ -32,7 +32,7 @@ function App() {
           <Route path={path.ABOUT} element={<AboutPage />} />
           <Route path={path.FEATURES} element={<FeaturesPage />} />
           <Route path={path.PRIVACY} element={<PrivacyPage />} />
-          {/* <Route path={path.DESKTOP_APP} element={<DesktopAppPage />} /> */}
+          <Route path={path.DESKTOP_APP} element={<DesktopAppPage />} />
           <Route
             path={path.RESETPASS}
             element={
