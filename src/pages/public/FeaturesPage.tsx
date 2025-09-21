@@ -1,137 +1,135 @@
-import { 
-  MapPin, 
-  Users, 
-  Camera, 
-  MessageCircle, 
-  Heart, 
-  Share2, 
-  Shield, 
-  Globe,
-  Smartphone,
-  Calendar,
-  Star,
-  Compass
-} from 'lucide-react';
+import { featChat, featDiscover, featSearch, featShare, featSuggest } from '../../assets/images';
 
 const FeaturesPage = () => {
-  const features = [
-    {
-      icon: MapPin,
-      title: "Khám phá địa điểm",
-      description: "Tìm kiếm và khám phá những địa điểm du lịch tuyệt vời từ cộng đồng"
-    },
-    {
-      icon: Users,
-      title: "Kết nối bạn bè",
-      description: "Kết bạn với những người cùng đam mê du lịch và chia sẻ kinh nghiệm"
-    },
-    {
-      icon: Camera,
-      title: "Chia sẻ ảnh",
-      description: "Đăng tải và chia sẻ những bức ảnh đẹp từ chuyến đi của bạn"
-    },
-    {
-      icon: MessageCircle,
-      title: "Trò chuyện",
-      description: "Chat trực tiếp với bạn bè và cộng đồng du lịch"
-    },
-    {
-      icon: Heart,
-      title: "Yêu thích",
-      description: "Lưu lại những địa điểm và bài viết bạn yêu thích"
-    },
-    {
-      icon: Share2,
-      title: "Chia sẻ",
-      description: "Chia sẻ chuyến đi và kinh nghiệm với mọi người"
-    },
-    {
-      icon: Shield,
-      title: "Bảo mật",
-      description: "Thông tin cá nhân được bảo vệ an toàn và riêng tư"
-    },
-    {
-      icon: Globe,
-      title: "Toàn cầu",
-      description: "Kết nối với du khách từ khắp nơi trên thế giới"
-    },
-    {
-      icon: Smartphone,
-      title: "Di động",
-      description: "Ứng dụng tối ưu cho điện thoại và máy tính bảng"
-    },
-    {
-      icon: Calendar,
-      title: "Lập kế hoạch",
-      description: "Tạo và quản lý lịch trình du lịch chi tiết"
-    },
-    {
-      icon: Star,
-      title: "Đánh giá",
-      description: "Đánh giá và nhận xét về địa điểm và dịch vụ"
-    },
-    {
-      icon: Compass,
-      title: "Định vị",
-      description: "Tìm kiếm địa điểm gần bạn và khám phá xung quanh"
-    }
-  ];
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-      {/* Hero Section */}
-      <div className="bg-gradient-to-r from-travel-primary-600 to-travel-secondary-600 text-white py-20">
-        <div className="max-w-7xl mx-auto px-4 text-center">
-          <h1 className="text-[70px] font-bold mb-6">
-            Tính năng nổi bật
+    <div className="min-h-screen bg-white">
+      {/* First Feature Section: Help. Connect. Express */}
+      <div className="py-20 px-4">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex flex-col lg:flex-row items-center gap-12">
+            <div className="flex-1">
+              <h1 className="text-5xl lg:text-6xl font-bold text-blue-600 mb-8 leading-tight">
+                <div>Khám phá.</div>
+                <div>Chia sẻ.</div>
+                <div>Kết nối.</div>
           </h1>
-          <p className="text-xl md:text-2xl text-blue-100 max-w-3xl mx-auto">
-            Khám phá tất cả những tính năng tuyệt vời giúp bạn có trải nghiệm du lịch hoàn hảo
-          </p>
+              <p className="text-md text-gray-700 leading-relaxed max-w-2xl">
+                Khám phá những điểm đến tuyệt vời, chia sẻ trải nghiệm du lịch của bạn, kết nối với cộng đồng du lịch và tạo ra những kỷ niệm đáng nhớ - tất cả trong một mạng xã hội du lịch.
+              </p>
+            </div>
+            <div className="flex-1 flex justify-center lg:justify-end">
+              <img 
+                src={featChat} 
+                alt="Feature 1 - Explore, Share, Connect" 
+                className="w-full max-w-md sm:max-w-lg lg:max-w-2xl h-auto rounded-2xl"
+              />
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Features Grid */}
-      <div className="max-w-7xl mx-auto px-4 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {features.map((feature, index) => {
-            const IconComponent = feature.icon;
-            return (
-              <div
-                key={index}
-                className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 border border-gray-100"
-              >
-                <div className="flex items-center justify-center w-16 h-16 bg-gradient-to-r from-travel-primary-500 to-travel-secondary-500 rounded-xl mb-6">
-                  <IconComponent className="w-8 h-8 text-white" />
-                </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-4">
-                  {feature.title}
-                </h3>
-                <p className="text-gray-600 leading-relaxed">
-                  {feature.description}
+      {/* Second Feature Section: Reach anyone, anywhere */}
+      <div className="py-20 px-4 bg-gray-50">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex flex-col lg:flex-row items-center gap-12">
+            <div className="flex-1 text-center lg:text-left">
+              <p className="text-sm font-bold text-gray-600 uppercase tracking-wider mb-4">CHAT VÀ GỌI ĐIỆN</p>
+              <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-8 leading-tight">
+                <div>Kết nối với mọi người,</div>
+                <div>ở bất cứ đâu</div>
+              </h2>
+              <p className="text-md text-gray-700 leading-relaxed max-w-2xl mx-auto lg:mx-0">
+                Tìm và kết nối với những người bạn du lịch, chia sẻ kinh nghiệm và lập kế hoạch chuyến đi cùng nhau.
+              </p>
+            </div>
+            <div className="flex-1 flex justify-center lg:justify-end">
+              <img 
+                src={featShare} 
+                alt="Feature 2 - Connect with travelers" 
+                className="w-full max-w-md sm:max-w-lg lg:max-w-2xl h-auto rounded-2xl"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Third Feature Section: Get expert travel advice */}
+      <div className="py-20 px-4">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex flex-col lg:flex-row items-center gap-12">
+            <div className="flex-1 flex justify-center lg:justify-start order-2 lg:order-1">
+              <img 
+                src={featSuggest} 
+                alt="Feature 3 - Travel Expert Consultation" 
+                className="w-full max-w-md sm:max-w-lg lg:max-w-2xl h-auto rounded-2xl"
+              />
+            </div>
+            <div className="flex-1 order-1 lg:order-2">
+              <p className="text-sm font-bold text-gray-600 uppercase tracking-wider mb-4">TƯ VẤN DU LỊCH</p>
+              <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-8 leading-tight">
+                <div>Nhận gợi ý du lịch</div>
+                <div>từ mọi người</div>
+              </h2>
+              <p className="text-md text-gray-700 leading-relaxed max-w-2xl mb-4">
+                Kết nối với cộng đồng để nhận tư vấn, gợi ý địa điểm, lập kế hoạch chuyến đi và khám phá những điểm đến mới.
+              </p>
+              <p className="text-sm text-gray-500">
+                *Cộng đồng du lịch luôn sẵn sàng chia sẻ kinh nghiệm và hỗ trợ bạn lập kế hoạch chuyến đi hoàn hảo
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Fourth Feature Section: Create content and connect */}
+      <div className="py-20 px-4 bg-gray-50">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex flex-col lg:flex-row items-center gap-12">
+            <div className="flex-1 text-center lg:text-left">
+              <p className="text-sm font-bold text-gray-600 uppercase tracking-wider mb-4">CHIA SẺ VÀ KẾT NỐI</p>
+              <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-8 leading-tight">
+                <div>Chia sẻ trải nghiệm</div>
+                <div>và kết nối</div>
+              </h2>
+              <p className="text-md text-gray-700 leading-relaxed max-w-2xl mx-auto lg:mx-0">
+                Chia sẻ những trải nghiệm du lịch tuyệt vời, tạo nội dung về chuyến đi và kết nối với cộng đồng du lịch để cùng khám phá thế giới.
                 </p>
               </div>
-            );
-          })}
+            <div className="flex-1 flex justify-center lg:justify-end">
+              <img 
+                src={featSearch} 
+                alt="Feature 4 - Share experiences and connect" 
+                className="w-full max-w-md sm:max-w-lg lg:max-w-2xl h-auto rounded-2xl"
+              />
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* CTA Section */}
-      <div className="bg-gradient-to-r from-travel-primary-600 to-travel-secondary-600 text-white py-16">
-        <div className="max-w-4xl mx-auto px-4 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold mb-6">
-            Sẵn sàng bắt đầu hành trình?
+      {/* Fifth Feature Section: Search and discover */}
+      <div className="py-20 px-4">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex flex-col lg:flex-row items-center gap-12">
+            <div className="flex-1 flex justify-center lg:justify-start order-2 lg:order-1">
+              <img 
+                src={featDiscover} 
+                alt="Feature 5 - Search and discover" 
+                className="w-full max-w-md sm:max-w-lg lg:max-w-2xl h-auto rounded-2xl"
+              />
+            </div>
+            <div className="flex-1 order-1 lg:order-2">
+              <p className="text-sm font-bold text-gray-600 uppercase tracking-wider mb-4">TÌM KIẾM VÀ KHÁM PHÁ</p>
+              <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-8 leading-tight">
+                <div>Tìm kiếm và</div>
+                <div>khám phá</div>
           </h2>
-          <p className="text-xl text-blue-100 mb-8">
-            Tham gia cộng đồng du lịch lớn nhất và khám phá thế giới cùng chúng tôi
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button className="bg-white text-travel-primary-600 px-8 py-4 rounded-xl font-bold text-lg hover:bg-gray-100 transition-all duration-300 transform hover:scale-105">
-              Tải ứng dụng ngay
-            </button>
-            <button className="border-2 border-white text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-white hover:text-travel-primary-600 transition-all duration-300 transform hover:scale-105">
-              Tìm hiểu thêm
-            </button>
+              <p className="text-md text-gray-700 leading-relaxed max-w-2xl mb-4">
+                Tìm kiếm địa điểm du lịch, khách sạn, nhà hàng và kết nối với du khách khác. Khám phá những điểm đến mới và lập kế hoạch chuyến đi hoàn hảo.
+              </p>
+              <p className="text-sm text-gray-500">
+                Tìm kiếm thông minh giúp bạn khám phá những địa điểm phù hợp với sở thích và ngân sách du lịch.
+              </p>
+            </div>
           </div>
         </div>
       </div>

@@ -4,7 +4,7 @@ import { apiResetPasswordService } from '../../../services/authService';
 import { path } from '../../../utilities/path';
 import { GoogleLoginButton, FacebookLoginButton } from '../buttons';
 import { TravelInput, TravelButton } from '../../common/inputs';
-import background from '../../../assets/images/background.png';
+import { background } from '../../../assets/images';
 
 const ResetPasswordForm = () => {
   const [newPassword, setNewPassword] = useState('');
@@ -84,7 +84,7 @@ const ResetPasswordForm = () => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-[70px] font-bold text-[var(--travel-primary-500)] leading-tight">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-[60px] font-bold text-[var(--travel-primary-500)] leading-tight text-left max-w-md">
               Thành công!
             </h1>
           </div>
@@ -108,7 +108,7 @@ const ResetPasswordForm = () => {
             <img
               src={background}
               alt="Social Network"
-              className="w-full h-auto rounded-3xl object-cover"
+              className="w-full max-w-2xl h-auto rounded-3xl object-cover"
             />
           </div>
 
@@ -125,7 +125,7 @@ const ResetPasswordForm = () => {
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 xl:gap-16 items-center w-full">
       {/* Left Side - Content */}
       <div className="space-y-6 lg:space-y-8 w-full flex flex-col items-center lg:items-start text-center lg:text-left order-first">
-        <h1 className="text-6xl lg:text-[70px] font-bold text-[var(--travel-primary-500)] leading-tight">
+        <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-[60px] font-bold text-[var(--travel-primary-500)] leading-tight text-left max-w-md">
           Đặt lại mật khẩu
         </h1>
 
@@ -217,7 +217,7 @@ const ResetPasswordForm = () => {
           <img
             src={background}
             alt="Social Network"
-            className="w-full h-auto rounded-3xl object-cover"
+            className="w-full max-w-2xl h-auto rounded-3xl object-cover"
           />
         </div>
 

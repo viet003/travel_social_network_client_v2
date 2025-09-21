@@ -39,6 +39,9 @@
   --travel-accent-900: #312e81;
   --travel-accent-950: #1e1b4b;
 
+  /* Background Colors */
+  --travel-bg-light: #F4F9FE;
+
   /* Gradient Definitions */
   --travel-gradient: linear-gradient(135deg, var(--travel-primary-500) 0%, var(--travel-secondary-500) 100%);
   --travel-gradient-light: linear-gradient(135deg, var(--travel-primary-100) 0%, var(--travel-secondary-100) 100%);
@@ -47,6 +50,10 @@
 
 /* Utility classes for easy use */
 @layer utilities {
+  .bg-travel-light {
+    background-color: var(--travel-bg-light);
+  }
+
   .bg-travel-gradient {
     background: var(--travel-gradient);
   }

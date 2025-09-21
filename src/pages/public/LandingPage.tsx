@@ -8,8 +8,7 @@ import {
   HelpCircle,
   ChevronRight
 } from 'lucide-react';
-import logo from '../../assets/images/logo.png';
-import sublogo from '../../assets/images/sublogo.png';
+import { logo, subLogo } from '../../assets/images';
 import { path } from '../../utilities/path';
 
 const LandingPage = () => {
@@ -68,7 +67,7 @@ const LandingPage = () => {
             </div>
             {/* <span className="text-xl font-bold text-gray-900">Social Network</span> */}
           </div>
-          <div className="hidden md:flex items-center space-x-8 text-[15px] text-gray-900 font-semibold">
+          <div className="hidden md:flex items-center space-x-4 lg:space-x-8 text-xs lg:text-[15px] text-gray-900 font-semibold">
             {[
               { text: "Tính năng ▼", to: path.FEATURES },
               { text: "Quyền riêng tư và an toàn", to: path.PRIVACY },
@@ -123,7 +122,7 @@ const LandingPage = () => {
                 </Link>
               </div>
               <div>
-                <h2 className="text-lg font-bold text-gray-900">TravelNest</h2>
+                <h2 className="text-base sm:text-lg font-bold text-gray-900">TravelNest</h2>
                 <p className="text-xs text-gray-500">Kết nối du lịch</p>
               </div>
             </div>
@@ -139,14 +138,14 @@ const LandingPage = () => {
 
           {/* Navigation Menu */}
           <div className="px-6 py-6 flex-1">
-            <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">Menu</h3>
+            <h3 className="text-xs sm:text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3 sm:mb-4">Menu</h3>
             <div className="space-y-1">
               <Link
                 to={path.FEATURES}
                 className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:text-travel-primary-600 hover:bg-travel-primary-50 rounded-xl cursor-pointer transition-all duration-200 group"
               >
                 <Zap className="w-5 h-5 text-gray-600 group-hover:text-travel-primary-600 transition-colors duration-200" />
-                <span className="flex-1 font-medium cursor-pointer transition-all duration-200 
+                <span className="flex-1 text-sm sm:text-base font-medium cursor-pointer transition-all duration-200 
                 hover:underline decoration-2 
                 decoration-[var(--travel-primary-600)] 
                 hover:underline-offset-4">Tính năng</span>
@@ -166,7 +165,7 @@ const LandingPage = () => {
                     className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:text-travel-primary-600 hover:bg-travel-primary-50 rounded-xl cursor-pointer transition-all duration-200 group"
                   >
                     <IconComponent className="w-5 h-5 text-gray-600 group-hover:text-travel-primary-600 transition-colors duration-200" />
-                    <span className="flex-1 font-medium cursor-pointer transition-all duration-200 
+                    <span className="flex-1 text-sm sm:text-base font-medium cursor-pointer transition-all duration-200 
                     hover:underline decoration-2 
                     decoration-[var(--travel-primary-600)] 
                     hover:underline-offset-4">{item.text}</span>
@@ -241,7 +240,7 @@ const LandingPage = () => {
             </div>
             <div className="flex items-center space-x-2 text-gray-400 order-1 lg:order-3">
               <img
-                src={sublogo}
+                src={subLogo}
                 alt="TravelNest Sub Logo"
                 className="w-[200px] object-contain"
               />

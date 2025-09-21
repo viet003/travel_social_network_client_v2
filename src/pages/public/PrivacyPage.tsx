@@ -5,9 +5,9 @@ const PrivacyPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-white">
       {/* Hero Section */}
-      <section className="py-20 px-4 text-center bg-travel-primary-50">
+      <section className="py-8 sm:py-12 lg:py-20 px-4 text-center bg-travel-primary-50">
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-[70px] font-bold text-gray-900 mb-6">
+          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-[70px] font-bold text-gray-900 mb-4 sm:mb-6 text-left lg:text-center">
             <span className="text-[var(--travel-primary-500)]">Yên tâm </span> chia sẻ
             <br />
             từng khoảnh khắc
@@ -19,18 +19,16 @@ const PrivacyPage: React.FC = () => {
               className="w-full h-80 object-cover rounded-2xl mx-auto shadow-lg"
             />
           </div>
-          <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+          <p className="text-md text-gray-600 mb-8 max-w-2xl mx-auto">
             Kết nối an toàn và bảo mật với
-            <br />
             cộng đồng mạng xã hội du lịch và những người
-            <br />
             bạn có cùng sở thích khám phá
           </p>
         </div>
       </section>
 
       {/* Features Grid */}
-      <section className="py-16 px-4">
+      <section className="py-8 sm:py-12 lg:py-16 px-4">
         <div className="max-w-6xl mx-auto grid md:grid-cols-3 gap-8">
           <div className="text-center p-6">
             <Shield className="w-12 h-12 text-[var(--travel-primary-500)] mx-auto mb-4" />
@@ -57,9 +55,9 @@ const PrivacyPage: React.FC = () => {
       </section>
 
       {/* App Preview Section */}
-      <section className="py-20 px-4 bg-gray-50">
+      <section className="py-8 sm:py-12 lg:py-20 px-4 bg-gray-50">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-4xl font-bold text-center text-gray-900 mb-4">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-center text-gray-900 mb-3 sm:mb-4">
             Bảo vệ cộng đồng mạng xã hội
             <br />
             du lịch của chúng tôi
@@ -110,7 +108,7 @@ const PrivacyPage: React.FC = () => {
       </section>
 
       {/* Chat Features */}
-      <section className="py-20 px-4">
+      <section className="py-8 sm:py-12 lg:py-20 px-4">
         <div className="max-w-6xl mx-auto space-y-20">
           {/* Feature 1 */}
           <div className="flex flex-col lg:flex-row items-center gap-12">
@@ -140,7 +138,7 @@ const PrivacyPage: React.FC = () => {
               </div>
             </div>
             <div className="lg:w-1/2">
-              <h3 className="text-3xl font-bold text-gray-900 mb-4">
+              <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3 sm:mb-4">
                 Kết nối dễ dàng với
                 <br />
                 cộng đồng <span className="text-[var(--travel-primary-500)]">yêu thích du lịch</span>
@@ -162,7 +160,7 @@ const PrivacyPage: React.FC = () => {
               />
             </div>
             <div className="lg:w-1/2">
-              <h3 className="text-3xl font-bold text-gray-900 mb-4">
+              <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3 sm:mb-4">
                 <span className="text-[var(--travel-primary-500)]">Chia sẻ địa điểm</span> yêu thích
                 <br />
                 một cách an toàn
@@ -177,9 +175,9 @@ const PrivacyPage: React.FC = () => {
       </section>
 
       {/* Group Chat Section */}
-      <section className="py-20 px-4 bg-gray-50">
+      <section className="py-8 sm:py-12 lg:py-20 px-4 bg-gray-50">
         <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-4xl font-bold text-gray-900 mb-4">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-3 sm:mb-4">
             Kiểm soát <span className="text-[var(--travel-primary-500)]">hoàn toàn</span>
             <br />
             <span className="text-[var(--travel-primary-500)]">nội dung chia sẻ</span> của bạn
@@ -189,7 +187,7 @@ const PrivacyPage: React.FC = () => {
             Chọn nội dung, đối tượng xem và mức độ riêng tư phù hợp với bạn.
           </p>
 
-          <img 
+          <img
             src="https://images.unsplash.com/photo-1646337005884-20d2c95fa786?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
             alt="Kiểm soát nội dung chia sẻ"
             className="w-full h-96 object-cover rounded-2xl shadow-lg"
@@ -198,9 +196,9 @@ const PrivacyPage: React.FC = () => {
       </section>
 
       {/* Privacy Section */}
-      <section className="py-20 px-4">
+      <section className="py-8 sm:py-12 lg:py-20 px-4">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-4xl font-bold text-center text-gray-900 mb-16">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-center text-gray-900 mb-12 sm:mb-16">
             <span className="text-[var(--travel-primary-500)]">Bảo mật là ưu tiên hàng đầu</span> của chúng tôi
           </h2>
 
@@ -209,7 +207,7 @@ const PrivacyPage: React.FC = () => {
             Vì vậy, chúng tôi đã xây dựng mạng xã hội du lịch với các công cụ bảo mật mạnh mẽ
             để bảo vệ thông tin cá nhân của bạn.
           </p>
-          <div className="grid md:grid-cols-2 gap-12 items-center">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="h-[300px] flex flex-col justify-center">
               <div className="grid grid-cols-2 gap-4 ">
                 <div className="bg-white rounded-xl p-6 shadow-md text-center">
@@ -225,7 +223,7 @@ const PrivacyPage: React.FC = () => {
               </div>
             </div>
 
-            <div className="rounded-3xl p-8 h-[300px]">
+            <div className="rounded-3xl p-8 h-[300px] hidden lg:grid">
               <div className="bg-white rounded-2xl shadow-lg p-8 h-[200px]">
                 <div className="flex items-center gap-3 mb-4">
                   <Shield className="w-6 h-6 text-green-500" />
@@ -246,9 +244,9 @@ const PrivacyPage: React.FC = () => {
       </section>
 
       {/* Trust Section */}
-      <section className="py-20 px-4 bg-gray-50">
+      <section className="py-8 sm:py-12 lg:py-20 px-4 bg-gray-50">
         <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-4xl font-bold text-gray-900 mb-8">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-6 sm:mb-8">
             Cam kết bảo vệ
             <br />
             cộng đồng mạng xã hội
@@ -290,9 +288,9 @@ const PrivacyPage: React.FC = () => {
       </section>
 
       {/* Features Highlight */}
-      <section className="py-20 px-4">
+      <section className="py-8 sm:py-12 lg:py-20 px-4">
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-4xl font-bold text-center text-gray-900 mb-16">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-center text-gray-900 mb-12 sm:mb-16">
             Công nghệ được sử dụng
           </h2>
 
@@ -344,9 +342,9 @@ const PrivacyPage: React.FC = () => {
       </section>
 
       {/* Power Source */}
-      <section className="py-20 px-4 bg-gray-50">
+      <section className="py-8 sm:py-12 lg:py-20 px-4 bg-gray-50">
         <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-4xl font-bold text-gray-900 mb-16">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-12 sm:mb-16">
             Tham gia cộng đồng mạng xã hội<br />
             du lịch ngay hôm nay
           </h2>
