@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { Skeleton } from 'antd';
 import { apiResetPasswordService } from '../../../services/authService';
 import { path } from '../../../utilities/path';
 import { GoogleLoginButton, FacebookLoginButton } from '../buttons';
@@ -12,8 +13,13 @@ const ResetPasswordForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+  const [imageLoading, setImageLoading] = useState(true);
   const [searchParams] = useSearchParams();
   const token = searchParams.get('token');
+
+  const handleImageLoad = () => {
+    setImageLoading(false);
+  };
 
   const navigate = useNavigate();
 
@@ -105,10 +111,18 @@ const ResetPasswordForm = () => {
         {/* Right Side - Background Image (3/5) */}
         <div className="relative h-full order-last w-full flex justify-center lg:col-span-3">
           <div className="relative z-10 rounded-3xl overflow-hidden w-full">
+            {imageLoading ? (
+              <Skeleton.Image 
+                active 
+                style={{ width: '100%', height: '600px' }}
+                className="rounded-3xl"
+              />
+            ) : null}
             <img
               src={background}
               alt="Social Network"
-              className="w-full h-auto rounded-3xl object-cover"
+              className={`w-full h-auto rounded-3xl object-cover ${imageLoading ? 'hidden' : 'block'}`}
+              onLoad={handleImageLoad}
             />
           </div>
 
@@ -214,10 +228,18 @@ const ResetPasswordForm = () => {
       {/* Right Side - Background Image (3/5) */}
       <div className="relative h-full order-last w-full flex justify-center lg:col-span-3">
         <div className="relative z-10 rounded-3xl overflow-hidden w-full">
+          {imageLoading ? (
+            <Skeleton.Image 
+              active 
+              style={{ width: '100%', height: '600px' }}
+              className="rounded-3xl"
+            />
+          ) : null}
           <img
             src={background}
             alt="Social Network"
-            className="w-full h-auto rounded-3xl object-cover"
+            className={`w-full h-auto rounded-3xl object-cover ${imageLoading ? 'hidden' : 'block'}`}
+            onLoad={handleImageLoad}
           />
         </div>
 

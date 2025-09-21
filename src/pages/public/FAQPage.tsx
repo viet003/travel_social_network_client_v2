@@ -1,10 +1,20 @@
 import { useState } from 'react';
 import { Search, Wrench, ArrowRight, Building, ChevronDown, ChevronUp } from 'lucide-react';
+import { Skeleton } from 'antd';
 import { featChat, featDiscover, featShare } from '../../assets/images';
 
 const FAQPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedFaqs, setExpandedFaqs] = useState<number[]>([]);
+  const [imageLoading, setImageLoading] = useState({
+    chat: true,
+    discover: true,
+    share: true
+  });
+
+  const handleImageLoad = (imageKey: keyof typeof imageLoading) => {
+    setImageLoading(prev => ({ ...prev, [imageKey]: false }));
+  };
 
   // Mock data for trending topics
   const trendingTopics = [
@@ -168,36 +178,60 @@ const FAQPage = () => {
               <div className="space-y-4 sm:space-y-6">
                 {/* Chat Feature */}
                 <div className="relative">
+                  {imageLoading.chat ? (
+                    <Skeleton.Image 
+                      active 
+                      style={{ width: '100%', height: '300px' }}
+                      className="rounded-xl sm:rounded-2xl"
+                    />
+                  ) : null}
                   <img
                     src={featChat}
                     alt="TravelNest Chat Feature"
-                    className="w-full h-auto rounded-xl sm:rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300"
+                    className={`w-full h-auto rounded-xl sm:rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 ${imageLoading.chat ? 'hidden' : 'block'}`}
+                    onLoad={() => handleImageLoad('chat')}
                   />
-                  <div className="absolute -bottom-1 sm:-bottom-2 left-1/2 transform -translate-x-1/2 bg-white px-2 sm:px-3 py-1 rounded-full shadow-md">
+                  <div className={`absolute -bottom-1 sm:-bottom-2 left-1/2 transform -translate-x-1/2 bg-white px-2 sm:px-3 py-1 rounded-full shadow-md ${imageLoading.chat ? 'hidden' : 'block'}`}>
                     <span className="text-xs font-medium text-gray-700">TravelNest Chat</span>
                   </div>
                 </div>
 
                 {/* Discover Feature */}
                 <div className="relative ml-4 sm:ml-8">
+                  {imageLoading.discover ? (
+                    <Skeleton.Image 
+                      active 
+                      style={{ width: '100%', height: '300px' }}
+                      className="rounded-xl sm:rounded-2xl"
+                    />
+                  ) : null}
                   <img
                     src={featDiscover}
                     alt="TravelNest Discover Feature"
-                    className="w-full h-auto rounded-xl sm:rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300"
+                    className={`w-full h-auto rounded-xl sm:rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 ${imageLoading.discover ? 'hidden' : 'block'}`}
+                    onLoad={() => handleImageLoad('discover')}
                   />
-                  <div className="absolute -bottom-1 sm:-bottom-2 left-1/2 transform -translate-x-1/2 bg-white px-2 sm:px-3 py-1 rounded-full shadow-md">
+                  <div className={`absolute -bottom-1 sm:-bottom-2 left-1/2 transform -translate-x-1/2 bg-white px-2 sm:px-3 py-1 rounded-full shadow-md ${imageLoading.discover ? 'hidden' : 'block'}`}>
                     <span className="text-xs font-medium text-gray-700">Khám phá</span>
                   </div>
                 </div>
 
                 {/* Share Feature */}
                 <div className="relative -ml-2 sm:-ml-4">
+                  {imageLoading.share ? (
+                    <Skeleton.Image 
+                      active 
+                      style={{ width: '100%', height: '300px' }}
+                      className="rounded-xl sm:rounded-2xl"
+                    />
+                  ) : null}
                   <img
                     src={featShare}
                     alt="TravelNest Share Feature"
-                    className="w-full h-auto rounded-xl sm:rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300"
+                    className={`w-full h-auto rounded-xl sm:rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 ${imageLoading.share ? 'hidden' : 'block'}`}
+                    onLoad={() => handleImageLoad('share')}
                   />
-                  <div className="absolute -bottom-1 sm:-bottom-2 left-1/2 transform -translate-x-1/2 bg-white px-2 sm:px-3 py-1 rounded-full shadow-md">
+                  <div className={`absolute -bottom-1 sm:-bottom-2 left-1/2 transform -translate-x-1/2 bg-white px-2 sm:px-3 py-1 rounded-full shadow-md ${imageLoading.share ? 'hidden' : 'block'}`}>
                     <span className="text-xs font-medium text-gray-700">Chia sẻ</span>
                   </div>
                 </div>

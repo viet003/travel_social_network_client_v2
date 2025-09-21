@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+import { Skeleton } from 'antd';
 import { authAction } from '../../stores/actions';
 import { path } from '../../utilities/path';
 
@@ -8,11 +9,56 @@ const HomePage: React.FC = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { user } = useSelector((state: any) => state.auth);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Simulate loading for demonstration
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleLogout = () => {
     dispatch(authAction.logout());
     navigate(path.LANDING);
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+        <div className="container mx-auto px-4 py-8">
+          {/* Welcome Section Skeleton */}
+          <div className="text-center mb-12">
+            <Skeleton.Input active size="large" style={{ width: '600px', height: '80px', margin: '0 auto 16px' }} />
+            <Skeleton.Input active size="default" style={{ width: '500px', height: '30px', margin: '0 auto' }} />
+          </div>
+
+          {/* User Info Card Skeleton */}
+          <div className="bg-white rounded-2xl shadow-xl p-8 mb-8 max-w-2xl mx-auto">
+            <Skeleton.Input active size="large" style={{ width: '100%', height: '60px', marginBottom: '24px' }} />
+            <Skeleton.Input active size="default" style={{ width: '100%', height: '20px' }} />
+          </div>
+
+          {/* Features Grid Skeleton */}
+          <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="bg-white rounded-xl p-6 shadow-lg">
+                <Skeleton.Input active size="large" style={{ width: '100%', height: '50px', marginBottom: '16px' }} />
+                <Skeleton.Input active size="default" style={{ width: '100%', height: '20px', marginBottom: '8px' }} />
+                <Skeleton.Input active size="default" style={{ width: '80%', height: '20px' }} />
+              </div>
+            ))}
+          </div>
+
+          {/* Call to Action Skeleton */}
+          <div className="text-center mt-12">
+            <Skeleton.Button active size="large" style={{ width: '200px', height: '50px' }} />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">

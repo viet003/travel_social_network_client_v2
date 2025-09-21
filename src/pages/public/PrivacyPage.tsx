@@ -1,7 +1,20 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Users, Shield, Smartphone, Heart, Globe, MapPin, Monitor } from 'lucide-react';
+import { Skeleton } from 'antd';
 
 const PrivacyPage: React.FC = () => {
+  const [imageLoading, setImageLoading] = useState({
+    hero: true,
+    chatAvatar: true,
+    locationShare: true,
+    contentControl: true,
+    trust: true
+  });
+
+  const handleImageLoad = (imageKey: keyof typeof imageLoading) => {
+    setImageLoading(prev => ({ ...prev, [imageKey]: false }));
+  };
+
   return (
     <div className="min-h-screen bg-white">
       {/* Hero Section */}
@@ -13,10 +26,18 @@ const PrivacyPage: React.FC = () => {
             từng khoảnh khắc
           </h1>
           <div className="mb-12">
+            {imageLoading.hero ? (
+              <Skeleton.Image 
+                active 
+                style={{ width: '100%', height: '320px' }}
+                className="rounded-2xl"
+              />
+            ) : null}
             <img
               src="https://images.unsplash.com/photo-1501785888041-af3ef285b470?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
               alt="Friends traveling together"
-              className="w-full h-80 object-cover rounded-2xl mx-auto shadow-lg"
+              className={`w-full h-80 object-cover rounded-2xl mx-auto shadow-lg ${imageLoading.hero ? 'hidden' : 'block'}`}
+              onLoad={() => handleImageLoad('hero')}
             />
           </div>
           <p className="text-md text-gray-600 mb-8 max-w-2xl mx-auto">
@@ -116,10 +137,14 @@ const PrivacyPage: React.FC = () => {
               <div className="bg-travel-primary-50 rounded-3xl p-8">
                 <div className="bg-white rounded-2xl shadow-lg p-6">
                   <div className="flex items-center gap-3 mb-4">
+                    {imageLoading.chatAvatar ? (
+                      <Skeleton.Avatar active size={40} />
+                    ) : null}
                     <img
                       src="https://i.pinimg.com/736x/66/82/08/668208d192e8f1940477efab820751fe.jpg"
                       alt="Việt Travel"
-                      className="w-10 h-10 rounded-full object-cover"
+                      className={`w-10 h-10 rounded-full object-cover ${imageLoading.chatAvatar ? 'hidden' : 'block'}`}
+                      onLoad={() => handleImageLoad('chatAvatar')}
                     />
                     <div>
                       <div className="font-medium">Việt Travel</div>
@@ -153,10 +178,18 @@ const PrivacyPage: React.FC = () => {
           {/* Feature 2 */}
           <div className="flex flex-col lg:flex-row-reverse items-center gap-12">
             <div className="lg:w-1/2">
+              {imageLoading.locationShare ? (
+                <Skeleton.Image 
+                  active 
+                  style={{ width: '100%', height: '320px' }}
+                  className="rounded-2xl"
+                />
+              ) : null}
               <img
                 src="https://images.unsplash.com/photo-1539635278303-d4002c07eae3?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
                 alt="Chia sẻ vị trí du lịch an toàn"
-                className="w-full h-80 object-cover rounded-2xl shadow-lg"
+                className={`w-full h-80 object-cover rounded-2xl shadow-lg ${imageLoading.locationShare ? 'hidden' : 'block'}`}
+                onLoad={() => handleImageLoad('locationShare')}
               />
             </div>
             <div className="lg:w-1/2">
@@ -187,10 +220,18 @@ const PrivacyPage: React.FC = () => {
             Chọn nội dung, đối tượng xem và mức độ riêng tư phù hợp với bạn.
           </p>
 
+          {imageLoading.contentControl ? (
+            <Skeleton.Image 
+              active 
+              style={{ width: '100%', height: '384px' }}
+              className="rounded-2xl"
+            />
+          ) : null}
           <img
             src="https://images.unsplash.com/photo-1646337005884-20d2c95fa786?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
             alt="Kiểm soát nội dung chia sẻ"
-            className="w-full h-96 object-cover rounded-2xl shadow-lg"
+            className={`w-full h-96 object-cover rounded-2xl shadow-lg ${imageLoading.contentControl ? 'hidden' : 'block'}`}
+            onLoad={() => handleImageLoad('contentControl')}
           />
         </div>
       </section>
@@ -256,10 +297,18 @@ const PrivacyPage: React.FC = () => {
 
           <div className="flex flex-col lg:flex-row items-center gap-12 mb-16">
             <div className="lg:w-1/2">
+              {imageLoading.trust ? (
+                <Skeleton.Image 
+                  active 
+                  style={{ width: '100%', height: '320px' }}
+                  className="rounded-2xl"
+                />
+              ) : null}
               <img
                 src="https://images.unsplash.com/photo-1511632765486-a01980e01a18?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
                 alt="Travelers planning trip together"
-                className="w-full h-80 object-cover rounded-2xl shadow-lg"
+                className={`w-full h-80 object-cover rounded-2xl shadow-lg ${imageLoading.trust ? 'hidden' : 'block'}`}
+                onLoad={() => handleImageLoad('trust')}
               />
             </div>
             <div className="lg:w-1/2 text-left">
