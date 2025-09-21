@@ -35,7 +35,7 @@ const FeaturesPage = () => {
               {imageLoading.feat1 ? (
                 <Skeleton.Image 
                   active 
-                  className="!w-full max-w-md sm:max-w-lg lg:max-w-2xl !h-64 sm:!h-80 md:!h-96 lg:!h-[400px] rounded-2xl"
+                  className="!w-full !h-64 sm:!w-full sm:!h-80 md:!w-full md:!h-96 lg:!w-full lg:!h-[400px] max-w-md sm:max-w-lg lg:max-w-2xl rounded-2xl"
                 />
               ) : null}
               <img
@@ -67,7 +67,7 @@ const FeaturesPage = () => {
               {imageLoading.feat2 ? (
                 <Skeleton.Image 
                   active 
-                  className="!w-full max-w-md sm:max-w-lg lg:max-w-2xl !h-64 sm:!h-80 md:!h-96 lg:!h-[400px] rounded-2xl"
+                  className="!w-full !h-64 sm:!w-full sm:!h-80 md:!w-full md:!h-96 lg:!w-full lg:!h-[400px] max-w-md sm:max-w-lg lg:max-w-2xl rounded-2xl"
                 />
               ) : null}
               <img
@@ -89,7 +89,7 @@ const FeaturesPage = () => {
               {imageLoading.feat3 ? (
                 <Skeleton.Image 
                   active 
-                  className="!w-full max-w-md sm:max-w-lg lg:max-w-2xl !h-64 sm:!h-80 md:!h-96 lg:!h-[400px] rounded-2xl"
+                  className="!w-full !h-64 sm:!w-full sm:!h-80 md:!w-full md:!h-96 lg:!w-full lg:!h-[400px] max-w-md sm:max-w-lg lg:max-w-2xl rounded-2xl"
                 />
               ) : null}
               <img
@@ -134,7 +134,7 @@ const FeaturesPage = () => {
               {imageLoading.feat4 ? (
                 <Skeleton.Image 
                   active 
-                  className="!w-full max-w-md sm:max-w-lg lg:max-w-2xl !h-64 sm:!h-80 md:!h-96 lg:!h-[400px] rounded-2xl"
+                  className="!w-full !h-64 sm:!w-full sm:!h-80 md:!w-full md:!h-96 lg:!w-full lg:!h-[400px] max-w-md sm:max-w-lg lg:max-w-2xl rounded-2xl"
                 />
               ) : null}
               <img
@@ -156,7 +156,7 @@ const FeaturesPage = () => {
               {imageLoading.feat5 ? (
                 <Skeleton.Image 
                   active 
-                  className="!w-full max-w-md sm:max-w-lg lg:max-w-2xl !h-64 sm:!h-80 md:!h-96 lg:!h-[400px] rounded-2xl"
+                  className="!w-full !h-64 sm:!w-full sm:!h-80 md:!w-full md:!h-96 lg:!w-full lg:!h-[400px] max-w-md sm:max-w-lg lg:max-w-2xl rounded-2xl"
                 />
               ) : null}
               <img

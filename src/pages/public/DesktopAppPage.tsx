@@ -54,7 +54,7 @@ const DesktopAppPage: React.FC = () => {
                 {imageLoading ? (
                   <Skeleton.Image 
                     active 
-                    className="!w-full max-w-sm sm:max-w-md lg:max-w-2xl !h-64 sm:!h-80 md:!h-96 lg:!h-[400px] rounded-2xl"
+                    className="!w-full !h-64 sm:!w-full sm:!h-80 md:!w-full md:!h-96 lg:!w-full lg:!h-[400px] max-w-sm sm:max-w-md lg:max-w-2xl rounded-2xl"
                   />
                 ) : null}
                 <img

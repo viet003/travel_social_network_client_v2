@@ -29,7 +29,7 @@ const PrivacyPage: React.FC = () => {
             {imageLoading.hero ? (
               <Skeleton.Image 
                 active 
-                className="!w-full !h-64 sm:!h-72 md:!h-80 rounded-2xl"
+                className="!w-full !h-64 sm:!w-full sm:!h-72 md:!w-full md:!h-80 rounded-2xl"
               />
             ) : null}
             <img
@@ -180,7 +180,7 @@ const PrivacyPage: React.FC = () => {
               {imageLoading.locationShare ? (
                 <Skeleton.Image 
                   active 
-                  className="!w-full !h-64 sm:!h-72 md:!h-80 rounded-2xl"
+                  className="!w-full !h-64 sm:!w-full sm:!h-72 md:!w-full md:!h-80 rounded-2xl"
                 />
               ) : null}
               <img
@@ -221,7 +221,7 @@ const PrivacyPage: React.FC = () => {
           {imageLoading.contentControl ? (
             <Skeleton.Image 
               active 
-              className="!w-full !h-80 sm:!h-96 md:!h-[400px] rounded-2xl"
+              className="!w-full !h-80 sm:!w-full sm:!h-96 md:!w-full md:!h-[400px] rounded-2xl"
             />
           ) : null}
           <img
@@ -297,7 +297,7 @@ const PrivacyPage: React.FC = () => {
               {imageLoading.trust ? (
                 <Skeleton.Image 
                   active 
-                  className="!w-full !h-64 sm:!h-72 md:!h-80 rounded-2xl"
+                  className="!w-full !h-64 sm:!w-full sm:!h-72 md:!w-full md:!h-80 rounded-2xl"
                 />
               ) : null}
               <img
