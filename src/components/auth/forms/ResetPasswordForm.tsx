@@ -114,7 +114,7 @@ const ResetPasswordForm = () => {
             {imageLoading ? (
               <Skeleton.Image 
                 active 
-                className="!w-full !h-[500px] sm:!h-[550px] md:!h-[600px] rounded-3xl"
+                className="!w-full !h-[500px] sm:!w-full sm:!h-[550px] md:!w-full md:!h-[600px] rounded-3xl"
               />
             ) : null}
             <img
@@ -230,7 +230,7 @@ const ResetPasswordForm = () => {
           {imageLoading ? (
             <Skeleton.Image 
               active 
-              className="!w-full !h-[500px] sm:!h-[550px] md:!h-[600px] rounded-3xl"
+              className="!w-full !h-[500px] sm:!w-full sm:!h-[550px] md:!w-full md:!h-[600px] rounded-3xl"
             />
           ) : null}
           <img
