@@ -25,7 +25,7 @@ const PrivacyPage: React.FC = () => {
             <br />
             từng khoảnh khắc
           </h1>
-          <div className="mb-12">
+          <div className="mb-12 w-full">
             {imageLoading.hero ? (
               <Skeleton.Image 
                 active 
@@ -135,7 +135,7 @@ const PrivacyPage: React.FC = () => {
             <div className="lg:w-1/2">
               <div className="bg-travel-primary-50 rounded-3xl p-8">
                 <div className="bg-white rounded-2xl shadow-lg p-6">
-                  <div className="flex items-center gap-3 mb-4">
+                  <div className="flex items-center gap-3 mb-4 w-full">
                     {imageLoading.chatAvatar ? (
                       <Skeleton.Avatar active size={40} />
                     ) : null}
@@ -176,7 +176,7 @@ const PrivacyPage: React.FC = () => {
 
           {/* Feature 2 */}
           <div className="flex flex-col lg:flex-row-reverse items-center gap-12">
-            <div className="lg:w-1/2">
+            <div className="lg:w-1/2 w-full">
               {imageLoading.locationShare ? (
                 <Skeleton.Image 
                   active 
@@ -293,7 +293,7 @@ const PrivacyPage: React.FC = () => {
           </h2>
 
           <div className="flex flex-col lg:flex-row items-center gap-12 mb-16">
-            <div className="lg:w-1/2">
+            <div className="lg:w-1/2 w-full">
               {imageLoading.trust ? (
                 <Skeleton.Image 
                   active 

@@ -31,7 +31,7 @@ const FeaturesPage = () => {
                 Khám phá những điểm đến tuyệt vời, chia sẻ trải nghiệm du lịch của bạn, kết nối với cộng đồng du lịch và tạo ra những kỷ niệm đáng nhớ - tất cả trong một mạng xã hội du lịch.
               </p>
             </div>
-            <div className="flex-1 flex justify-center lg:justify-end">
+            <div className="flex-1 flex justify-center lg:justify-end w-full">
               {imageLoading.feat1 ? (
                 <Skeleton.Image 
                   active 
@@ -63,7 +63,7 @@ const FeaturesPage = () => {
                 Tìm và kết nối với những người bạn du lịch, chia sẻ kinh nghiệm và lập kế hoạch chuyến đi cùng nhau.
               </p>
             </div>
-            <div className="flex-1 flex justify-center lg:justify-end">
+            <div className="flex-1 flex justify-center lg:justify-end w-full">
               {imageLoading.feat2 ? (
                 <Skeleton.Image 
                   active 
@@ -85,7 +85,7 @@ const FeaturesPage = () => {
       <div className="py-20 px-4">
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col lg:flex-row items-center gap-12">
-            <div className="flex-1 flex justify-center lg:justify-start order-2 lg:order-1">
+            <div className="flex-1 flex justify-center lg:justify-start order-2 lg:order-1 w-full">
               {imageLoading.feat3 ? (
                 <Skeleton.Image 
                   active 
@@ -130,7 +130,7 @@ const FeaturesPage = () => {
                 Chia sẻ những trải nghiệm du lịch tuyệt vời, tạo nội dung về chuyến đi và kết nối với cộng đồng du lịch để cùng khám phá thế giới.
               </p>
             </div>
-            <div className="flex-1 flex justify-center lg:justify-end">
+            <div className="flex-1 flex justify-center lg:justify-end w-full">
               {imageLoading.feat4 ? (
                 <Skeleton.Image 
                   active 
@@ -152,7 +152,7 @@ const FeaturesPage = () => {
       <div className="py-20 px-4">
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col lg:flex-row items-center gap-12">
-            <div className="flex-1 flex justify-center lg:justify-start order-2 lg:order-1">
+            <div className="flex-1 flex justify-center lg:justify-start order-2 lg:order-1 w-full">
               {imageLoading.feat5 ? (
                 <Skeleton.Image 
                   active 

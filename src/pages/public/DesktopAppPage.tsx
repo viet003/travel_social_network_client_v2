@@ -49,7 +49,7 @@ const DesktopAppPage: React.FC = () => {
             </div>
 
             {/* Right Section - Desktop App Screenshot */}
-            <div className="lg:w-1/2 flex justify-center">
+            <div className="lg:w-1/2 flex justify-center w-full">
               <div className="relative">
                 {imageLoading ? (
                   <Skeleton.Image 
