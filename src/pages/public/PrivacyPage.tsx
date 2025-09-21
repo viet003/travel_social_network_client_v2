@@ -75,7 +75,7 @@ const PrivacyPage: React.FC = () => {
                   Chúng tôi có các biện pháp bảo vệ để ngăn chặn spam, nội dung không phù hợp và các hành vi quấy rối trong cộng đồng mạng xã hội du lịch.
                 </p>
               </div>
-              <a href="#" className="text-[var(--travel-primary-500)] underline hover:text-[var(--travel-primary-600)] transition-colors">
+              <a href="#" className="text-[var(--travel-primary-500)] underline hover:text-[var(--travel-primary-600)] transition-colors cursor-pointer">
                 Tìm hiểu thêm
               </a>
             </div>
@@ -87,7 +87,7 @@ const PrivacyPage: React.FC = () => {
                   Bạn có toàn quyền kiểm soát những gì chia sẻ, ai có thể xem nội dung của bạn và cách tương tác trong cộng đồng mạng xã hội du lịch.
                 </p>
               </div>
-              <a href="#" className="text-[var(--travel-primary-500)] underline hover:text-[var(--travel-primary-600)] transition-colors">
+              <a href="#" className="text-[var(--travel-primary-500)] underline hover:text-[var(--travel-primary-600)] transition-colors cursor-pointer">
                 Tìm hiểu thêm
               </a>
             </div>
@@ -96,9 +96,9 @@ const PrivacyPage: React.FC = () => {
               <div>
                 <h3 className="text-2xl font-bold text-gray-900 mb-4">Phản hồi tận tâm</h3>
                 <p className="text-gray-600 mb-6 leading-relaxed">
-                  Chúng tôi có đội ngũ hỗ trợ chuyên nghiệp để xem xét và xử lý các báo cáo về nội dung không phù hợp. Chúng tôi thực thi <a href="#" className="text-[var(--travel-primary-500)] underline hover:text-[var(--travel-primary-600)] transition-colors">Tiêu chuẩn cộng đồng</a> của mình và luôn sẵn sàng hỗ trợ bạn khi cần thiết.
+                  Chúng tôi có đội ngũ hỗ trợ chuyên nghiệp để xem xét và xử lý các báo cáo về nội dung không phù hợp. Chúng tôi thực thi <a href="#" className="text-[var(--travel-primary-500)] underline hover:text-[var(--travel-primary-600)] transition-colors cursor-pointer">Tiêu chuẩn cộng đồng</a> của mình và luôn sẵn sàng hỗ trợ bạn khi cần thiết.
                 </p>
-                <a href="#" className="text-[var(--travel-primary-500)] underline hover:text-[var(--travel-primary-600)] transition-colors">
+                <a href="#" className="text-[var(--travel-primary-500)] underline hover:text-[var(--travel-primary-600)] transition-colors cursor-pointer">
                   Tìm hiểu thêm
                 </a>
               </div>
