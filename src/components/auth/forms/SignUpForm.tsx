@@ -290,8 +290,7 @@ const SignUpForm = () => {
           {imageLoading ? (
             <Skeleton.Image 
               active 
-              style={{ width: '100%', height: '600px' }}
-              className="rounded-3xl"
+              className="!w-full !h-[500px] sm:!h-[550px] md:!h-[600px] rounded-3xl"
             />
           ) : null}
           <img

@@ -181,8 +181,7 @@ const FAQPage = () => {
                   {imageLoading.chat ? (
                     <Skeleton.Image 
                       active 
-                      style={{ width: '100%', height: '300px' }}
-                      className="rounded-xl sm:rounded-2xl"
+                      className="!w-full !h-48 sm:!h-64 md:!h-80 rounded-xl sm:rounded-2xl"
                     />
                   ) : null}
                   <img
@@ -201,8 +200,7 @@ const FAQPage = () => {
                   {imageLoading.discover ? (
                     <Skeleton.Image 
                       active 
-                      style={{ width: '100%', height: '300px' }}
-                      className="rounded-xl sm:rounded-2xl"
+                      className="!w-full !h-48 sm:!h-64 md:!h-80 rounded-xl sm:rounded-2xl"
                     />
                   ) : null}
                   <img
@@ -221,8 +219,7 @@ const FAQPage = () => {
                   {imageLoading.share ? (
                     <Skeleton.Image 
                       active 
-                      style={{ width: '100%', height: '300px' }}
-                      className="rounded-xl sm:rounded-2xl"
+                      className="!w-full !h-48 sm:!h-64 md:!h-80 rounded-xl sm:rounded-2xl"
                     />
                   ) : null}
                   <img
