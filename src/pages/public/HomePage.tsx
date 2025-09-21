@@ -30,13 +30,22 @@ const HomePage: React.FC = () => {
         <div className="container mx-auto px-4 py-8">
           {/* Welcome Section Skeleton */}
           <div className="text-center mb-12">
-            <Skeleton.Input active size="large" style={{ width: '600px', height: '80px', margin: '0 auto 16px' }} />
-            <Skeleton.Input active size="default" style={{ width: '500px', height: '30px', margin: '0 auto' }} />
+            <Skeleton.Input active size="large" style={{ width: '600px', height: '80px', margin: '0 auto 16px' }} className="mx-auto" />
+            <Skeleton.Input active size="default" style={{ width: '500px', height: '30px', margin: '0 auto' }} className="mx-auto" />
           </div>
 
           {/* User Info Card Skeleton */}
           <div className="bg-white rounded-2xl shadow-xl p-8 mb-8 max-w-2xl mx-auto">
-            <Skeleton.Input active size="large" style={{ width: '100%', height: '60px', marginBottom: '24px' }} />
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center space-x-4">
+                <Skeleton.Avatar active size={64} />
+                <div>
+                  <Skeleton.Input active size="default" style={{ width: '200px', height: '24px', marginBottom: '8px' }} />
+                  <Skeleton.Input active size="default" style={{ width: '150px', height: '16px' }} />
+                </div>
+              </div>
+              <Skeleton.Button active size="default" style={{ width: '100px', height: '40px' }} />
+            </div>
             <Skeleton.Input active size="default" style={{ width: '100%', height: '20px' }} />
           </div>
 
@@ -44,9 +53,10 @@ const HomePage: React.FC = () => {
           <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
             {[1, 2, 3].map((i) => (
               <div key={i} className="bg-white rounded-xl p-6 shadow-lg">
-                <Skeleton.Input active size="large" style={{ width: '100%', height: '50px', marginBottom: '16px' }} />
-                <Skeleton.Input active size="default" style={{ width: '100%', height: '20px', marginBottom: '8px' }} />
-                <Skeleton.Input active size="default" style={{ width: '80%', height: '20px' }} />
+                <div className="w-12 h-12 bg-gray-200 rounded-lg mb-4"></div>
+                <Skeleton.Input active size="default" style={{ width: '100%', height: '24px', marginBottom: '8px' }} />
+                <Skeleton.Input active size="default" style={{ width: '100%', height: '16px', marginBottom: '4px' }} />
+                <Skeleton.Input active size="default" style={{ width: '80%', height: '16px' }} />
               </div>
             ))}
           </div>

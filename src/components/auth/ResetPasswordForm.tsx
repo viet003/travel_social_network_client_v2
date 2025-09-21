@@ -71,29 +71,30 @@ const ResetPasswordForm = () => {
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 lg:gap-12 xl:gap-16 items-center w-full">
         {/* Left Side - Content (2/5) */}
         <div className="space-y-6 lg:space-y-8 w-full flex flex-col items-center lg:items-start text-center lg:text-left order-first lg:col-span-2">
-        {/* Success Icon and Title */}
-        <div className="flex items-center gap-4 mb-6">
-          <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
-            <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-            </svg>
+          {/* Success Icon and Title */}
+          <div className="flex items-center gap-4 mb-6">
+            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
+              <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-[60px] font-bold text-[var(--travel-primary-500)] leading-tight">
+              Thành công!
+            </h1>
           </div>
-          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-[60px] font-bold text-[var(--travel-primary-500)] leading-tight">
-            Thành công!
-          </h1>
-        </div>
 
-        <p className="text-gray-600 text-base sm:text-md max-w-md">
-          Mật khẩu của bạn đã được đặt lại thành công. Bạn sẽ được chuyển hướng đến trang đăng nhập trong vài giây.
-        </p>
+          <p className="text-gray-600 text-base sm:text-md max-w-md">
+            Mật khẩu của bạn đã được đặt lại thành công. Bạn sẽ được chuyển hướng đến trang đăng nhập trong vài giây.
+          </p>
 
-        <div className="space-y-4 w-full max-w-md">
-          <Link 
-            to={path.LANDING}
-            className="bg-travel-primary-500 text-white px-6 py-2 text-sm rounded-xl font-medium hover:bg-travel-primary-500-dark hover:scale-105 hover:shadow-lg transition-all duration-300 w-full cursor-pointer transform inline-block text-center"
-          >
-            Đăng nhập ngay
-          </Link>
+          <div className="space-y-4 w-full max-w-md">
+            <Link 
+              to={path.LANDING}
+              className="bg-travel-primary-500 text-white px-6 py-2 text-sm rounded-xl font-medium hover:bg-travel-primary-500-dark hover:scale-105 hover:shadow-lg transition-all duration-300 w-full cursor-pointer transform inline-block text-center"
+            >
+              Đăng nhập ngay
+            </Link>
+          </div>
         </div>
 
         {/* Right Side - Background Image (3/5) */}
@@ -119,65 +120,65 @@ const ResetPasswordForm = () => {
     <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 lg:gap-12 xl:gap-16 items-center w-full">
       {/* Left Side - Content (2/5) */}
       <div className="space-y-6 lg:space-y-8 w-full flex flex-col items-center lg:items-start text-center lg:text-left order-first lg:col-span-2">
-      <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-[60px] font-bold text-[var(--travel-primary-500)] leading-tight">
-        Đặt lại mật khẩu
-      </h1>
+        <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-[60px] font-bold text-[var(--travel-primary-500)] leading-tight">
+          Đặt lại mật khẩu
+        </h1>
 
-      <p className="text-gray-600 text-base sm:text-md max-w-md">
-        Nhập mật khẩu mới của bạn để hoàn tất quá trình đặt lại mật khẩu.
-      </p>
+        <p className="text-gray-600 text-base sm:text-md max-w-md">
+          Nhập mật khẩu mới của bạn để hoàn tất quá trình đặt lại mật khẩu.
+        </p>
 
-      {/* Reset Password Form */}
-      <form onSubmit={handleSubmit} className="space-y-3 w-full max-w-md">
-        {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-xl text-sm">
-            {error}
+        {/* Reset Password Form */}
+        <form onSubmit={handleSubmit} className="space-y-3 w-full max-w-md">
+          {error && (
+            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-xl text-sm">
+              {error}
+            </div>
+          )}
+
+          <input
+            type="password"
+            placeholder="Mật khẩu mới * (8-15 ký tự)"
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
+            required
+            minLength={8}
+            maxLength={15}
+            className="w-full px-3 py-2 text-sm text-gray-500 border border-gray-300 rounded-xl focus:outline-none focus:border-gray-500"
+          />
+
+          <input
+            type="password"
+            placeholder="Xác nhận mật khẩu mới *"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            required
+            minLength={8}
+            maxLength={15}
+            className="w-full px-3 py-2 text-sm text-gray-500 border border-gray-300 rounded-xl focus:outline-none focus:border-gray-500"
+          />
+
+          {confirmPassword && newPassword !== confirmPassword && (
+            <p className="text-xs text-red-500">Mật khẩu xác nhận không khớp</p>
+          )}
+
+          <button 
+            type="submit"
+            disabled={isLoading || !token}
+            className="bg-travel-primary-500 text-white px-6 py-2 text-sm rounded-xl font-medium hover:bg-travel-primary-500-dark hover:scale-105 hover:shadow-lg transition-all duration-300 w-full cursor-pointer transform disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isLoading ? 'Đang xử lý...' : 'Đặt lại mật khẩu'}
+          </button>
+
+          <div className="text-center">
+            <p className="text-xs text-gray-500">
+              Nhớ lại mật khẩu?{' '}
+              <Link to={path.LANDING} className="text-[var(--travel-primary-600)] font-medium cursor-pointer transition-all duration-200 hover:underline decoration-2 decoration-[var(--travel-primary-600)] hover:underline-offset-4">
+                Đăng nhập ngay
+              </Link>
+            </p>
           </div>
-        )}
-
-        <input
-          type="password"
-          placeholder="Mật khẩu mới * (8-15 ký tự)"
-          value={newPassword}
-          onChange={(e) => setNewPassword(e.target.value)}
-          required
-          minLength={8}
-          maxLength={15}
-          className="w-full px-3 py-2 text-sm text-gray-500 border border-gray-300 rounded-xl focus:outline-none focus:border-gray-500"
-        />
-
-        <input
-          type="password"
-          placeholder="Xác nhận mật khẩu mới *"
-          value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
-          required
-          minLength={8}
-          maxLength={15}
-          className="w-full px-3 py-2 text-sm text-gray-500 border border-gray-300 rounded-xl focus:outline-none focus:border-gray-500"
-        />
-
-        {confirmPassword && newPassword !== confirmPassword && (
-          <p className="text-xs text-red-500">Mật khẩu xác nhận không khớp</p>
-        )}
-
-        <button 
-          type="submit"
-          disabled={isLoading || !token}
-          className="bg-travel-primary-500 text-white px-6 py-2 text-sm rounded-xl font-medium hover:bg-travel-primary-500-dark hover:scale-105 hover:shadow-lg transition-all duration-300 w-full cursor-pointer transform disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {isLoading ? 'Đang xử lý...' : 'Đặt lại mật khẩu'}
-        </button>
-
-        <div className="text-center">
-          <p className="text-xs text-gray-500">
-            Nhớ lại mật khẩu?{' '}
-            <Link to={path.LANDING} className="text-[var(--travel-primary-600)] font-medium cursor-pointer transition-all duration-200 hover:underline decoration-2 decoration-[var(--travel-primary-600)] hover:underline-offset-4">
-              Đăng nhập ngay
-            </Link>
-          </p>
-        </div>
-      </form>
+        </form>
       </div>
 
       {/* Right Side - Background Image (3/5) */}
