@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Outlet, Link } from 'react-router-dom';
+import { Outlet, Link, useLocation } from 'react-router-dom';
 import {
   Zap,
   Shield,
@@ -14,6 +14,13 @@ import { path } from '../../utilities/path';
 const LandingPage = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const location = useLocation();
+
+  // Function to check if a tab is active
+  const isActiveTab = (pathToCheck: string | null) => {
+    if (!pathToCheck) return false;
+    return location.pathname === pathToCheck;
+  };
 
   useEffect(() => {
     let ticking = false;
@@ -72,20 +79,27 @@ const LandingPage = () => {
               { text: "Tính năng ▼", to: path.FEATURES },
               { text: "Quyền riêng tư và an toàn", to: path.PRIVACY },
               { text: "Ứng dụng dành cho máy tính", to: path.DESKTOP_APP },
-              { text: "Dành cho nhà phát triển", to: null },
+              { text: "Dành cho nhà phát triển", to: path.LOGIN },
               { text: "Trung tâm trợ giúp", to: path.HELP },
-            ].map((item, index) => (
-              <Link
-                key={index}
-                to={item?.to  || path.LANDING}
-                className="font-medium cursor-pointer transition-all duration-200 
-                 hover:underline decoration-3 
-                 decoration-[var(--travel-primary-600)] 
-                 hover:underline-offset-4"
-              >
-                {item.text}
-              </Link>
-            ))}
+            ].map((item, index) => {
+              const isActive = isActiveTab(item.to);
+              return (
+                <Link
+                  key={index}
+                  to={item?.to  || path.LANDING}
+                  className={`font-medium cursor-pointer transition-all duration-200 
+                   hover:underline decoration-3 
+                   decoration-[var(--travel-primary-600)] 
+                   hover:underline-offset-4
+                   ${isActive 
+                     ? 'text-[var(--travel-primary-600)] underline decoration-3 decoration-[var(--travel-primary-600)] underline-offset-4' 
+                     : 'text-gray-900'
+                   }`}
+                >
+                  {item.text}
+                </Link>
+              );
+            })}
           </div>
           {/* Mobile menu button */}
           <button
@@ -142,14 +156,30 @@ const LandingPage = () => {
             <div className="space-y-1">
               <Link
                 to={path.FEATURES}
-                className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:text-travel-primary-600 hover:bg-travel-primary-50 rounded-xl cursor-pointer transition-all duration-200 group"
+                className={`flex items-center space-x-3 px-4 py-3 rounded-xl cursor-pointer transition-all duration-200 group ${
+                  isActiveTab(path.FEATURES)
+                    ? 'text-[var(--travel-primary-600)] bg-travel-primary-50'
+                    : 'text-gray-700 hover:text-travel-primary-600 hover:bg-travel-primary-50'
+                }`}
               >
-                <Zap className="w-5 h-5 text-gray-600 group-hover:text-travel-primary-600 transition-colors duration-200" />
-                <span className="flex-1 text-sm sm:text-base font-medium cursor-pointer transition-all duration-200 
+                <Zap className={`w-5 h-5 transition-colors duration-200 ${
+                  isActiveTab(path.FEATURES)
+                    ? 'text-[var(--travel-primary-600)]'
+                    : 'text-gray-600 group-hover:text-travel-primary-600'
+                }`} />
+                <span className={`flex-1 text-sm sm:text-base font-medium cursor-pointer transition-all duration-200 
                 hover:underline decoration-2 
                 decoration-[var(--travel-primary-600)] 
-                hover:underline-offset-4">Tính năng</span>
-                <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-travel-primary-600 transition-colors duration-200" />
+                hover:underline-offset-4 ${
+                  isActiveTab(path.FEATURES)
+                    ? 'underline decoration-2 decoration-[var(--travel-primary-600)] underline-offset-4'
+                    : ''
+                }`}>Tính năng</span>
+                <ChevronRight className={`w-4 h-4 transition-colors duration-200 ${
+                  isActiveTab(path.FEATURES)
+                    ? 'text-[var(--travel-primary-600)]'
+                    : 'text-gray-400 group-hover:text-travel-primary-600'
+                }`} />
               </Link>
               {[
                 { text: "Quyền riêng tư và an toàn", icon: Shield, to: path.PRIVACY },
@@ -158,17 +188,30 @@ const LandingPage = () => {
                 { text: "Trung tâm trợ giúp", icon: HelpCircle, to: path.HELP },
               ].map((item, i) => {
                 const IconComponent = item.icon;
+                const isActive = isActiveTab(item.to);
                 return (
                   <Link
                     key={i}
                     to={item?.to  || path.LANDING}
-                    className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:text-travel-primary-600 hover:bg-travel-primary-50 rounded-xl cursor-pointer transition-all duration-200 group"
+                    className={`flex items-center space-x-3 px-4 py-3 rounded-xl cursor-pointer transition-all duration-200 group ${
+                      isActive
+                        ? 'text-[var(--travel-primary-600)] bg-travel-primary-50'
+                        : 'text-gray-700 hover:text-travel-primary-600 hover:bg-travel-primary-50'
+                    }`}
                   >
-                    <IconComponent className="w-5 h-5 text-gray-600 group-hover:text-travel-primary-600 transition-colors duration-200" />
-                    <span className="flex-1 text-sm sm:text-base font-medium cursor-pointer transition-all duration-200 
+                    <IconComponent className={`w-5 h-5 transition-colors duration-200 ${
+                      isActive
+                        ? 'text-[var(--travel-primary-600)]'
+                        : 'text-gray-600 group-hover:text-travel-primary-600'
+                    }`} />
+                    <span className={`flex-1 text-sm sm:text-base font-medium cursor-pointer transition-all duration-200 
                     hover:underline decoration-2 
                     decoration-[var(--travel-primary-600)] 
-                    hover:underline-offset-4">{item.text}</span>
+                    hover:underline-offset-4 ${
+                      isActive
+                        ? 'underline decoration-2 decoration-[var(--travel-primary-600)] underline-offset-4'
+                        : ''
+                    }`}>{item.text}</span>
                   </Link>
                 );
               })}
