@@ -35,8 +35,7 @@ const FeaturesPage = () => {
               {imageLoading.feat1 ? (
                 <Skeleton.Image 
                   active 
-                  style={{ width: '100%', maxWidth: '512px', height: '400px' }}
-                  className="rounded-2xl"
+                  className="!w-full max-w-md sm:max-w-lg lg:max-w-2xl !h-64 sm:!h-80 md:!h-96 lg:!h-[400px] rounded-2xl"
                 />
               ) : null}
               <img
@@ -68,8 +67,7 @@ const FeaturesPage = () => {
               {imageLoading.feat2 ? (
                 <Skeleton.Image 
                   active 
-                  style={{ width: '100%', maxWidth: '512px', height: '400px' }}
-                  className="rounded-2xl"
+                  className="!w-full max-w-md sm:max-w-lg lg:max-w-2xl !h-64 sm:!h-80 md:!h-96 lg:!h-[400px] rounded-2xl"
                 />
               ) : null}
               <img
@@ -91,8 +89,7 @@ const FeaturesPage = () => {
               {imageLoading.feat3 ? (
                 <Skeleton.Image 
                   active 
-                  style={{ width: '100%', maxWidth: '512px', height: '400px' }}
-                  className="rounded-2xl"
+                  className="!w-full max-w-md sm:max-w-lg lg:max-w-2xl !h-64 sm:!h-80 md:!h-96 lg:!h-[400px] rounded-2xl"
                 />
               ) : null}
               <img
@@ -137,8 +134,7 @@ const FeaturesPage = () => {
               {imageLoading.feat4 ? (
                 <Skeleton.Image 
                   active 
-                  style={{ width: '100%', maxWidth: '512px', height: '400px' }}
-                  className="rounded-2xl"
+                  className="!w-full max-w-md sm:max-w-lg lg:max-w-2xl !h-64 sm:!h-80 md:!h-96 lg:!h-[400px] rounded-2xl"
                 />
               ) : null}
               <img
@@ -160,8 +156,7 @@ const FeaturesPage = () => {
               {imageLoading.feat5 ? (
                 <Skeleton.Image 
                   active 
-                  style={{ width: '100%', maxWidth: '512px', height: '400px' }}
-                  className="rounded-2xl"
+                  className="!w-full max-w-md sm:max-w-lg lg:max-w-2xl !h-64 sm:!h-80 md:!h-96 lg:!h-[400px] rounded-2xl"
                 />
               ) : null}
               <img
