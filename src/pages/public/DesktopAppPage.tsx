@@ -1,8 +1,15 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Monitor, Download, Video } from 'lucide-react';
+import { Skeleton } from 'antd';
 import { desktopScreenApp } from '../../assets/images';
 
 const DesktopAppPage: React.FC = () => {
+  const [imageLoading, setImageLoading] = useState(true);
+
+  const handleImageLoad = () => {
+    setImageLoading(false);
+  };
+
   return (
     <div className="min-h-screen bg-white">
       {/* Main Content Section */}
@@ -44,10 +51,18 @@ const DesktopAppPage: React.FC = () => {
             {/* Right Section - Desktop App Screenshot */}
             <div className="lg:w-1/2 flex justify-center">
               <div className="relative">
+                {imageLoading ? (
+                  <Skeleton.Image 
+                    active 
+                    style={{ width: '100%', maxWidth: '512px', height: '400px' }}
+                    className="rounded-2xl"
+                  />
+                ) : null}
                 <img
                   src={desktopScreenApp}
                   alt="TravelNest Desktop Application"
-                  className="w-full max-w-sm sm:max-w-md lg:max-w-2xl h-auto rounded-2xl"
+                  className={`w-full max-w-sm sm:max-w-md lg:max-w-2xl h-auto rounded-2xl ${imageLoading ? 'hidden' : 'block'}`}
+                  onLoad={handleImageLoad}
                 />
               </div>
             </div>
