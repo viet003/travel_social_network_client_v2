@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { apiResetPasswordService } from '../../services/authService';
 import { path } from '../../utilities/path';
+import { background } from '../../assets/images';
 
 const ResetPasswordForm = () => {
   const [newPassword, setNewPassword] = useState('');
@@ -67,7 +68,9 @@ const ResetPasswordForm = () => {
 
   if (success) {
     return (
-      <div className="space-y-6 lg:space-y-8 w-full flex flex-col items-center lg:items-start text-center lg:text-left">
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 lg:gap-12 xl:gap-16 items-center w-full">
+        {/* Left Side - Content (2/5) */}
+        <div className="space-y-6 lg:space-y-8 w-full flex flex-col items-center lg:items-start text-center lg:text-left order-first lg:col-span-2">
         {/* Success Icon and Title */}
         <div className="flex items-center gap-4 mb-6">
           <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
@@ -75,7 +78,7 @@ const ResetPasswordForm = () => {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
             </svg>
           </div>
-          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-[70px] font-bold text-[var(--travel-primary-500)] leading-tight">
+          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-[60px] font-bold text-[var(--travel-primary-500)] leading-tight">
             Thành công!
           </h1>
         </div>
@@ -92,13 +95,31 @@ const ResetPasswordForm = () => {
             Đăng nhập ngay
           </Link>
         </div>
+
+        {/* Right Side - Background Image (3/5) */}
+        <div className="relative h-full order-last w-full flex justify-center lg:col-span-3">
+          <div className="relative z-10 rounded-3xl overflow-hidden w-full">
+            <img
+              src={background}
+              alt="Social Network"
+              className="w-full h-auto rounded-3xl object-cover"
+            />
+          </div>
+
+          {/* Background Decorative Elements */}
+          <div className="absolute -top-4 -right-4 w-20 h-20 bg-blue-400 rounded-full opacity-20"></div>
+          <div className="absolute -bottom-8 -left-8 w-32 h-32 bg-cyan-400 rounded-full opacity-20"></div>
+          <div className="absolute top-1/2 -right-12 w-16 h-16 bg-indigo-400 rounded-full opacity-30"></div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6 lg:space-y-8 w-full flex flex-col items-center lg:items-start text-center lg:text-left">
-      <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-[70px] font-bold text-[var(--travel-primary-500)] leading-tight">
+    <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 lg:gap-12 xl:gap-16 items-center w-full">
+      {/* Left Side - Content (2/5) */}
+      <div className="space-y-6 lg:space-y-8 w-full flex flex-col items-center lg:items-start text-center lg:text-left order-first lg:col-span-2">
+      <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-[60px] font-bold text-[var(--travel-primary-500)] leading-tight">
         Đặt lại mật khẩu
       </h1>
 
@@ -157,6 +178,23 @@ const ResetPasswordForm = () => {
           </p>
         </div>
       </form>
+      </div>
+
+      {/* Right Side - Background Image (3/5) */}
+      <div className="relative h-full order-last w-full flex justify-center lg:col-span-3">
+        <div className="relative z-10 rounded-3xl overflow-hidden w-full">
+          <img
+            src={background}
+            alt="Social Network"
+            className="w-full h-auto rounded-3xl object-cover"
+          />
+        </div>
+
+        {/* Background Decorative Elements */}
+        <div className="absolute -top-4 -right-4 w-20 h-20 bg-blue-400 rounded-full opacity-20"></div>
+        <div className="absolute -bottom-8 -left-8 w-32 h-32 bg-cyan-400 rounded-full opacity-20"></div>
+        <div className="absolute top-1/2 -right-12 w-16 h-16 bg-indigo-400 rounded-full opacity-30"></div>
+      </div>
     </div>
   );
 };

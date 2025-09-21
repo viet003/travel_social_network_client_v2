@@ -5,7 +5,6 @@ export const path = {
     RESETPASS: "/reset-password",
     LANDING: "/",
     SIGNUP: "/signup",
-    ABOUT: "/about",
     FEATURES: "/features",
     PRIVACY: "/privacy",
     DESKTOP_APP: "/desktop-app",

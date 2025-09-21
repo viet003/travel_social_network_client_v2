@@ -38,9 +38,9 @@ const ForgotPasswordForm = () => {
 
   if (isEmailSent) {
     return (
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 xl:gap-16 items-center w-full">
-        {/* Left Side - Content */}
-        <div className="space-y-6 lg:space-y-8 w-full flex flex-col items-center lg:items-start text-center lg:text-left order-first">
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 lg:gap-12 xl:gap-16 items-center w-full">
+        {/* Left Side - Content (2/5) */}
+        <div className="space-y-6 lg:space-y-8 w-full flex flex-col items-center lg:items-start text-center lg:text-left order-first lg:col-span-2">
           {/* Success Icon and Title */}
           <div className="flex items-center gap-4 mb-6">
             <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
@@ -99,13 +99,13 @@ const ForgotPasswordForm = () => {
           </div>
         </div>
 
-        {/* Right Side - Background Image */}
-        <div className="relative h-full order-last w-full flex justify-center">
-          <div className="relative z-10 rounded-3xl overflow-hidden w-full max-w-sm sm:max-w-md lg:max-w-lg">
+        {/* Right Side - Background Image (3/5) */}
+        <div className="relative h-full order-last w-full flex justify-center lg:col-span-3">
+           <div className="relative z-10 rounded-3xl overflow-hidden w-full">
             <img
               src={background}
               alt="Social Network"
-              className="w-full max-w-2xl h-auto rounded-3xl object-cover"
+              className="w-full h-auto rounded-3xl object-cover"
             />
           </div>
 
@@ -119,9 +119,9 @@ const ForgotPasswordForm = () => {
   }
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 xl:gap-16 items-center w-full">
-      {/* Left Side - Content */}
-      <div className="space-y-6 lg:space-y-8 w-full flex flex-col items-center lg:items-start text-center lg:text-left order-first">
+    <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 lg:gap-12 xl:gap-16 items-center w-full">
+      {/* Left Side - Content (2/5) */}
+      <div className="space-y-6 lg:space-y-8 w-full flex flex-col items-center lg:items-start text-center lg:text-left order-first lg:col-span-2">
         <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-[60px] font-bold text-[var(--travel-primary-500)] leading-tight text-left max-w-md">
           Quên mật khẩu?
         </h1>
@@ -215,13 +215,13 @@ const ForgotPasswordForm = () => {
         </div>
       </div>
 
-      {/* Right Side - Background Image */}
-      <div className="relative h-full order-last w-full flex justify-center">
-        <div className="relative z-10 rounded-3xl overflow-hidden w-full max-w-sm sm:max-w-md lg:max-w-lg">
+      {/* Right Side - Background Image (3/5) */}
+      <div className="relative h-full order-last w-full flex justify-center lg:col-span-3">
+           <div className="relative z-10 rounded-3xl overflow-hidden w-full">
           <img
             src={background}
             alt="Social Network"
-            className="w-full max-w-2xl h-auto rounded-3xl object-cover"
+            className="w-full h-auto rounded-3xl object-cover"
           />
         </div>
 

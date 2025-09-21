@@ -73,7 +73,7 @@ const LandingPage = () => {
               { text: "Quyền riêng tư và an toàn", to: path.PRIVACY },
               { text: "Ứng dụng dành cho máy tính", to: path.DESKTOP_APP },
               { text: "Dành cho nhà phát triển", to: null },
-              { text: "Trung tâm trợ giúp", to: null },
+              { text: "Trung tâm trợ giúp", to: path.HELP },
             ].map((item, index) => (
               <Link
                 key={index}
@@ -155,7 +155,7 @@ const LandingPage = () => {
                 { text: "Quyền riêng tư và an toàn", icon: Shield, to: path.PRIVACY },
                 { text: "Ứng dụng dành cho máy tính", icon: Monitor, to: path.DESKTOP_APP },
                 { text: "Dành cho nhà phát triển", icon: Code, to: null },
-                { text: "Trung tâm trợ giúp", icon: HelpCircle, to: null },
+                { text: "Trung tâm trợ giúp", icon: HelpCircle, to: path.HELP },
               ].map((item, i) => {
                 const IconComponent = item.icon;
                 return (
@@ -181,9 +181,9 @@ const LandingPage = () => {
               <p className="text-xs text-gray-400 mb-2">© TravelNest Network 2025</p>
               <div className="flex justify-center space-x-4 text-xs">
                 {[
-                  { text: "Chính sách", to: null },
+                  { text: "Chính sách", to: path.PRIVACY },
                   { text: "Điều khoản", to: null },
-                  { text: "Hỗ trợ", to: null },
+                  { text: "Hỗ trợ", to: path.HELP },
                 ].map((item, i) => (
                   <Link
                     key={i}
