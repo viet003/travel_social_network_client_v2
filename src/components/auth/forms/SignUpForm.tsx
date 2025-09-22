@@ -6,6 +6,8 @@ import { authAction } from '../../../stores/actions';
 import { path } from '../../../utilities/path';
 import { GoogleLoginButton, FacebookLoginButton } from '../buttons';
 import { TravelInput, TravelButton, TravelCheckbox, TravelSelect, TravelDatePicker } from '../../common/inputs';
+import { LoadingOverlay } from '../../common';
+import { useLoading } from '../../../hooks/useLoading';
 import { background } from '../../../assets/images';
 
 const SignUpForm = () => {
@@ -18,9 +20,11 @@ const SignUpForm = () => {
   const [dateOfBirth, setDateOfBirth] = useState('');
   const [gender, setGender] = useState('');
   const [agreeToTerms, setAgreeToTerms] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [imageLoading, setImageLoading] = useState(true);
+  
+  // Sử dụng useLoading hook
+  const { isLoading, showLoading, hideLoading } = useLoading();
 
   const handleImageLoad = () => {
     setImageLoading(false);
@@ -35,19 +39,19 @@ const SignUpForm = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
+    showLoading();
     setError('');
 
     // Validation
     if (password !== confirmPassword) {
       setError('Mật khẩu xác nhận không khớp');
-      setIsLoading(false);
+      hideLoading();
       return;
     }
 
     if (!agreeToTerms) {
       setError('Vui lòng đồng ý với điều khoản dịch vụ');
-      setIsLoading(false);
+      hideLoading();
       return;
     }
 
@@ -70,11 +74,12 @@ const SignUpForm = () => {
     } catch (error: any) {
       setError(error?.message || 'Có lỗi xảy ra khi đăng ký');
     } finally {
-      setIsLoading(false);
+      hideLoading();
     }
   };
 
   return (
+    <>
     <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 lg:gap-12 xl:gap-16 items-center w-full">
       {/* Left Side - Content */}
       <div className="space-y-6 lg:space-y-8 w-full flex flex-col items-center lg:items-start text-center lg:text-left order-first lg:col-span-2">
@@ -220,10 +225,9 @@ const SignUpForm = () => {
           <TravelButton
             type="primary"
             htmlType="submit"
-            loading={isLoading}
             disabled={isLoading}
           >
-            {isLoading ? 'Đang tạo tài khoản...' : 'Tạo tài khoản'}
+            Tạo tài khoản
           </TravelButton>
 
           {/* Divider */}
@@ -307,6 +311,13 @@ const SignUpForm = () => {
         <div className="absolute top-1/2 -right-12 w-16 h-16 bg-indigo-400 rounded-full opacity-30"></div>
       </div>
     </div>
+
+    {/* Loading Overlay */}
+    <LoadingOverlay 
+      isVisible={isLoading} 
+      message="Đang tạo tài khoản..." 
+    />
+    </>
   );
 };
 

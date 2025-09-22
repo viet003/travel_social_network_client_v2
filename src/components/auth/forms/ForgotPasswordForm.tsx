@@ -5,14 +5,18 @@ import { apiForgotPassWordService } from '../../../services/authService';
 import { path } from '../../../utilities/path';
 import { GoogleLoginButton, FacebookLoginButton } from '../buttons';
 import { TravelInput, TravelButton } from '../../common/inputs';
+import { LoadingOverlay } from '../../common';
+import { useLoading } from '../../../hooks/useLoading';
 import { background } from '../../../assets/images';
 
 const ForgotPasswordForm = () => {
   const [email, setEmail] = useState('');
   const [isEmailSent, setIsEmailSent] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [imageLoading, setImageLoading] = useState(true);
+  
+  // Sử dụng useLoading hook
+  const { isLoading, showLoading, hideLoading } = useLoading();
 
   const handleImageLoad = () => {
     setImageLoading(false);
@@ -24,7 +28,7 @@ const ForgotPasswordForm = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
+    showLoading();
     setError('');
 
     try {
@@ -38,12 +42,13 @@ const ForgotPasswordForm = () => {
     } catch (error: any) {
       setError(error?.message || 'Có lỗi xảy ra khi gửi email');
     } finally {
-      setIsLoading(false);
+      hideLoading();
     }
   };
 
   if (isEmailSent) {
     return (
+      <>
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 lg:gap-12 xl:gap-16 items-center w-full">
         {/* Left Side - Content (2/5) */}
         <div className="space-y-6 lg:space-y-8 w-full flex flex-col items-center lg:items-start text-center lg:text-left order-first lg:col-span-2">
@@ -128,10 +133,18 @@ const ForgotPasswordForm = () => {
           <div className="absolute top-1/2 -right-12 w-16 h-16 bg-indigo-400 rounded-full opacity-30"></div>
         </div>
       </div>
+
+      {/* Loading Overlay */}
+      <LoadingOverlay 
+        isVisible={isLoading} 
+        message="Đang gửi email..." 
+      />
+      </>
     );
   }
 
   return (
+    <>
     <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 lg:gap-12 xl:gap-16 items-center w-full">
       {/* Left Side - Content (2/5) */}
       <div className="space-y-6 lg:space-y-8 w-full flex flex-col items-center lg:items-start text-center lg:text-left order-first lg:col-span-2">
@@ -163,10 +176,9 @@ const ForgotPasswordForm = () => {
             <TravelButton
               type="primary"
               htmlType="submit"
-              loading={isLoading}
               disabled={isLoading}
             >
-              {isLoading ? 'Đang gửi...' : 'Gửi hướng dẫn khôi phục'}
+              Gửi hướng dẫn khôi phục
             </TravelButton>
           </div>
 
@@ -251,6 +263,13 @@ const ForgotPasswordForm = () => {
         <div className="absolute top-1/2 -right-12 w-16 h-16 bg-indigo-400 rounded-full opacity-30"></div>
       </div>
     </div>
+
+    {/* Loading Overlay */}
+    <LoadingOverlay 
+      isVisible={isLoading} 
+      message="Đang gửi email..." 
+    />
+    </>
   );
 };
 

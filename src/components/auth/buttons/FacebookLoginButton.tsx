@@ -1,9 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { authAction } from '../../../stores/actions';
 import { path } from '../../../utilities/path';
 import { FACEBOOK_CONFIG } from '../../../configurations/facebookConfig';
+import { useLoading } from '../../../hooks/useLoading';
+import { LoadingOverlay } from '../../common';
 
 interface FacebookLoginButtonProps {
   onError?: (error: string) => void;
@@ -16,12 +18,12 @@ const FacebookLoginButton = ({
   buttonText = 'Đăng nhập bằng Facebook', 
   loadingText = 'Đang xử lý...' 
 }: FacebookLoginButtonProps) => {
-  const [isLoading, setIsLoading] = useState(false);
+  const { isLoading, showLoading, hideLoading } = useLoading();
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const handleFacebookLogin = async (accessToken: string) => {
-    setIsLoading(true);
+    // Loading đã được hiển thị ở onClick, không cần gọi lại
     onError?.('');
 
     try {
@@ -35,13 +37,13 @@ const FacebookLoginButton = ({
     } catch (error: any) {
       onError?.(error?.message || 'Có lỗi xảy ra khi đăng nhập Facebook');
     } finally {
-      setIsLoading(false);
+      hideLoading();
     }
   };
 
   const handleFacebookError = (error: string) => {
     onError?.(`Lỗi Facebook: ${error}`);
-    setIsLoading(false);
+    hideLoading();
   };
 
   // Load Facebook SDK và khởi tạo
@@ -95,7 +97,8 @@ const FacebookLoginButton = ({
   }, []);
 
   const handleFacebookClick = () => {
-    setIsLoading(true);
+    // Hiển thị loading ngay khi click
+    // showOAuthLoading();
     
     if (!(window as any).FB) {
       handleFacebookError('Facebook SDK chưa được tải');
@@ -107,8 +110,11 @@ const FacebookLoginButton = ({
       if (response.authResponse) {
         // Lấy access token từ response
         const accessToken = response.authResponse.accessToken;
+        // Hiển thị loading khi bắt đầu gửi request đến server
+        showLoading();
         handleFacebookLogin(accessToken);
       } else {
+        // Không cần ẩn loading vì chưa hiển thị
         handleFacebookError('Đăng nhập Facebook thất bại hoặc bị hủy');
       }
     }, { 
@@ -134,11 +140,11 @@ const FacebookLoginButton = ({
       </button>
       
       
-      {isLoading && (
-        <div className="text-center mt-2">
-          <span className="text-sm text-gray-600">Đang xử lý đăng nhập Facebook...</span>
-        </div>
-      )}
+      {/* OAuth Loading Overlay */}
+      <LoadingOverlay
+        isVisible={isLoading}
+        message="Đang xử lý đăng nhập Facebook..."
+      />
     </div>
   );
 };

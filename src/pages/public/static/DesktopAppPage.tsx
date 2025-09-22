@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Monitor, Download, Video } from 'lucide-react';
 import { Skeleton } from 'antd';
-import { desktopScreenApp } from '../../assets/images';
+import { desktopScreenApp } from '../../../assets/images';
 
 const DesktopAppPage: React.FC = () => {
   const [imageLoading, setImageLoading] = useState(true);

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Search, Wrench, ArrowRight, Building, ChevronDown, ChevronUp } from 'lucide-react';
 import { Skeleton } from 'antd';
-import { featChat, featDiscover, featShare } from '../../assets/images';
+import { featChat, featDiscover, featShare } from '../../../assets/images';
 
 const FAQPage = () => {
   const [searchQuery, setSearchQuery] = useState('');

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { path } from '../../utilities/path';
-import LoadingSpinner from './LoadingSpinner';
+import LoadingSpinner from './loading/LoadingSpinner';
 
 interface ProtectedResetRouteProps {
   children: React.ReactNode;
