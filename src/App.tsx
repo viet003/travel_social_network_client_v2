@@ -47,7 +47,7 @@ function App() {
         <Route
           path={path.HOME}
           element={
-            <ProtectedRoute isPublic={false}>
+            <ProtectedRoute isPublic={true}>
               <MainPage />
             </ProtectedRoute>
           }

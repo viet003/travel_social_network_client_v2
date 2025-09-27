@@ -1,9 +1,14 @@
 // Loading Components Package
-export * from './loading';
+export * from '../ui/loading';
 
 // Travel Input Components
-export * from './inputs';
+export * from '../ui/customize';
+
+// Dropdown Components
+export * from './dropdowns';
+
+// Layout Components
+export * from './layout';
 
 // Other Common Components
-export { default as ProtectedRoute } from './ProtectedRoute';
-export { default as ProtectedResetRoute } from './ProtectedResetRoute';
+export { default as SearchResults } from './dropdowns/SearchDropdown';

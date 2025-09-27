@@ -4,8 +4,8 @@ import { Skeleton } from 'antd';
 import { apiForgotPassWordService } from '../../../services/authService';
 import { path } from '../../../utilities/path';
 import { GoogleLoginButton, FacebookLoginButton } from '../buttons';
-import { TravelInput, TravelButton } from '../../common/inputs';
-import { LoadingOverlay } from '../../common';
+import { TravelInput, TravelButton } from '../../ui/customize';
+import { LoadingOverlay } from '../../ui/loading';
 import { useLoading } from '../../../hooks/useLoading';
 import { background } from '../../../assets/images';
 

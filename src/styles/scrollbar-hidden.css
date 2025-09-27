@@ -1,0 +1,26 @@
+/* Hide scrollbars */
+div::-webkit-scrollbar {
+    display: none;
+}
+
+/* Line clamp utilities */
+.line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* Travel Tooltip Styles */
+.travel-tooltip .ant-tooltip-inner {
+    background-color: rgba(0, 0, 0, 0.85);
+    border-radius: 8px;
+    font-size: 12px;
+    padding: 4px 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    text-align: center !important;
+}
+
+.travel-tooltip .ant-tooltip-arrow::before {
+    background-color: rgba(0, 0, 0, 0.85);
+}
