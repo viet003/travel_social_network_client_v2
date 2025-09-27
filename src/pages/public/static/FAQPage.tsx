@@ -1,11 +1,10 @@
 import { useState } from 'react';
-import { Search, Wrench, ArrowRight, Building, ChevronDown, ChevronUp } from 'lucide-react';
-import { Skeleton } from 'antd';
-import { featChat, featDiscover, featShare } from '../../assets/images';
+import { Search, Wrench, ArrowRight, Building } from 'lucide-react';
+import { Skeleton, Collapse } from 'antd';
+import { featChat, featDiscover, featShare } from '../../../assets/images';
 
 const FAQPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [expandedFaqs, setExpandedFaqs] = useState<number[]>([]);
   const [imageLoading, setImageLoading] = useState({
     chat: true,
     discover: true,
@@ -27,55 +26,96 @@ const FAQPage = () => {
     "Xử lý khi bị quấy rối trên TravelNest"
   ];
 
-  // Mock data for FAQs
-  const faqs = [
+  // Mock data for FAQs - formatted for Ant Design Collapse
+  const faqItems = [
     {
-      id: 1,
-      question: "Làm thế nào để tạo tài khoản TravelNest?",
-      answer: "Bạn có thể tạo tài khoản TravelNest bằng cách nhấn vào nút 'Đăng ký' ở trang chủ, sau đó điền thông tin cá nhân và xác thực email của bạn."
+      key: '1',
+      label: "Làm thế nào để tạo tài khoản TravelNest?",
+      children: "Bạn có thể tạo tài khoản TravelNest bằng cách nhấn vào nút 'Đăng ký' ở trang chủ, sau đó điền thông tin cá nhân và xác thực email của bạn."
     },
     {
-      id: 2,
-      question: "Tôi có thể đăng bài du lịch như thế nào?",
-      answer: "Để đăng bài du lịch, hãy nhấn vào nút 'Tạo bài viết' ở trang chủ, sau đó thêm hình ảnh, mô tả về chuyến đi và vị trí của bạn. Bạn cũng có thể thêm hashtag để dễ dàng tìm kiếm."
+      key: '2',
+      label: "Tôi có thể đăng bài du lịch như thế nào?",
+      children: "Để đăng bài du lịch, hãy nhấn vào nút 'Tạo bài viết' ở trang chủ, sau đó thêm hình ảnh, mô tả về chuyến đi và vị trí của bạn. Bạn cũng có thể thêm hashtag để dễ dàng tìm kiếm."
     },
     {
-      id: 3,
-      question: "Làm sao để tìm bạn bè và kết nối trên TravelNest?",
-      answer: "Bạn có thể tìm bạn bè bằng cách sử dụng tính năng tìm kiếm, nhập tên hoặc email của họ. TravelNest cũng gợi ý những người có thể quen biết dựa trên bạn bè chung."
+      key: '3',
+      label: "Làm sao để tìm bạn bè và kết nối trên TravelNest?",
+      children: "Bạn có thể tìm bạn bè bằng cách sử dụng tính năng tìm kiếm, nhập tên hoặc email của họ. TravelNest cũng gợi ý những người có thể quen biết dựa trên bạn bè chung."
     },
     {
-      id: 4,
-      question: "Tôi có thể tạo nhóm du lịch không?",
-      answer: "Có! Bạn có thể tạo nhóm du lịch để lên kế hoạch chuyến đi cùng bạn bè. Vào 'Nhóm' > 'Tạo nhóm mới' và mời những người bạn muốn tham gia."
+      key: '4',
+      label: "Tôi có thể tạo nhóm du lịch không?",
+      children: "Có! Bạn có thể tạo nhóm du lịch để lên kế hoạch chuyến đi cùng bạn bè. Vào 'Nhóm' > 'Tạo nhóm mới' và mời những người bạn muốn tham gia."
     },
     {
-      id: 5,
-      question: "Làm thế nào để báo cáo nội dung không phù hợp?",
-      answer: "Để báo cáo nội dung không phù hợp, nhấn vào dấu '...' ở góc trên bên phải của bài viết, chọn 'Báo cáo' và làm theo hướng dẫn. Đội ngũ TravelNest sẽ xem xét và xử lý."
+      key: '5',
+      label: "Làm thế nào để báo cáo nội dung không phù hợp?",
+      children: "Để báo cáo nội dung không phù hợp, nhấn vào dấu '...' ở góc trên bên phải của bài viết, chọn 'Báo cáo' và làm theo hướng dẫn. Đội ngũ TravelNest sẽ xem xét và xử lý."
     },
     {
-      id: 6,
-      question: "Tôi có thể chia sẻ vị trí thực tế không?",
-      answer: "Có, TravelNest cho phép bạn chia sẻ vị trí hiện tại hoặc vị trí của các địa điểm du lịch. Bạn có thể bật/tắt tính năng này trong cài đặt quyền riêng tư."
+      key: '6',
+      label: "Tôi có thể chia sẻ vị trí thực tế không?",
+      children: "Có, TravelNest cho phép bạn chia sẻ vị trí hiện tại hoặc vị trí của các địa điểm du lịch. Bạn có thể bật/tắt tính năng này trong cài đặt quyền riêng tư."
     },
     {
-      id: 7,
-      question: "Làm thế nào để xóa tài khoản TravelNest?",
-      answer: "Để xóa tài khoản, vào 'Cài đặt' > 'Tài khoản' > 'Xóa tài khoản'. Lưu ý rằng hành động này không thể hoàn tác và tất cả dữ liệu sẽ bị xóa vĩnh viễn."
+      key: '7',
+      label: "Làm thế nào để xóa tài khoản TravelNest?",
+      children: "Để xóa tài khoản, vào 'Cài đặt' > 'Tài khoản' > 'Xóa tài khoản'. Lưu ý rằng hành động này không thể hoàn tác và tất cả dữ liệu sẽ bị xóa vĩnh viễn."
     }
   ];
 
-  const toggleFaq = (id: number) => {
-    setExpandedFaqs(prev => 
-      prev.includes(id) 
-        ? prev.filter(faqId => faqId !== id)
-        : [...prev, id]
-    );
-  };
-
   return (
       <div className="min-h-screen bg-white">
+        <style dangerouslySetInnerHTML={{
+          __html: `
+            .faq-collapse {
+              border: none !important;
+              background: transparent !important;
+            }
+            .faq-collapse .ant-collapse-item {
+              border: 1px solid #e5e7eb !important;
+              border-radius: 8px !important;
+              margin-bottom: 12px !important;
+              background: white !important;
+            }
+            .faq-collapse .ant-collapse-item:last-child {
+              margin-bottom: 0 !important;
+            }
+            .faq-collapse .ant-collapse-header {
+              padding: 12px 16px !important;
+              font-weight: 500 !important;
+              color: #111827 !important;
+              font-size: 14px !important;
+            }
+            .faq-collapse .ant-collapse-content-box {
+              padding: 0 16px 16px 16px !important;
+              color: #374151 !important;
+              font-size: 14px !important;
+              line-height: 1.6 !important;
+            }
+            .faq-collapse .ant-collapse-header:hover {
+              background-color: #f9fafb !important;
+            }
+            .faq-collapse .ant-collapse-expand-icon {
+              color: #6b7280 !important;
+              margin-left: 8px !important;
+            }
+            @media (min-width: 640px) {
+              .faq-collapse .ant-collapse-item {
+                margin-bottom: 16px !important;
+              }
+              .faq-collapse .ant-collapse-header {
+                padding: 20px 24px !important;
+                font-size: 16px !important;
+              }
+              .faq-collapse .ant-collapse-content-box {
+                padding: 0 24px 24px 24px !important;
+                font-size: 16px !important;
+              }
+            }
+          `
+        }} />
         {/* Main Content */}
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
         {/* Header */}
@@ -143,31 +183,13 @@ const FAQPage = () => {
               <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 sm:mb-6">
                 Câu hỏi thường gặp
               </h2>
-              <div className="space-y-4">
-                {faqs.map((faq) => (
-                  <div
-                    key={faq.id}
-                    className="border border-gray-200 rounded-lg overflow-hidden"
-                  >
-                    <button
-                      onClick={() => toggleFaq(faq.id)}
-                      className="w-full px-4 sm:px-6 py-3 sm:py-4 text-left flex items-center justify-between hover:bg-gray-50 transition-colors cursor-pointer"
-                    >
-                      <span className="font-medium text-gray-900 text-xs sm:text-sm">{faq.question}</span>
-                      {expandedFaqs.includes(faq.id) ? (
-                        <ChevronUp className="w-5 h-5 text-gray-500" />
-                      ) : (
-                        <ChevronDown className="w-5 h-5 text-gray-500" />
-                      )}
-                    </button>
-                    {expandedFaqs.includes(faq.id) && (
-                      <div className="px-4 sm:px-6 pb-3 sm:pb-4">
-                        <p className="text-gray-700 leading-relaxed text-xs sm:text-sm">{faq.answer}</p>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
+              <Collapse
+                items={faqItems}
+                size="large"
+                className="faq-collapse"
+                expandIconPosition="end"
+                bordered={false}
+              />
             </div>
           </div>
 

@@ -5,16 +5,20 @@ import { Skeleton } from 'antd';
 import { authAction } from '../../../stores/actions';
 import { path } from '../../../utilities/path';
 import { GoogleLoginButton, FacebookLoginButton } from '../buttons';
-import { TravelInput, TravelButton, TravelCheckbox } from '../../common/inputs';
+import { TravelInput, TravelButton, TravelCheckbox } from '../../ui/customize';
+import { LoadingOverlay } from '../../ui/loading';
+import { useLoading } from '../../../hooks/useLoading';
 import { background } from '../../../assets/images';
 
 const LoginForm = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [keepLoggedIn, setKeepLoggedIn] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [imageLoading, setImageLoading] = useState(true);
+  
+  // Sử dụng useLoading hook
+  const { isLoading, showLoading, hideLoading } = useLoading();
 
   const handleImageLoad = () => {
     setImageLoading(false);
@@ -25,7 +29,7 @@ const LoginForm = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
+    showLoading();
     setError('');
 
     try {
@@ -38,16 +42,18 @@ const LoginForm = () => {
     } catch (error: any) {
       setError(error?.message || 'Có lỗi xảy ra khi đăng nhập');
     } finally {
-      setIsLoading(false);
+      hideLoading();
     }
   };
 
   const handleSocialError = (error: string) => {
     setError(error);
+    hideLoading();
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 lg:gap-12 xl:gap-16 items-center w-full">
+    <>
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 lg:gap-12 xl:gap-16 items-center w-full">
       {/* Left Side - Content (2/5) */}
       <div className="space-y-6 lg:space-y-8 w-full flex flex-col items-center lg:items-start text-center lg:text-left order-first lg:col-span-2">
         <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-[60px] font-bold text-[var(--travel-primary-500)] leading-tight text-left max-w-md">
@@ -99,10 +105,9 @@ const LoginForm = () => {
             <TravelButton
               type="primary"
               htmlType="submit"
-              loading={isLoading}
               disabled={isLoading}
             >
-              {isLoading ? 'Đang đăng nhập...' : 'Đăng nhập'}
+              Đăng nhập
             </TravelButton>
             <Link to={path.FORGOTPASS} className="text-gray-500 text-xs text-center sm:text-right font-medium cursor-pointer hover:underline decoration-2 decoration-[var(--travel-primary-600)] hover:underline-offset-4 hover:text-[var(--travel-primary-700)]">
               Bạn quên mật khẩu?
@@ -121,8 +126,12 @@ const LoginForm = () => {
 
           {/* Social Login Buttons */}
           <div className="space-y-3">
-            <GoogleLoginButton onError={handleSocialError} />
-            <FacebookLoginButton onError={handleSocialError} />
+            <GoogleLoginButton 
+              onError={handleSocialError} 
+            />
+            <FacebookLoginButton 
+              onError={handleSocialError}
+            />
           </div>
 
           <div className="text-center">
@@ -183,6 +192,13 @@ const LoginForm = () => {
         <div className="absolute top-1/2 -right-12 w-16 h-16 bg-indigo-400 rounded-full opacity-30"></div>
       </div>
     </div>
+
+    {/* Loading Overlay */}
+    <LoadingOverlay 
+      isVisible={isLoading} 
+      message="Đang đăng nhập..." 
+    />
+    </>
   );
 };
 

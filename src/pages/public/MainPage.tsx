@@ -1,14 +1,9 @@
 import React, { useState } from 'react';
-import { Outlet, useNavigate } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
+import { Outlet } from 'react-router-dom';
 import { Skeleton } from 'antd';
-import { authAction } from '../../stores/actions';
-import { path } from '../../utilities/path';
+import { Header } from '../../components/common';
 
 const MainPage: React.FC = () => {
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
-  const { user } = useSelector((state: any) => state.auth);
   const [isLoading, setIsLoading] = useState(true);
 
   // Simulate loading for demonstration
@@ -19,29 +14,44 @@ const MainPage: React.FC = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  const handleLogout = () => {
-    dispatch(authAction.logout());
-    navigate(path.LANDING);
-  };
 
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50">
         <div className="flex flex-col h-screen">
           {/* Header Skeleton */}
-          <header className="bg-white shadow-sm border-b border-gray-200">
-            <div className="px-4 py-3 flex items-center justify-between">
-              <div className="flex items-center space-x-2 sm:space-x-3">
-                <Skeleton.Avatar active size={32} />
-                <Skeleton.Input active size="default" style={{ width: '120px', height: '24px' }} />
+          <div className="bg-white shadow-sm border-b border-gray-200 h-14">
+            <div className="w-full px-4 h-full flex items-center justify-between">
+              {/* Logo - giống header landing */}
+              <div className="flex items-center space-x-3 flex-1 max-w-md">
+                <div className="w-8 h-8 bg-travel-primary-500 rounded-full flex items-center justify-center flex-shrink-0">
+                  <span className="text-white font-bold text-sm">TN</span>
+                </div>
+                {/* Search Bar Skeleton - Desktop */}
+                <div className="hidden md:block">
+                  <Skeleton.Input active size="default" style={{ width: '200px', height: '32px' }} />
+                </div>
+                {/* Search Button Skeleton - Mobile */}
+                <div className="md:hidden">
+                  <Skeleton.Avatar active size={40} />
+                </div>
               </div>
-              
-              <div className="flex items-center space-x-2 sm:space-x-4">
-                <Skeleton.Input active size="default" style={{ width: '150px', height: '20px' }} />
-                <Skeleton.Button active size="default" style={{ width: '80px', height: '32px' }} />
+
+              {/* Center Section Skeleton - Hidden on Mobile */}
+              <div className="hidden lg:flex items-center justify-center space-x-1 flex-1 max-w-4xl">
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <Skeleton.Input key={i} active size="default" style={{ width: '120px', height: '40px' }} />
+                ))}
+              </div>
+
+              {/* Right Section Skeleton */}
+              <div className="flex items-center space-x-2 flex-1 justify-end max-w-md">
+                {[1, 2, 3, 4].map((i) => (
+                  <Skeleton.Avatar key={i} active size={40} />
+                ))}
               </div>
             </div>
-          </header>
+          </div>
 
           {/* Main Content Skeleton */}
           <main className="flex-1 overflow-y-auto p-4">
@@ -67,30 +77,7 @@ const MainPage: React.FC = () => {
     <div className="min-h-screen bg-gray-50">
       <div className="flex flex-col h-screen">
         {/* Header */}
-        <header className="bg-white shadow-sm border-b border-gray-200">
-          <div className="px-4 py-3 flex items-center justify-between">
-            <div className="flex items-center space-x-2 sm:space-x-3">
-              <div className="w-6 h-6 sm:w-8 sm:h-8 bg-travel-primary-500 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-xs sm:text-sm">TN</span>
-              </div>
-              <h1 className="text-lg sm:text-xl font-semibold text-gray-900">TravelNest</h1>
-            </div>
-            
-            <div className="flex items-center space-x-2 sm:space-x-4">
-              <div className="hidden sm:block">
-                <span className="text-xs sm:text-sm text-gray-600">
-                  Xin chào, <span className="font-medium text-gray-900">{user?.firstName || user?.userName || 'Người dùng'}</span>
-                </span>
-              </div>
-              <button
-                onClick={handleLogout}
-                className="bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-all duration-300 hover:scale-105 hover:shadow-md transform cursor-pointer"
-              >
-                Đăng xuất
-              </button>
-            </div>
-          </div>
-        </header>
+        <Header />
 
         {/* Main Content */}
         <main className="flex-1 overflow-y-auto">

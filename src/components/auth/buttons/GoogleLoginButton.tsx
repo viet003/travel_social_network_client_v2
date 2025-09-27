@@ -1,9 +1,11 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { authAction } from '../../../stores/actions';
 import { path } from '../../../utilities/path';
 import { GOOGLE_CONFIG } from '../../../configurations/googleConfig';
+import { useLoading } from '../../../hooks/useLoading';
+import { LoadingOverlay } from '../../common';
 
 interface GoogleLoginButtonProps {
   onError?: (error: string) => void;
@@ -12,13 +14,13 @@ interface GoogleLoginButtonProps {
 }
 
 const GoogleLoginButton = ({ onError, buttonText = 'Đăng nhập bằng Google', loadingText = 'Đang xử lý...' }: GoogleLoginButtonProps) => {
-  const [isLoading, setIsLoading] = useState(false);
+  const { isLoading, showLoading, hideLoading } = useLoading();
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const googleButtonRef = useRef<HTMLDivElement>(null);
 
   const handleGoogleLogin = async (credential: string) => {
-    setIsLoading(true);
+    // Loading đã được hiển thị ở onClick, không cần gọi lại
     onError?.('');
 
     try {
@@ -32,13 +34,13 @@ const GoogleLoginButton = ({ onError, buttonText = 'Đăng nhập bằng Google'
     } catch (error: any) {
       onError?.(error?.message || 'Có lỗi xảy ra khi đăng nhập Google');
     } finally {
-      setIsLoading(false);
+      hideLoading();
     }
   };
 
   const handleGoogleError = (error: string) => {
     onError?.(`Lỗi Google: ${error}`);
-    setIsLoading(false);
+    hideLoading();
   };
 
   // Tải Google script và khởi tạo trong component
@@ -103,6 +105,9 @@ const GoogleLoginButton = ({ onError, buttonText = 'Đăng nhập bằng Google'
       {/* Custom Google Button với style giống SignUpForm */}
       <button 
         onClick={() => {
+          // Hiển thị loading ngay khi click
+          // showOAuthLoading();
+          
           // Trigger Google OAuth One Tap
           if ((window as any).google) {
             (window as any).google.accounts.id.prompt((notification: any) => {
@@ -114,14 +119,24 @@ const GoogleLoginButton = ({ onError, buttonText = 'Đăng nhập bằng Google'
                   callback: (response: any) => {
                     if (response.access_token) {
                       // console.log("Access token received:", response.access_token);
+                      // Hiển thị loading khi bắt đầu gửi request đến server
+                      showLoading();
                       // Convert access token to credential format
                       handleGoogleLogin(response.access_token);
+                    } else {
+                      // Không cần ẩn loading vì chưa hiển thị
                     }
                   }
                 }).requestAccessToken();
+              } else {
+                // Nếu One Tap hiển thị thành công, chưa cần làm gì
+                // Loading sẽ hiển thị khi user chọn account và gửi request
               }
               // console.log("Notification:", notification, " ", GOOGLE_CONFIG.CLIENT_ID);
             });
+          } else {
+            // Nếu Google SDK chưa load, hiển thị lỗi
+            handleGoogleError('Google SDK chưa được tải');
           }
         }}
         className="w-full bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-xl flex items-center justify-center space-x-3 hover:bg-gray-50 hover:border-gray-400 transition-all duration-300 cursor-pointer transform hover:scale-105 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
@@ -133,9 +148,9 @@ const GoogleLoginButton = ({ onError, buttonText = 'Đăng nhập bằng Google'
           <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
           <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
         </svg>
-        <span className="text-sm font-medium">
-          {isLoading ? loadingText : buttonText}
-        </span>
+               <span className="text-sm font-medium">
+                 {isLoading ? loadingText : buttonText}
+               </span>
       </button>
       
       {/* Hidden div cho Google button (để Google render vào) */}
@@ -145,11 +160,11 @@ const GoogleLoginButton = ({ onError, buttonText = 'Đăng nhập bằng Google'
         className="hidden"
       />
       
-      {isLoading && (
-        <div className="text-center mt-2">
-          <span className="text-sm text-gray-600">Đang xử lý đăng nhập Google...</span>
-        </div>
-      )}
+      {/* OAuth Loading Overlay */}
+      <LoadingOverlay
+        isVisible={isLoading}
+        message="Đang xử lý đăng nhập Google..."
+      />
     </div>
   );
 };

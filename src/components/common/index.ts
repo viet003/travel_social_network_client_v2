@@ -1,7 +1,14 @@
-export { default as LoadingSpinner } from './LoadingSpinner';
-export { default as ProtectedRoute } from './ProtectedRoute';
-export { default as PageTransition } from './PageTransition';
-export { default as ProtectedResetRoute } from './ProtectedResetRoute';
+// Loading Components Package
+export * from '../ui/loading';
 
 // Travel Input Components
-export * from './inputs';
+export * from '../ui/customize';
+
+// Dropdown Components
+export * from './dropdowns';
+
+// Layout Components
+export * from './layout';
+
+// Other Common Components
+export { default as SearchResults } from './dropdowns/SearchDropdown';

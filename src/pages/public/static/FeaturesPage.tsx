@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Skeleton } from 'antd';
-import { featChat, featDiscover, featSearch, featShare, featSuggest } from '../../assets/images';
+import { featChat, featDiscover, featSearch, featShare, featSuggest } from '../../../assets/images';
 
 const FeaturesPage = () => {
   const [imageLoading, setImageLoading] = useState({

@@ -4,16 +4,20 @@ import { Skeleton } from 'antd';
 import { apiResetPasswordService } from '../../../services/authService';
 import { path } from '../../../utilities/path';
 import { GoogleLoginButton, FacebookLoginButton } from '../buttons';
-import { TravelInput, TravelButton } from '../../common/inputs';
+import { TravelInput, TravelButton } from '../../ui/customize';
+import { LoadingOverlay } from '../../ui/loading';
+import { useLoading } from '../../../hooks/useLoading';
 import { background } from '../../../assets/images';
 
 const ResetPasswordForm = () => {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [imageLoading, setImageLoading] = useState(true);
+  
+  // Sử dụng useLoading hook
+  const { isLoading, showLoading, hideLoading } = useLoading();
   const [searchParams] = useSearchParams();
   const token = searchParams.get('token');
 
@@ -35,25 +39,25 @@ const ResetPasswordForm = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
+    showLoading();
     setError('');
 
     // Validation
     if (newPassword !== confirmPassword) {
       setError('Mật khẩu xác nhận không khớp');
-      setIsLoading(false);
+      hideLoading();
       return;
     }
 
     if (newPassword.length < 8 || newPassword.length > 15) {
       setError('Mật khẩu phải có từ 8-15 ký tự');
-      setIsLoading(false);
+      hideLoading();
       return;
     }
 
     if (!token) {
       setError('Token không hợp lệ');
-      setIsLoading(false);
+      hideLoading();
       return;
     }
 
@@ -74,12 +78,13 @@ const ResetPasswordForm = () => {
     } catch (error: any) {
       setError(error?.message || 'Có lỗi xảy ra khi đặt lại mật khẩu');
     } finally {
-      setIsLoading(false);
+      hideLoading();
     }
   };
 
   if (success) {
     return (
+      <>
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 lg:gap-12 xl:gap-16 items-center w-full">
         {/* Left Side - Content */}
         <div className="space-y-6 lg:space-y-8 w-full flex flex-col items-center lg:items-start text-center lg:text-left order-first lg:col-span-2">
@@ -131,10 +136,18 @@ const ResetPasswordForm = () => {
           <div className="absolute top-1/2 -right-12 w-16 h-16 bg-indigo-400 rounded-full opacity-30"></div>
         </div>
       </div>
+
+      {/* Loading Overlay */}
+      <LoadingOverlay 
+        isVisible={isLoading} 
+        message="Đang đặt lại mật khẩu..." 
+      />
+      </>
     );
   }
 
   return (
+    <>
     <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 lg:gap-12 xl:gap-16 items-center w-full">
       {/* Left Side - Content */}
       <div className="space-y-6 lg:space-y-8 w-full flex flex-col items-center lg:items-start text-center lg:text-left order-first lg:col-span-2">
@@ -183,10 +196,9 @@ const ResetPasswordForm = () => {
           <TravelButton
             type="primary"
             htmlType="submit"
-            loading={isLoading}
             disabled={isLoading || !token}
           >
-            {isLoading ? 'Đang xử lý...' : 'Đặt lại mật khẩu'}
+            Đặt lại mật khẩu
           </TravelButton>
 
           {/* Divider */}
@@ -247,6 +259,13 @@ const ResetPasswordForm = () => {
         <div className="absolute top-1/2 -right-12 w-16 h-16 bg-indigo-400 rounded-full opacity-30"></div>
       </div>
     </div>
+
+    {/* Loading Overlay */}
+    <LoadingOverlay 
+      isVisible={isLoading} 
+      message="Đang đặt lại mật khẩu..." 
+    />
+    </>
   );
 };
 
