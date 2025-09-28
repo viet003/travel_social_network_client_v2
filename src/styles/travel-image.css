@@ -1,0 +1,38 @@
+/* TravelImage Component Styles */
+.travel-image {
+  object-fit: cover !important;
+  width: 100% !important;
+  max-height: 350px !important;
+  border-radius: 12px !important;
+  cursor: pointer !important;
+  transition: opacity 0.3s ease !important;
+  display: block !important;
+}
+
+.travel-image:hover {
+  opacity: 0.95 !important;
+}
+
+/* Override Antd Image styles */
+.ant-image {
+  display: block !important;
+}
+
+.ant-image-img {
+  object-fit: cover !important;
+  width: 100% !important;
+  max-height: 350px !important;
+  border-radius: 12px !important;
+  cursor: pointer !important;
+  transition: opacity 0.3s ease !important;
+  display: block !important;
+}
+
+.ant-image-img:hover {
+  opacity: 0.95 !important;
+}
+
+/* Ensure image container takes full width */
+.ant-image-mask {
+  border-radius: 12px !important;
+}

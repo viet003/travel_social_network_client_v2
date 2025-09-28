@@ -96,38 +96,52 @@ const Header: React.FC = () => {
         <div className="hidden xl:flex items-center justify-center space-x-1 flex-1 max-w-6xl xl:max-w-5xl 2xl:max-w-4xl h-full py-1">
           {/* Home Icon */}
           <TravelTooltip title="Trang chủ">
-            <button className="px-6 py-2 rounded-lg hover:bg-gray-100 transition-colors duration-200 lg:min-w-[80px] xl:min-w-[120px] h-full flex items-center justify-center cursor-pointer">
+            <button 
+              onClick={() => navigate(path.HOME)}
+              className="px-6 py-2 rounded-lg hover:bg-gray-100 transition-colors duration-200 lg:min-w-[80px] xl:min-w-[120px] h-full flex items-center justify-center cursor-pointer"
+            >
               <Icon icon="fluent:home-24-filled" className="h-5 w-5 2xl:h-8 2xl:w-6 text-black" />
             </button>
           </TravelTooltip>
 
-          {/* Friends Icon - Active */}
+          {/* Friends Icon */}
           <TravelTooltip title="Bạn bè">
             <div className="relative h-full">
-              <button className="px-6 py-2 rounded-lg hover:bg-gray-100 transition-colors duration-200 lg:min-w-[80px] xl:min-w-[120px] h-full flex items-center justify-center cursor-pointer">
-                <Icon icon="fluent:people-24-filled" className="h-5 w-5 2xl:h-8 2xl:w-6 text-blue-600" />
+              <button 
+                onClick={() => navigate(`${path.HOME}/${path.FRIENDS}`)}
+                className="px-6 py-2 rounded-lg hover:bg-gray-100 transition-colors duration-200 lg:min-w-[80px] xl:min-w-[120px] h-full flex items-center justify-center cursor-pointer"
+              >
+                <Icon icon="fluent:people-24-filled" className="h-5 w-5 2xl:h-8 2xl:w-6 text-black" />
               </button>
-              <div className="absolute -bottom-1 left-0 right-0 h-[3px] bg-[var(--travel-primary-500)] rounded-full"></div>
             </div>
           </TravelTooltip>
 
           {/* Watch Icon */}
           <TravelTooltip title="Watch">
-            <button className="px-6 py-2 rounded-lg hover:bg-gray-100 transition-colors duration-200 lg:min-w-[80px] xl:min-w-[120px] h-full flex items-center justify-center cursor-pointer">
+            <button 
+              onClick={() => navigate(`${path.HOME}/${path.WATCH}`)}
+              className="px-6 py-2 rounded-lg hover:bg-gray-100 transition-colors duration-200 lg:min-w-[80px] xl:min-w-[120px] h-full flex items-center justify-center cursor-pointer"
+            >
               <Icon icon="fluent:play-24-filled" className="h-5 w-5 2xl:h-8 2xl:w-6 text-black" />
             </button>
           </TravelTooltip>
 
           {/* Groups Icon */}
           <TravelTooltip title="Nhóm">
-            <button className="px-6 py-2 rounded-lg hover:bg-gray-100 transition-colors duration-200 lg:min-w-[80px] xl:min-w-[120px] h-full flex items-center justify-center cursor-pointer">
+            <button 
+              onClick={() => navigate(`${path.HOME}/${path.GROUPS}`)}
+              className="px-6 py-2 rounded-lg hover:bg-gray-100 transition-colors duration-200 lg:min-w-[80px] xl:min-w-[120px] h-full flex items-center justify-center cursor-pointer"
+            >
               <Icon icon="fluent:people-community-24-filled" className="h-5 w-5 2xl:h-8 2xl:w-6 text-black" />
             </button>
           </TravelTooltip>
 
           {/* Explore Icon */}
           <TravelTooltip title="Khám phá dành cho du lịch">
-            <button className="px-6 py-2 rounded-lg hover:bg-gray-100 transition-colors duration-200 lg:min-w-[80px] xl:min-w-[120px] h-full flex items-center justify-center cursor-pointer">
+            <button 
+              onClick={() => navigate(`${path.HOME}/${path.EXPLORE}`)}
+              className="px-6 py-2 rounded-lg hover:bg-gray-100 transition-colors duration-200 lg:min-w-[80px] xl:min-w-[120px] h-full flex items-center justify-center cursor-pointer"
+            >
               <Icon icon="fluent:globe-search-24-filled" className="h-5 w-5 2xl:h-8 2xl:w-6 text-black" />
             </button>
           </TravelTooltip>

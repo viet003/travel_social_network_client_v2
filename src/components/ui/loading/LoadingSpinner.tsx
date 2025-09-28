@@ -1,22 +1,21 @@
-import { ClipLoader } from 'react-spinners';
+import React from 'react';
+import { ClipLoader } from "react-spinners";
 
-type LoadingSpinnerProps = {
+interface LoadingSpinnerProps {
   size?: number;
   color?: string;
-};
+}
 
-const LoadingSpinner = ({ 
-  size = 16, 
-  color = '#3B82F6' // blue-600
-}: LoadingSpinnerProps) => {
+const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({ 
+  size = 20, 
+  color = "#FFFFFF" 
+}) => {
   return (
     <ClipLoader
-      size={size}
       color={color}
-      loading={true}
+      size={size}
     />
   );
 };
 
 export default LoadingSpinner;
-

@@ -11,5 +11,9 @@ export const path = {
     DEVELOPER: "/developer",
     HELP: "/help",
     USER: "/user/:userId",
+    FRIENDS: "friends",
+    GROUPS: "groups",
+    WATCH: "watch",
+    EXPLORE: "explore",
     STAR: "*"
 }
