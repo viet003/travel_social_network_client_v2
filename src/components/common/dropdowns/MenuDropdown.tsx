@@ -1,15 +1,5 @@
 import React, { useEffect } from 'react';
-import {
-  Edit3,
-  BookOpen,
-  Film,
-  Star,
-  Flag,
-  Megaphone,
-  Users,
-  Calendar,
-  ShoppingBag
-} from 'lucide-react';
+import { Icon } from '@iconify/react';
 
 interface CreateDropdownProps {
   onClose?: () => void;
@@ -27,49 +17,49 @@ const CreateDropdown: React.FC<CreateDropdownProps> = ({ onClose }) => {
   const createMenuItems: CreateMenuItem[] = [
     {
       id: 'post',
-      icon: <Edit3 className="w-4 h-4 text-black" />,
+      icon: <Icon icon="fluent:edit-24-filled" className="w-6 h-6 text-black" />,
       title: 'Đăng',
       onClick: () => console.log('Create post clicked')
     },
     {
       id: 'story',
-      icon: <BookOpen className="w-4 h-4 text-black" />,
+      icon: <Icon icon="fluent:book-24-filled" className="w-6 h-6 text-black" />,
       title: 'Tin',
       onClick: () => console.log('Create story clicked')
     },
     {
       id: 'reel',
-      icon: <Film className="w-4 h-4 text-black" />,
+      icon: <Icon icon="fluent:video-24-filled" className="w-6 h-6 text-black" />,
       title: 'Thước phim',
       onClick: () => console.log('Create reel clicked')
     },
     {
       id: 'life_event',
-      icon: <Star className="w-4 h-4 text-black" />,
+      icon: <Icon icon="fluent:star-24-filled" className="w-6 h-6 text-black" />,
       title: 'Sự kiện trong đời',
       onClick: () => console.log('Create life event clicked')
     },
     {
       id: 'page',
-      icon: <Flag className="w-4 h-4 text-black" />,
+      icon: <Icon icon="fluent:flag-24-filled" className="w-6 h-6 text-black" />,
       title: 'Trang',
       onClick: () => console.log('Create page clicked')
     },
     {
       id: 'ad',
-      icon: <Megaphone className="w-4 h-4 text-black" />,
+      icon: <Icon icon="fluent:megaphone-24-filled" className="w-6 h-6 text-black" />,
       title: 'Quảng cáo',
       onClick: () => console.log('Create ad clicked')
     },
     {
       id: 'group',
-      icon: <Users className="w-4 h-4 text-black" />,
+      icon: <Icon icon="fluent:people-24-filled" className="w-6 h-6 text-black" />,
       title: 'Nhóm',
       onClick: () => console.log('Create group clicked')
     },
     {
       id: 'event',
-      icon: <Calendar className="w-4 h-4 text-black" />,
+      icon: <Icon icon="fluent:calendar-24-filled" className="w-6 h-6 text-black" />,
       title: 'Sự kiện',
       onClick: () => console.log('Create event clicked')
     },
@@ -113,7 +103,7 @@ const CreateDropdown: React.FC<CreateDropdownProps> = ({ onClose }) => {
       {/* Create Header */}
       <div className="py-4">
         <div className="px-2">
-          <h2 className="text-2xl font-bold">Tạo</h2>
+          <h2 className="text-2xl font-bold">Menu</h2>
         </div>
       </div>
 
@@ -129,9 +119,9 @@ const CreateDropdown: React.FC<CreateDropdownProps> = ({ onClose }) => {
             onClick={item.onClick}
             className="w-full flex items-center space-x-3 py-2 px-2 rounded-xl hover:bg-gray-100 transition-colors cursor-pointer group"
           >
-            <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
-              {item.icon}
-            </div>
+             <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
+               {item.icon}
+             </div>
             <div className="flex-1 text-left">
               <p className="text-sm font-medium">{item.title}</p>
             </div>

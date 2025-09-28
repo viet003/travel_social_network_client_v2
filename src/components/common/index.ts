@@ -10,5 +10,5 @@ export * from './dropdowns';
 // Layout Components
 export * from './layout';
 
-// Other Common Components
-export { default as SearchResults } from './dropdowns/SearchDropdown';
+// Sidebar Components
+export * from './sidebar';

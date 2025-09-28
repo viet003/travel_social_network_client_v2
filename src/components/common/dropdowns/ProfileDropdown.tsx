@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Settings, HelpCircle, Moon, MessageSquare, LogOut, ChevronRight, Users } from 'lucide-react';
+import { Icon } from '@iconify/react';
 
 interface ProfileDropdownProps {
   onClose?: () => void;
@@ -41,28 +41,28 @@ const ProfileDropdown: React.FC<ProfileDropdownProps> = ({ onClose, user }) => {
   const menuItems: MenuItem[] = [
     {
       id: 'settings',
-      icon: <Settings className="w-4 h-4 text-black" />,
+      icon: <Icon icon="fluent:settings-24-filled" className="w-6 h-6 text-black" />,
       title: 'Cài đặt và quyền riêng tư',
       hasArrow: true,
       onClick: () => console.log('Settings clicked')
     },
     {
       id: 'help',
-      icon: <HelpCircle className="w-4 h-4 text-black" />,
+      icon: <Icon icon="fluent:question-circle-24-filled" className="w-6 h-6 text-black" />,
       title: 'Trợ giúp và hỗ trợ',
       hasArrow: true,
       onClick: () => console.log('Help clicked')
     },
     {
       id: 'display',
-      icon: <Moon className="w-4 h-4 text-black" />,
+      icon: <Icon icon="fluent:dark-theme-24-filled" className="w-6 h-6 text-black" />,
       title: 'Màn hình và trợ năng',
       hasArrow: true,
       onClick: () => console.log('Display clicked')
     },
     {
       id: 'feedback',
-      icon: <MessageSquare className="w-4 h-4 text-black" />,
+      icon: <Icon icon="fluent:chat-24-filled" className="w-6 h-6 text-black" />,
       title: 'Đóng góp ý kiến',
       description: 'CTRL B',
       hasArrow: false,
@@ -70,7 +70,7 @@ const ProfileDropdown: React.FC<ProfileDropdownProps> = ({ onClose, user }) => {
     },
     {
       id: 'logout',
-      icon: <LogOut className="w-4 h-4 text-black" />,
+      icon: <Icon icon="fluent:sign-out-24-filled" className="w-6 h-6 text-black" />,
       title: 'Đăng xuất',
       hasArrow: false,
       onClick: () => console.log('Logout clicked')
@@ -128,9 +128,9 @@ const ProfileDropdown: React.FC<ProfileDropdownProps> = ({ onClose, user }) => {
         {/* User Pages */}
         {userPages.map((page) => (
           <div key={page.id} className="flex items-center space-x-3 mb-3 p-2 hover:bg-gray-100 rounded-xl transition-colors cursor-pointer">
-            <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
-              <span className="text-sm">{page.icon}</span>
-            </div>
+             <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">
+               <span className="text-sm">{page.icon}</span>
+             </div>
             <span className="text-sm">{page.name}</span>
           </div>
         ))}
@@ -140,7 +140,7 @@ const ProfileDropdown: React.FC<ProfileDropdownProps> = ({ onClose, user }) => {
           className="w-full flex items-center justify-center space-x-2 py-2 px-3 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors cursor-pointer"
           onClick={() => setShowAllPages(!showAllPages)}
         >
-          <Users className="w-4 h-4 text-black" />
+          <Icon icon="fluent:people-24-filled" className="w-6 h-6 text-black" />
           <span className="text-sm">Xem tất cả trang cá nhân</span>
         </button>
       </div>
@@ -158,9 +158,9 @@ const ProfileDropdown: React.FC<ProfileDropdownProps> = ({ onClose, user }) => {
             className="w-full flex items-center justify-between py-2 px-2 rounded-xl hover:bg-gray-100 transition-colors cursor-pointer group"
           >
             <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
-                {item.icon}
-              </div>
+               <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">
+                 {item.icon}
+               </div>
               <div className="flex-1 text-left">
                 <p className="text-sm font-medium text-gray-900">{item.title}</p>
                 {item.description && (
@@ -169,7 +169,7 @@ const ProfileDropdown: React.FC<ProfileDropdownProps> = ({ onClose, user }) => {
               </div>
             </div>
             {item.hasArrow && (
-              <ChevronRight className="w-4 h-4 text-black" />
+              <Icon icon="fluent:chevron-right-24-filled" className="w-6 h-6 text-black" />
             )}
           </button>
         ))}

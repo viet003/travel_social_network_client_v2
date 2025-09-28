@@ -2,17 +2,9 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import TravelTooltip from '../../ui/customize/TravelTooltip';
+import { Icon } from '@iconify/react';
 import {
-  Search,
-  Home,
-  Users,
-  Play,
-  Store,
-  Gamepad2,
-  Menu,
-  MessageCircle,
-  Bell,
-  ChevronDown
+  Search
 } from 'lucide-react';
 
 import logo from '../../../assets/images/logo.png';
@@ -105,7 +97,7 @@ const Header: React.FC = () => {
           {/* Home Icon */}
           <TravelTooltip title="Trang chủ">
             <button className="px-6 py-2 rounded-lg hover:bg-gray-100 transition-colors duration-200 lg:min-w-[80px] xl:min-w-[120px] h-full flex items-center justify-center cursor-pointer">
-              <Home className="h-5 w-5 2xl:h-8 2xl:w-6 text-black" />
+              <Icon icon="fluent:home-24-filled" className="h-5 w-5 2xl:h-8 2xl:w-6 text-black" />
             </button>
           </TravelTooltip>
 
@@ -113,7 +105,7 @@ const Header: React.FC = () => {
           <TravelTooltip title="Bạn bè">
             <div className="relative h-full">
               <button className="px-6 py-2 rounded-lg hover:bg-gray-100 transition-colors duration-200 lg:min-w-[80px] xl:min-w-[120px] h-full flex items-center justify-center cursor-pointer">
-                <Users className="h-5 w-5 2xl:h-8 2xl:w-6 text-black" />
+                <Icon icon="fluent:people-24-filled" className="h-5 w-5 2xl:h-8 2xl:w-6 text-blue-600" />
               </button>
               <div className="absolute -bottom-1 left-0 right-0 h-[3px] bg-[var(--travel-primary-500)] rounded-full"></div>
             </div>
@@ -122,21 +114,21 @@ const Header: React.FC = () => {
           {/* Watch Icon */}
           <TravelTooltip title="Watch">
             <button className="px-6 py-2 rounded-lg hover:bg-gray-100 transition-colors duration-200 lg:min-w-[80px] xl:min-w-[120px] h-full flex items-center justify-center cursor-pointer">
-              <Play className="h-5 w-5 2xl:h-8 2xl:w-6 text-black" />
+              <Icon icon="fluent:play-24-filled" className="h-5 w-5 2xl:h-8 2xl:w-6 text-black" />
             </button>
           </TravelTooltip>
 
-          {/* Marketplace Icon */}
-          <TravelTooltip title="Thị trường">
+          {/* Groups Icon */}
+          <TravelTooltip title="Nhóm">
             <button className="px-6 py-2 rounded-lg hover:bg-gray-100 transition-colors duration-200 lg:min-w-[80px] xl:min-w-[120px] h-full flex items-center justify-center cursor-pointer">
-              <Store className="h-5 w-5 2xl:h-8 2xl:w-6 text-black" />
+              <Icon icon="fluent:people-community-24-filled" className="h-5 w-5 2xl:h-8 2xl:w-6 text-black" />
             </button>
           </TravelTooltip>
 
-          {/* Gaming Icon */}
-          <TravelTooltip title="Game">
+          {/* Explore Icon */}
+          <TravelTooltip title="Khám phá dành cho du lịch">
             <button className="px-6 py-2 rounded-lg hover:bg-gray-100 transition-colors duration-200 lg:min-w-[80px] xl:min-w-[120px] h-full flex items-center justify-center cursor-pointer">
-              <Gamepad2 className="h-5 w-5 2xl:h-8 2xl:w-6 text-black" />
+              <Icon icon="fluent:globe-search-24-filled" className="h-5 w-5 2xl:h-8 2xl:w-6 text-black" />
             </button>
           </TravelTooltip>
         </div>
@@ -144,13 +136,13 @@ const Header: React.FC = () => {
         {/* Right Section: User Actions */}
         <div className="flex items-center space-x-2 flex-1 justify-end max-w-md">
           {/* Menu Icon with Create Dropdown */}
-          <TravelTooltip title="Tạo">
+          <TravelTooltip title="Menu">
             <div className="relative" data-create-container>
               <button 
                 className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center hover:bg-gray-300 transition-colors duration-200 cursor-pointer"
                 onClick={() => setShowCreateDropdown(!showCreateDropdown)}
               >
-                <Menu className="h-5 w-5 text-black" />
+                <Icon icon="fluent:apps-24-filled" className="h-5 w-5 text-black" />
               </button>
 
               {/* Create Dropdown */}
@@ -161,13 +153,13 @@ const Header: React.FC = () => {
           </TravelTooltip>
 
           {/* Messenger Icon with Dropdown */}
-          <TravelTooltip title="Messenger">
+          <TravelTooltip title="Đoạn chat">
             <div className="relative" data-chat-container>
               <button 
                 className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center hover:bg-gray-300 transition-colors duration-200 cursor-pointer relative"
                 onClick={() => setShowChatDropdown(!showChatDropdown)}
               >
-                <MessageCircle className="h-5 w-5 text-black" />
+                <Icon icon="fluent:chat-24-filled" className="h-5 w-5 text-black" />
                 {/* Notification badge */}
                 <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">3</span>
               </button>
@@ -186,7 +178,7 @@ const Header: React.FC = () => {
                 className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center hover:bg-gray-300 transition-colors duration-200 cursor-pointer relative"
                 onClick={() => setShowNotificationsDropdown(!showNotificationsDropdown)}
               >
-                <Bell className="h-5 w-5 text-black" />
+                <Icon icon="fluent:alert-24-filled" className="h-5 w-5 text-black" />
                 {/* Notification badge */}
                 <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">5</span>
               </button>
@@ -199,7 +191,7 @@ const Header: React.FC = () => {
           </TravelTooltip>
 
           {/* Profile Picture with Dropdown */}
-          <TravelTooltip title="Menu">
+          <TravelTooltip title="Tài khoản">
             <div className="relative" data-profile-container>
               <button 
                 className="w-10 h-10 rounded-full hover:opacity-80 transition-opacity duration-200 cursor-pointer relative"
@@ -211,7 +203,7 @@ const Header: React.FC = () => {
                   className="w-full h-full object-cover rounded-full"
                 />
                 {/* Dropdown arrow */}
-                <ChevronDown className="absolute -bottom-1 -right-1 w-4 h-4 text-black bg-white rounded-full" />
+                <Icon icon="fluent:chevron-down-24-filled" className="absolute -bottom-1 -right-1 w-4 h-4 text-black bg-white rounded-full" />
               </button>
 
               {/* Profile Dropdown */}
