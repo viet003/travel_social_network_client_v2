@@ -8,10 +8,11 @@ import {
   HelpCircle,
   ChevronRight
 } from 'lucide-react';
-import { logo, subLogo } from '../../assets/images';
-import { path } from '../../utilities/path';
+import { Icon } from '@iconify/react';
+import { logo, subLogo } from '../assets/images';
+import { path } from '../utilities/path';
 
-const LandingPage = () => {
+const PublicLayout = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
@@ -106,9 +107,7 @@ const LandingPage = () => {
             className="md:hidden p-2 text-gray-700 hover:text-travel-primary-600 cursor-pointer transition-colors duration-200"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
+            <Icon icon="fluent:line-horizontal-3-24-regular" className="w-6 h-6" />
           </button>
         </nav>
       </header>
@@ -144,9 +143,7 @@ const LandingPage = () => {
               onClick={() => setIsMobileMenuOpen(false)}
               className="p-2 text-gray-400 hover:text-travel-primary-600 hover:bg-travel-primary-50 rounded-full cursor-pointer transition-all duration-200"
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
+              <Icon icon="fluent:dismiss-24-regular" className="w-6 h-6" />
             </button>
           </div>
 
@@ -295,4 +292,4 @@ const LandingPage = () => {
   );
 };
 
-export default LandingPage;
+export default PublicLayout;

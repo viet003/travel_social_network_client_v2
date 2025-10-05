@@ -1,19 +1,30 @@
 import React, { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import { Skeleton } from 'antd';
-import { Header } from '../../components/common';
+import { Header } from '../components/common';
 
-const MainPage: React.FC = () => {
-  const [isLoading, setIsLoading] = useState(true);
+interface MainLayoutProps {
+  children?: React.ReactNode;
+  showLoading?: boolean;
+  loadingDuration?: number;
+}
+
+const MainLayout: React.FC<MainLayoutProps> = ({ 
+  children, 
+  showLoading = false, 
+  loadingDuration = 800 
+}) => {
+  const [isLoading, setIsLoading] = useState(showLoading);
 
   // Simulate loading for demonstration
   React.useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 800);
-    return () => clearTimeout(timer);
-  }, []);
-
+    if (showLoading) {
+      const timer = setTimeout(() => {
+        setIsLoading(false);
+      }, loadingDuration);
+      return () => clearTimeout(timer);
+    }
+  }, [showLoading, loadingDuration]);
 
   if (isLoading) {
     return (
@@ -81,11 +92,11 @@ const MainPage: React.FC = () => {
 
         {/* Main Content */}
         <main className="flex-1 overflow-y-auto">
-          <Outlet />
+          {children || <Outlet />}
         </main>
       </div>
     </div>
   );
 };
 
-export default MainPage;
+export default MainLayout;

@@ -6,8 +6,7 @@ import { authAction } from '../../../stores/actions';
 import { path } from '../../../utilities/path';
 import { GoogleLoginButton, FacebookLoginButton } from '../buttons';
 import { TravelInput, TravelButton, TravelCheckbox, TravelSelect, TravelDatePicker } from '../../ui/customize';
-import { LoadingOverlay } from '../../ui/loading';
-import { useLoading } from '../../../hooks/useLoading';
+import { LoadingSpinner } from '../../ui/loading';
 import { background } from '../../../assets/images';
 
 const SignUpForm = () => {
@@ -23,8 +22,7 @@ const SignUpForm = () => {
   const [error, setError] = useState('');
   const [imageLoading, setImageLoading] = useState(true);
   
-  // Sử dụng useLoading hook
-  const { isLoading, showLoading, hideLoading } = useLoading();
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleImageLoad = () => {
     setImageLoading(false);
@@ -39,19 +37,19 @@ const SignUpForm = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    showLoading();
+    setIsLoading(true);
     setError('');
 
     // Validation
     if (password !== confirmPassword) {
       setError('Mật khẩu xác nhận không khớp');
-      hideLoading();
+      setIsLoading(false);
       return;
     }
 
     if (!agreeToTerms) {
       setError('Vui lòng đồng ý với điều khoản dịch vụ');
-      hideLoading();
+      setIsLoading(false);
       return;
     }
 
@@ -74,7 +72,7 @@ const SignUpForm = () => {
     } catch (error: any) {
       setError(error?.message || 'Có lỗi xảy ra khi đăng ký');
     } finally {
-      hideLoading();
+      setIsLoading(false);
     }
   };
 
@@ -227,7 +225,14 @@ const SignUpForm = () => {
             htmlType="submit"
             disabled={isLoading}
           >
-            Tạo tài khoản
+            {isLoading ? (
+              <div className="flex items-center justify-center space-x-2">
+                <LoadingSpinner size={16} color="#FFFFFF" />
+                <span>Đang tạo tài khoản...</span>
+              </div>
+            ) : (
+              "Tạo tài khoản"
+            )}
           </TravelButton>
 
           {/* Divider */}
@@ -312,11 +317,6 @@ const SignUpForm = () => {
       </div>
     </div>
 
-    {/* Loading Overlay */}
-    <LoadingOverlay 
-      isVisible={isLoading} 
-      message="Đang tạo tài khoản..." 
-    />
     </>
   );
 };

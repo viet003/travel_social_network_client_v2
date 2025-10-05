@@ -2,9 +2,7 @@
 import { Route, Routes, Navigate } from 'react-router-dom';
 import { path } from './utilities/path';
 import { 
-  MainPage, 
   HomePage, 
-  LandingPage, 
   FeaturesPage, 
   PrivacyPage, 
   DesktopAppPage, 
@@ -12,6 +10,7 @@ import {
   WatchPage,
   ExplorePage
 } from './pages';
+import { MainLayout, PublicLayout } from './layout';
 import FriendsPage from './pages/public/FriendsPage';
 import GroupsPage from './pages/public/GroupsPage';
 import { LoginForm, SignUpForm, ForgotPasswordForm, ResetPasswordForm } from './components/auth';
@@ -23,12 +22,12 @@ function App() {
   return (
     <>
       <Routes>
-        {/* Landing page with nested routes */}
+        {/* Public layout with nested routes */}
         <Route
           path="/"
           element={
             <ProtectedRoute isPublic={true}>
-              <LandingPage />
+              <PublicLayout />
             </ProtectedRoute>
           }
         >
@@ -52,7 +51,7 @@ function App() {
           path={path.HOME}
           element={
             <ProtectedRoute isPublic={true}>
-              <MainPage />
+              <MainLayout />
             </ProtectedRoute>
           }
         >

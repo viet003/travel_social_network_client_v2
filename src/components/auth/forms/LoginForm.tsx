@@ -6,8 +6,7 @@ import { authAction } from '../../../stores/actions';
 import { path } from '../../../utilities/path';
 import { GoogleLoginButton, FacebookLoginButton } from '../buttons';
 import { TravelInput, TravelButton, TravelCheckbox } from '../../ui/customize';
-import { LoadingOverlay } from '../../ui/loading';
-import { useLoading } from '../../../hooks/useLoading';
+import { LoadingSpinner } from '../../ui/loading';
 import { background } from '../../../assets/images';
 
 const LoginForm = () => {
@@ -17,8 +16,7 @@ const LoginForm = () => {
   const [error, setError] = useState('');
   const [imageLoading, setImageLoading] = useState(true);
   
-  // Sử dụng useLoading hook
-  const { isLoading, showLoading, hideLoading } = useLoading();
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleImageLoad = () => {
     setImageLoading(false);
@@ -29,7 +27,7 @@ const LoginForm = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    showLoading();
+    setIsLoading(true);
     setError('');
 
     try {
@@ -42,13 +40,13 @@ const LoginForm = () => {
     } catch (error: any) {
       setError(error?.message || 'Có lỗi xảy ra khi đăng nhập');
     } finally {
-      hideLoading();
+      setIsLoading(false);
     }
   };
 
   const handleSocialError = (error: string) => {
     setError(error);
-    hideLoading();
+    setIsLoading(false);
   };
 
   return (
@@ -107,7 +105,14 @@ const LoginForm = () => {
               htmlType="submit"
               disabled={isLoading}
             >
-              Đăng nhập
+              {isLoading ? (
+                <div className="flex items-center justify-center space-x-2">
+                  <LoadingSpinner size={16} color="#FFFFFF" />
+                  <span>Đang đăng nhập...</span>
+                </div>
+              ) : (
+                "Đăng nhập"
+              )}
             </TravelButton>
             <Link to={path.FORGOTPASS} className="text-gray-500 text-xs text-center sm:text-right font-medium cursor-pointer hover:underline decoration-2 decoration-[var(--travel-primary-600)] hover:underline-offset-4 hover:text-[var(--travel-primary-700)]">
               Bạn quên mật khẩu?
@@ -193,11 +198,6 @@ const LoginForm = () => {
       </div>
     </div>
 
-    {/* Loading Overlay */}
-    <LoadingOverlay 
-      isVisible={isLoading} 
-      message="Đang đăng nhập..." 
-    />
     </>
   );
 };

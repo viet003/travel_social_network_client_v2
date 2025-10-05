@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import TravelTooltip from '../../ui/customize/TravelTooltip';
 import { Icon } from '@iconify/react';
@@ -12,6 +12,35 @@ import { path } from '../../../utilities/path';
 import SearchResults from '../dropdowns/SearchDropdown';
 import { ChatDropdown, NotificationsDropdown, ProfileDropdown, CreateDropdown } from '../dropdowns';
 
+// NavButton component for navigation items with active state
+interface NavButtonProps {
+  icon: string;
+  tooltip: string;
+  onClick: () => void;
+  isActive: boolean;
+}
+
+const NavButton: React.FC<NavButtonProps> = ({ icon, tooltip, onClick, isActive }) => {
+  return (
+    <TravelTooltip title={tooltip}>
+      <button 
+        onClick={onClick}
+        className="px-6 py-2 rounded-lg hover:bg-gray-100 transition-colors duration-200 lg:min-w-[80px] xl:min-w-[120px] h-full flex items-center justify-center cursor-pointer relative"
+      >
+        <Icon 
+          icon={icon} 
+          className={`h-5 w-5 2xl:h-8 2xl:w-6 transition-colors duration-200 ${
+            isActive ? 'text-blue-600' : 'text-black'
+          }`} 
+        />
+        {isActive && (
+          <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-[calc(80%)] h-1 bg-blue-600 rounded-full"></div>
+        )}
+      </button>
+    </TravelTooltip>
+  );
+};
+
 const Header: React.FC = () => {
   const { user } = useSelector((state: any) => state.auth);
   const [showSearchResults, setShowSearchResults] = useState(false);
@@ -21,6 +50,14 @@ const Header: React.FC = () => {
   const [showCreateDropdown, setShowCreateDropdown] = useState(false);
 
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const isRouteActive = (routePath: string): boolean => {
+    if (routePath === path.HOME) {
+      return location.pathname === path.HOME || location.pathname === `${path.HOME}/`;
+    }
+    return location.pathname.startsWith(`${path.HOME}/${routePath}`);
+  };
 
   // Handle click outside to close search results
   React.useEffect(() => {
@@ -95,56 +132,44 @@ const Header: React.FC = () => {
         {/* Center Section: Navigation Icons - Hidden on Mobile */}
         <div className="hidden xl:flex items-center justify-center space-x-1 flex-1 max-w-6xl xl:max-w-5xl 2xl:max-w-4xl h-full py-1">
           {/* Home Icon */}
-          <TravelTooltip title="Trang chủ">
-            <button 
-              onClick={() => navigate(path.HOME)}
-              className="px-6 py-2 rounded-lg hover:bg-gray-100 transition-colors duration-200 lg:min-w-[80px] xl:min-w-[120px] h-full flex items-center justify-center cursor-pointer"
-            >
-              <Icon icon="fluent:home-24-filled" className="h-5 w-5 2xl:h-8 2xl:w-6 text-black" />
-            </button>
-          </TravelTooltip>
+          <NavButton
+            icon="fluent:home-24-filled"
+            tooltip="Trang chủ"
+            onClick={() => navigate(path.HOME)}
+            isActive={isRouteActive(path.HOME)}
+          />
 
           {/* Friends Icon */}
-          <TravelTooltip title="Bạn bè">
-            <div className="relative h-full">
-              <button 
-                onClick={() => navigate(`${path.HOME}/${path.FRIENDS}`)}
-                className="px-6 py-2 rounded-lg hover:bg-gray-100 transition-colors duration-200 lg:min-w-[80px] xl:min-w-[120px] h-full flex items-center justify-center cursor-pointer"
-              >
-                <Icon icon="fluent:people-24-filled" className="h-5 w-5 2xl:h-8 2xl:w-6 text-black" />
-              </button>
-            </div>
-          </TravelTooltip>
+          <NavButton
+            icon="fluent:people-24-filled"
+            tooltip="Bạn bè"
+            onClick={() => navigate(`${path.HOME}/${path.FRIENDS}`)}
+            isActive={isRouteActive(path.FRIENDS)}
+          />
 
           {/* Watch Icon */}
-          <TravelTooltip title="Watch">
-            <button 
-              onClick={() => navigate(`${path.HOME}/${path.WATCH}`)}
-              className="px-6 py-2 rounded-lg hover:bg-gray-100 transition-colors duration-200 lg:min-w-[80px] xl:min-w-[120px] h-full flex items-center justify-center cursor-pointer"
-            >
-              <Icon icon="fluent:play-24-filled" className="h-5 w-5 2xl:h-8 2xl:w-6 text-black" />
-            </button>
-          </TravelTooltip>
+          <NavButton
+            icon="fluent:play-24-filled"
+            tooltip="Watch"
+            onClick={() => navigate(`${path.HOME}/${path.WATCH}`)}
+            isActive={isRouteActive(path.WATCH)}
+          />
 
           {/* Groups Icon */}
-          <TravelTooltip title="Nhóm">
-            <button 
-              onClick={() => navigate(`${path.HOME}/${path.GROUPS}`)}
-              className="px-6 py-2 rounded-lg hover:bg-gray-100 transition-colors duration-200 lg:min-w-[80px] xl:min-w-[120px] h-full flex items-center justify-center cursor-pointer"
-            >
-              <Icon icon="fluent:people-community-24-filled" className="h-5 w-5 2xl:h-8 2xl:w-6 text-black" />
-            </button>
-          </TravelTooltip>
+          <NavButton
+            icon="fluent:people-community-24-filled"
+            tooltip="Nhóm"
+            onClick={() => navigate(`${path.HOME}/${path.GROUPS}`)}
+            isActive={isRouteActive(path.GROUPS)}
+          />
 
           {/* Explore Icon */}
-          <TravelTooltip title="Khám phá dành cho du lịch">
-            <button 
-              onClick={() => navigate(`${path.HOME}/${path.EXPLORE}`)}
-              className="px-6 py-2 rounded-lg hover:bg-gray-100 transition-colors duration-200 lg:min-w-[80px] xl:min-w-[120px] h-full flex items-center justify-center cursor-pointer"
-            >
-              <Icon icon="fluent:globe-search-24-filled" className="h-5 w-5 2xl:h-8 2xl:w-6 text-black" />
-            </button>
-          </TravelTooltip>
+          <NavButton
+            icon="fluent:globe-search-24-filled"
+            tooltip="Khám phá dành cho du lịch"
+            onClick={() => navigate(`${path.HOME}/${path.EXPLORE}`)}
+            isActive={isRouteActive(path.EXPLORE)}
+          />
         </div>
 
         {/* Right Section: User Actions */}
