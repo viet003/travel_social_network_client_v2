@@ -85,7 +85,7 @@ const FriendsPage: React.FC = () => {
           <div className="flex items-center justify-between">
             <h1 className="text-xl font-semibold text-gray-900">Bạn bè</h1>
             <button 
-              className="w-10 h-10 bg-gray-500 rounded-full flex items-center justify-center hover:bg-gray-300 transition-colors duration-200 cursor-pointer relative"
+              className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center hover:bg-gray-300 transition-colors duration-200 cursor-pointer relative"
               onClick={() => {/* Handle settings click */}}
             >
               <Icon icon="fluent:settings-24-regular" className="h-5 w-5 text-black" />

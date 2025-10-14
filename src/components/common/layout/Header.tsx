@@ -42,7 +42,7 @@ const NavButton: React.FC<NavButtonProps> = ({ icon, tooltip, onClick, isActive 
 };
 
 const Header: React.FC = () => {
-  const { user } = useSelector((state: any) => state.auth);
+  const { user } = useSelector((state : any) => state.auth);
   const [showSearchResults, setShowSearchResults] = useState(false);
   const [showChatDropdown, setShowChatDropdown] = useState(false);
   const [showNotificationsDropdown, setShowNotificationsDropdown] = useState(false);
@@ -91,7 +91,7 @@ const Header: React.FC = () => {
   }, [showSearchResults]);
 
   return (
-    <header className="bg-white shadow-xs border-b-[1px] border-gray-200 sticky top-0 z-50 h-14 h-[55px]">
+    <header className="bg-white shadow-xs border-b-[1px] border-gray-200 sticky top-0 z-50 h-[55px]">
       <div className="w-full px-4 h-full flex items-center justify-between">
         {/* Left Section: Logo + Search */}
         <div className="flex items-center space-x-3 flex-1 max-w-md relative" data-search-container>
