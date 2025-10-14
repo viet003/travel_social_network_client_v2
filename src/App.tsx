@@ -50,7 +50,7 @@ function App() {
         <Route
           path={path.HOME}
           element={
-            <ProtectedRoute isPublic={true}>
+            <ProtectedRoute isPublic={false}>
               <MainLayout />
             </ProtectedRoute>
           }

@@ -1,6 +1,5 @@
 import React from 'react';
-import { FaHeart } from 'react-icons/fa6';
-import { SlHeart } from 'react-icons/sl';
+import { Icon } from '@iconify/react';
 
 interface LikeButtonProps {
   isLiked: boolean;
@@ -44,7 +43,7 @@ const LikeButton: React.FC<LikeButtonProps> = ({
       className={`flex items-center gap-1 cursor-pointer transition-colors ${isLiked ? 'text-red-500' : 'hover:text-red-500'} ${className}`}
       onClick={handleLike}
     >
-      {isLiked ? <FaHeart className="w-5 h-5 fill-current" /> : <SlHeart className="w-5 h-5" />}
+      {isLiked ? <Icon icon="fluent:heart-24-filled" className="w-5 h-5" /> : <Icon icon="fluent:heart-24-regular" className="w-5 h-5" />}
       {likeCount}
     </button>
   );

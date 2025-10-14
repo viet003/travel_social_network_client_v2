@@ -3,7 +3,6 @@ import { useSelector } from 'react-redux';
 import { Icon } from '@iconify/react';
 import LocationDropdown from "../../common/inputs/LocationDropdown";
 import avatardf from '../../../assets/images/avatar_default.png'
-import { MdOutlineExplore } from "react-icons/md";
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
@@ -321,7 +320,7 @@ const PostCreateModal: React.FC<PostCreateModalProps> = ({
             <div className="sticky top-0 z-10 flex items-center justify-between p-6 bg-white border-b border-gray-200">
               <div className="flex flex-col items-start">
                 <span className="flex items-center mb-2 text-xl font-bold text-blue-600">
-                  <MdOutlineExplore className="text-blue-600 w-7 h-7" />
+                  <Icon icon="fluent:compass-northwest-24-regular" className="text-blue-600 w-7 h-7" />
                   TravelNest
                 </span>
                  <h2 className="text-2xl font-bold text-gray-800">Tạo Bài Viết</h2>
