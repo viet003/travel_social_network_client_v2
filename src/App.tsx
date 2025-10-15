@@ -2,14 +2,17 @@
 import { Route, Routes, Navigate } from 'react-router-dom';
 import { path } from './utilities/path';
 import { 
-  MainPage, 
   HomePage, 
-  LandingPage, 
   FeaturesPage, 
   PrivacyPage, 
   DesktopAppPage, 
-  FAQPage 
+  FAQPage,
+  WatchPage,
+  ExplorePage
 } from './pages';
+import { MainLayout, PublicLayout } from './layout';
+import FriendsPage from './pages/public/FriendsPage';
+import GroupsPage from './pages/public/GroupsPage';
 import { LoginForm, SignUpForm, ForgotPasswordForm, ResetPasswordForm } from './components/auth';
 import { ToastContainer } from 'react-toastify';
 import { ProtectedRoute, ProtectedResetRoute } from './components/index';
@@ -19,12 +22,12 @@ function App() {
   return (
     <>
       <Routes>
-        {/* Landing page with nested routes */}
+        {/* Public layout with nested routes */}
         <Route
           path="/"
           element={
             <ProtectedRoute isPublic={true}>
-              <LandingPage />
+              <PublicLayout />
             </ProtectedRoute>
           }
         >
@@ -47,12 +50,16 @@ function App() {
         <Route
           path={path.HOME}
           element={
-            <ProtectedRoute isPublic={true}>
-              <MainPage />
+            <ProtectedRoute isPublic={false}>
+              <MainLayout />
             </ProtectedRoute>
           }
         >
           <Route index element={<HomePage />} />
+          <Route path={path.FRIENDS} element={<FriendsPage />} />
+          <Route path={path.GROUPS} element={<GroupsPage />} />
+          <Route path={path.WATCH} element={<WatchPage />} />
+          <Route path={path.EXPLORE} element={<ExplorePage />} />
         </Route>
         <Route path={path.STAR} element={<Navigate to="/" replace />} />
       </Routes>

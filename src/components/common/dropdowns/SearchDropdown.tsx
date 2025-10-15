@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Clock, User, Search, ArrowLeft } from 'lucide-react';
+import { Icon } from '@iconify/react';
 import { useNavigate } from 'react-router-dom';
 import { path } from '../../../utilities/path';
 import '../../../styles/main-header.css';
@@ -96,14 +96,14 @@ const SearchResults: React.FC<SearchResultsProps> = ({ onClose }) => {
         if (item.type === 'search') {
             return (
                 <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
-                    <Clock className="w-5 h-5 text-black" />
+                    <Icon icon="fluent:clock-24-filled" className="w-5 h-5 text-black" />
                 </div>
             );
         }
 
         return (
             <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
-                <User className="w-5 h-5 text-black" />
+                <Icon icon="fluent:person-24-filled" className="w-5 h-5 text-black" />
             </div>
         );
     };
@@ -123,13 +123,13 @@ const SearchResults: React.FC<SearchResultsProps> = ({ onClose }) => {
                         }
                     }}
                 >
-                    <ArrowLeft className="w-6 h-6 text-black hover:text-gray-600 transition-colors" />
+                    <Icon icon="fluent:arrow-left-24-filled" className="w-6 h-6 text-black hover:text-gray-600 transition-colors" />
                 </div>
 
                 {/* Search Bar - Desktop */}
                 <div className="relative flex-1 w-65 md:hidden">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <Search className="h-4 w-4 text-black" />
+                        <Icon icon="fluent:search-24-filled" className="h-4 w-4 text-black" />
                     </div>
                     <input
                         type="text"
@@ -195,7 +195,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ onClose }) => {
                             }}
                             className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors cursor-pointer"
                         >
-                            <X className="w-4 h-4 text-black" />
+                            <Icon icon="fluent:dismiss-24-filled" className="w-4 h-4 text-black" />
                         </button>
                     </div>
                 ))}

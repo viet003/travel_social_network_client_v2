@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, ChevronDown } from 'lucide-react';
+import { Icon } from '@iconify/react';
 
 interface ChatDropdownProps {
   onClose?: () => void;
@@ -143,19 +143,13 @@ const ChatDropdown: React.FC<ChatDropdownProps> = ({ onClose }) => {
         
         <div className="flex items-center space-x-1">
           <button className="p-2 hover:bg-gray-100 rounded-full transition-colors cursor-pointer">
-            <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
-            </svg>
+            <Icon icon="fluent:more-vertical-24-filled" className="w-4 h-4 text-black" />
           </button>
           <button className="p-2 hover:bg-gray-100 rounded-full transition-colors cursor-pointer">
-            <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
-            </svg>
+            <Icon icon="fluent:arrow-resize-24-filled" className="w-4 h-4 text-black" />
           </button>
           <button className="p-2 hover:bg-gray-100 rounded-full transition-colors cursor-pointer">
-            <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-            </svg>
+            <Icon icon="fluent:add-24-filled" className="w-4 h-4 text-black" />
           </button>
         </div>
       </div>
@@ -164,7 +158,7 @@ const ChatDropdown: React.FC<ChatDropdownProps> = ({ onClose }) => {
       <div className="px-2 mb-3">
         <div className="relative">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <Search className="h-4 w-4 text-gray-400" />
+            <Icon icon="fluent:search-24-filled" className="h-4 w-4 text-gray-400" />
           </div>
           <input
             type="text"
@@ -192,9 +186,7 @@ const ChatDropdown: React.FC<ChatDropdownProps> = ({ onClose }) => {
           </button>
         ))}
         <button className="p-1 hover:bg-gray-100 rounded-full transition-colors cursor-pointer ml-auto">
-          <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
-          </svg>
+          <Icon icon="fluent:more-vertical-24-filled" className="w-4 h-4 text-black" />
         </button>
       </div>
 
@@ -224,9 +216,7 @@ const ChatDropdown: React.FC<ChatDropdownProps> = ({ onClose }) => {
                   <div className="flex items-center space-x-1">
                     {chat.isUnread && <div className="w-2 h-2 bg-blue-500 rounded-full"></div>}
                     {chat.isMuted && (
-                      <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-5 5v-5zM4 19h6v-6H4v6z" />
-                      </svg>
+                      <Icon icon="fluent:speaker-mute-24-filled" className="w-4 h-4 text-gray-400" />
                     )}
                     <span className="text-xs text-gray-500">{chat.time}</span>
                   </div>
@@ -242,7 +232,7 @@ const ChatDropdown: React.FC<ChatDropdownProps> = ({ onClose }) => {
       <div className="p-3">
         <button className="w-full text-center text-blue-600 text-sm hover:text-blue-700 hover:underline py-2 cursor-pointer">
           Xem tất cả trong đoạn chat
-          <ChevronDown className="w-4 h-4 inline ml-1" />
+          <Icon icon="fluent:chevron-down-24-filled" className="w-4 h-4 inline ml-1 text-black" />
         </button>
       </div>
     </div>

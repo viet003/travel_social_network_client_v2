@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Bell, MessageCircle, Shield, Play, ChevronDown } from 'lucide-react';
+import { Icon } from '@iconify/react';
 import '../../../styles/main-header.css';
 
 interface NotificationsDropdownProps {
@@ -30,7 +30,7 @@ const NotificationsDropdown: React.FC<NotificationsDropdownProps> = ({ onClose }
       time: '1 ngày',
       type: 'mention',
       isUnread: false,
-      icon: <MessageCircle className="w-4 h-4 text-green-600" />
+      icon: <Icon icon="fluent:chat-24-filled" className="w-6 h-6 text-green-600" />
     },
     {
       id: '2',
@@ -40,7 +40,7 @@ const NotificationsDropdown: React.FC<NotificationsDropdownProps> = ({ onClose }
       time: '1 tuần',
       type: 'privacy',
       isUnread: true,
-      icon: <Shield className="w-4 h-4 text-blue-600" />
+      icon: <Icon icon="fluent:shield-24-filled" className="w-6 h-6 text-blue-600" />
     },
     {
       id: '3',
@@ -50,7 +50,7 @@ const NotificationsDropdown: React.FC<NotificationsDropdownProps> = ({ onClose }
       time: '1 tuần',
       type: 'developer',
       isUnread: true,
-      icon: <Bell className="w-4 h-4 text-gray-600" />
+      icon: <Icon icon="fluent:alert-24-filled" className="w-6 h-6 text-gray-600" />
     },
     {
       id: '4',
@@ -60,7 +60,7 @@ const NotificationsDropdown: React.FC<NotificationsDropdownProps> = ({ onClose }
       time: '1 tuần',
       type: 'developer',
       isUnread: true,
-      icon: <Bell className="w-4 h-4 text-gray-600" />
+      icon: <Icon icon="fluent:alert-24-filled" className="w-6 h-6 text-gray-600" />
     },
     {
       id: '5',
@@ -70,7 +70,7 @@ const NotificationsDropdown: React.FC<NotificationsDropdownProps> = ({ onClose }
       time: '1 tuần',
       type: 'developer',
       isUnread: true,
-      icon: <Bell className="w-4 h-4 text-gray-600" />
+      icon: <Icon icon="fluent:alert-24-filled" className="w-6 h-6 text-gray-600" />
     },
     {
       id: '6',
@@ -80,7 +80,7 @@ const NotificationsDropdown: React.FC<NotificationsDropdownProps> = ({ onClose }
       time: '2 tuần',
       type: 'post',
       isUnread: true,
-      icon: <Play className="w-4 h-4 text-blue-600" />
+      icon: <Icon icon="fluent:play-24-filled" className="w-6 h-6 text-blue-600" />
     }
   ];
 
@@ -127,9 +127,7 @@ const NotificationsDropdown: React.FC<NotificationsDropdownProps> = ({ onClose }
 
         <div className="flex items-center space-x-1">
           <button className="p-2 hover:bg-gray-100 rounded-full transition-colors cursor-pointer">
-            <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
-            </svg>
+            <Icon icon="fluent:more-vertical-24-filled" className="w-6 h-6 text-black" />
           </button>
         </div>
       </div>
@@ -178,9 +176,9 @@ const NotificationsDropdown: React.FC<NotificationsDropdownProps> = ({ onClose }
                     className="w-14 h-14 rounded-full object-cover"
                   />
                   {/* Icon overlay */}
-                  <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-white rounded-full flex items-center justify-center shadow-sm">
-                    {notification.icon}
-                  </div>
+                   <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-white rounded-full flex items-center justify-center shadow-sm">
+                     {notification.icon}
+                   </div>
                 </div>
 
                 <div className="flex-1 min-w-0 flex flex-col justify-between h-full">
@@ -197,9 +195,7 @@ const NotificationsDropdown: React.FC<NotificationsDropdownProps> = ({ onClose }
                     <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
                   )}
                   <button className="p-1 hover:bg-gray-100 rounded-full transition-colors cursor-pointer ml-2">
-                    <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
-                    </svg>
+                    <Icon icon="fluent:more-vertical-24-filled" className="w-6 h-6 text-black" />
                   </button>
                 </div>
               </div>
@@ -212,7 +208,7 @@ const NotificationsDropdown: React.FC<NotificationsDropdownProps> = ({ onClose }
       <div className="p-3">
         <button className="w-full text-center text-blue-600 text-sm hover:text-blue-700 hover:underline py-2 cursor-pointer">
           Xem thông báo trước đó
-          <ChevronDown className="w-4 h-4 inline ml-1" />
+          <Icon icon="fluent:chevron-down-24-filled" className="w-6 h-6 inline ml-1 text-black" />
         </button>
       </div>
     </div>

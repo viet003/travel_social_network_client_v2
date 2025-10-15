@@ -1,7 +1,7 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { path } from '../../../utilities/path';
+import { path } from '../../utilities/path';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;

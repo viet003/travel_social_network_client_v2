@@ -1,11 +1,11 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { authAction } from '../../../stores/actions';
 import { path } from '../../../utilities/path';
 import { FACEBOOK_CONFIG } from '../../../configurations/facebookConfig';
-import { useLoading } from '../../../hooks/useLoading';
-import { LoadingOverlay } from '../../common';
+import { LoadingSpinner } from '../../ui/loading';
+import { Icon } from '@iconify/react';
 
 interface FacebookLoginButtonProps {
   onError?: (error: string) => void;
@@ -18,7 +18,7 @@ const FacebookLoginButton = ({
   buttonText = 'Đăng nhập bằng Facebook', 
   loadingText = 'Đang xử lý...' 
 }: FacebookLoginButtonProps) => {
-  const { isLoading, showLoading, hideLoading } = useLoading();
+  const [isLoading, setIsLoading] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -37,13 +37,13 @@ const FacebookLoginButton = ({
     } catch (error: any) {
       onError?.(error?.message || 'Có lỗi xảy ra khi đăng nhập Facebook');
     } finally {
-      hideLoading();
+      setIsLoading(false);
     }
   };
 
   const handleFacebookError = (error: string) => {
     onError?.(`Lỗi Facebook: ${error}`);
-    hideLoading();
+    setIsLoading(false);
   };
 
   // Load Facebook SDK và khởi tạo
@@ -111,7 +111,7 @@ const FacebookLoginButton = ({
         // Lấy access token từ response
         const accessToken = response.authResponse.accessToken;
         // Hiển thị loading khi bắt đầu gửi request đến server
-        showLoading();
+        setIsLoading(true);
         handleFacebookLogin(accessToken);
       } else {
         // Không cần ẩn loading vì chưa hiển thị
@@ -131,20 +131,20 @@ const FacebookLoginButton = ({
         className="w-full bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-xl flex items-center justify-center space-x-3 hover:bg-gray-50 hover:border-gray-400 transition-all duration-300 cursor-pointer transform hover:scale-105 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
         disabled={isLoading}
       >
-        <svg className="w-5 h-5" viewBox="0 0 24 24" fill="#1877F2">
-          <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-        </svg>
+        <Icon icon="logos:facebook" className="w-5 h-5" />
         <span className="text-sm font-medium">
-          {isLoading ? loadingText : buttonText}
+          {isLoading ? (
+            <div className="flex items-center justify-center space-x-2">
+              <span>{loadingText}</span>
+              <LoadingSpinner size={14} color="#374151" />
+            </div>
+          ) : (
+            buttonText
+          )}
         </span>
       </button>
       
       
-      {/* OAuth Loading Overlay */}
-      <LoadingOverlay
-        isVisible={isLoading}
-        message="Đang xử lý đăng nhập Facebook..."
-      />
     </div>
   );
 };

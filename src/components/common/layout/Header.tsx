@@ -1,18 +1,10 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import TravelTooltip from '../../ui/customize/TravelTooltip';
+import { Icon } from '@iconify/react';
 import {
-  Search,
-  Home,
-  Users,
-  Play,
-  Store,
-  Gamepad2,
-  Menu,
-  MessageCircle,
-  Bell,
-  ChevronDown
+  Search
 } from 'lucide-react';
 
 import logo from '../../../assets/images/logo.png';
@@ -20,8 +12,37 @@ import { path } from '../../../utilities/path';
 import SearchResults from '../dropdowns/SearchDropdown';
 import { ChatDropdown, NotificationsDropdown, ProfileDropdown, CreateDropdown } from '../dropdowns';
 
+// NavButton component for navigation items with active state
+interface NavButtonProps {
+  icon: string;
+  tooltip: string;
+  onClick: () => void;
+  isActive: boolean;
+}
+
+const NavButton: React.FC<NavButtonProps> = ({ icon, tooltip, onClick, isActive }) => {
+  return (
+    <TravelTooltip title={tooltip}>
+      <button 
+        onClick={onClick}
+        className="px-6 py-2 rounded-lg hover:bg-gray-100 transition-colors duration-200 lg:min-w-[80px] xl:min-w-[120px] h-full flex items-center justify-center cursor-pointer relative"
+      >
+        <Icon 
+          icon={icon} 
+          className={`h-5 w-5 2xl:h-8 2xl:w-6 transition-colors duration-200 ${
+            isActive ? 'text-blue-600' : 'text-black'
+          }`} 
+        />
+        {isActive && (
+          <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-[calc(80%)] h-1 bg-blue-600 rounded-full"></div>
+        )}
+      </button>
+    </TravelTooltip>
+  );
+};
+
 const Header: React.FC = () => {
-  const { user } = useSelector((state: any) => state.auth);
+  const { user } = useSelector((state : any) => state.auth);
   const [showSearchResults, setShowSearchResults] = useState(false);
   const [showChatDropdown, setShowChatDropdown] = useState(false);
   const [showNotificationsDropdown, setShowNotificationsDropdown] = useState(false);
@@ -29,6 +50,14 @@ const Header: React.FC = () => {
   const [showCreateDropdown, setShowCreateDropdown] = useState(false);
 
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const isRouteActive = (routePath: string): boolean => {
+    if (routePath === path.HOME) {
+      return location.pathname === path.HOME || location.pathname === `${path.HOME}/`;
+    }
+    return location.pathname.startsWith(`${path.HOME}/${routePath}`);
+  };
 
   // Handle click outside to close search results
   React.useEffect(() => {
@@ -62,7 +91,7 @@ const Header: React.FC = () => {
   }, [showSearchResults]);
 
   return (
-    <header className="bg-white shadow-xs border-b-[1px] border-gray-200 sticky top-0 z-50 h-14 h-[55px]">
+    <header className="bg-white shadow-xs border-b-[1px] border-gray-200 sticky top-0 z-50 h-[55px]">
       <div className="w-full px-4 h-full flex items-center justify-between">
         {/* Left Section: Logo + Search */}
         <div className="flex items-center space-x-3 flex-1 max-w-md relative" data-search-container>
@@ -103,54 +132,56 @@ const Header: React.FC = () => {
         {/* Center Section: Navigation Icons - Hidden on Mobile */}
         <div className="hidden xl:flex items-center justify-center space-x-1 flex-1 max-w-6xl xl:max-w-5xl 2xl:max-w-4xl h-full py-1">
           {/* Home Icon */}
-          <TravelTooltip title="Trang chủ">
-            <button className="px-6 py-2 rounded-lg hover:bg-gray-100 transition-colors duration-200 lg:min-w-[80px] xl:min-w-[120px] h-full flex items-center justify-center cursor-pointer">
-              <Home className="h-5 w-5 2xl:h-8 2xl:w-6 text-black" />
-            </button>
-          </TravelTooltip>
+          <NavButton
+            icon="fluent:home-24-filled"
+            tooltip="Trang chủ"
+            onClick={() => navigate(path.HOME)}
+            isActive={isRouteActive(path.HOME)}
+          />
 
-          {/* Friends Icon - Active */}
-          <TravelTooltip title="Bạn bè">
-            <div className="relative h-full">
-              <button className="px-6 py-2 rounded-lg hover:bg-gray-100 transition-colors duration-200 lg:min-w-[80px] xl:min-w-[120px] h-full flex items-center justify-center cursor-pointer">
-                <Users className="h-5 w-5 2xl:h-8 2xl:w-6 text-black" />
-              </button>
-              <div className="absolute -bottom-1 left-0 right-0 h-[3px] bg-[var(--travel-primary-500)] rounded-full"></div>
-            </div>
-          </TravelTooltip>
+          {/* Friends Icon */}
+          <NavButton
+            icon="fluent:people-24-filled"
+            tooltip="Bạn bè"
+            onClick={() => navigate(`${path.HOME}/${path.FRIENDS}`)}
+            isActive={isRouteActive(path.FRIENDS)}
+          />
 
           {/* Watch Icon */}
-          <TravelTooltip title="Watch">
-            <button className="px-6 py-2 rounded-lg hover:bg-gray-100 transition-colors duration-200 lg:min-w-[80px] xl:min-w-[120px] h-full flex items-center justify-center cursor-pointer">
-              <Play className="h-5 w-5 2xl:h-8 2xl:w-6 text-black" />
-            </button>
-          </TravelTooltip>
+          <NavButton
+            icon="fluent:play-24-filled"
+            tooltip="Watch"
+            onClick={() => navigate(`${path.HOME}/${path.WATCH}`)}
+            isActive={isRouteActive(path.WATCH)}
+          />
 
-          {/* Marketplace Icon */}
-          <TravelTooltip title="Thị trường">
-            <button className="px-6 py-2 rounded-lg hover:bg-gray-100 transition-colors duration-200 lg:min-w-[80px] xl:min-w-[120px] h-full flex items-center justify-center cursor-pointer">
-              <Store className="h-5 w-5 2xl:h-8 2xl:w-6 text-black" />
-            </button>
-          </TravelTooltip>
+          {/* Groups Icon */}
+          <NavButton
+            icon="fluent:people-community-24-filled"
+            tooltip="Nhóm"
+            onClick={() => navigate(`${path.HOME}/${path.GROUPS}`)}
+            isActive={isRouteActive(path.GROUPS)}
+          />
 
-          {/* Gaming Icon */}
-          <TravelTooltip title="Game">
-            <button className="px-6 py-2 rounded-lg hover:bg-gray-100 transition-colors duration-200 lg:min-w-[80px] xl:min-w-[120px] h-full flex items-center justify-center cursor-pointer">
-              <Gamepad2 className="h-5 w-5 2xl:h-8 2xl:w-6 text-black" />
-            </button>
-          </TravelTooltip>
+          {/* Explore Icon */}
+          <NavButton
+            icon="fluent:globe-search-24-filled"
+            tooltip="Khám phá dành cho du lịch"
+            onClick={() => navigate(`${path.HOME}/${path.EXPLORE}`)}
+            isActive={isRouteActive(path.EXPLORE)}
+          />
         </div>
 
         {/* Right Section: User Actions */}
         <div className="flex items-center space-x-2 flex-1 justify-end max-w-md">
           {/* Menu Icon with Create Dropdown */}
-          <TravelTooltip title="Tạo">
+          <TravelTooltip title="Menu">
             <div className="relative" data-create-container>
               <button 
                 className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center hover:bg-gray-300 transition-colors duration-200 cursor-pointer"
                 onClick={() => setShowCreateDropdown(!showCreateDropdown)}
               >
-                <Menu className="h-5 w-5 text-black" />
+                <Icon icon="fluent:apps-24-filled" className="h-5 w-5 text-black" />
               </button>
 
               {/* Create Dropdown */}
@@ -161,13 +192,13 @@ const Header: React.FC = () => {
           </TravelTooltip>
 
           {/* Messenger Icon with Dropdown */}
-          <TravelTooltip title="Messenger">
+          <TravelTooltip title="Đoạn chat">
             <div className="relative" data-chat-container>
               <button 
                 className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center hover:bg-gray-300 transition-colors duration-200 cursor-pointer relative"
                 onClick={() => setShowChatDropdown(!showChatDropdown)}
               >
-                <MessageCircle className="h-5 w-5 text-black" />
+                <Icon icon="fluent:chat-24-filled" className="h-5 w-5 text-black" />
                 {/* Notification badge */}
                 <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">3</span>
               </button>
@@ -186,7 +217,7 @@ const Header: React.FC = () => {
                 className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center hover:bg-gray-300 transition-colors duration-200 cursor-pointer relative"
                 onClick={() => setShowNotificationsDropdown(!showNotificationsDropdown)}
               >
-                <Bell className="h-5 w-5 text-black" />
+                <Icon icon="fluent:alert-24-filled" className="h-5 w-5 text-black" />
                 {/* Notification badge */}
                 <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">5</span>
               </button>
@@ -199,7 +230,7 @@ const Header: React.FC = () => {
           </TravelTooltip>
 
           {/* Profile Picture with Dropdown */}
-          <TravelTooltip title="Menu">
+          <TravelTooltip title="Tài khoản">
             <div className="relative" data-profile-container>
               <button 
                 className="w-10 h-10 rounded-full hover:opacity-80 transition-opacity duration-200 cursor-pointer relative"
@@ -211,7 +242,7 @@ const Header: React.FC = () => {
                   className="w-full h-full object-cover rounded-full"
                 />
                 {/* Dropdown arrow */}
-                <ChevronDown className="absolute -bottom-1 -right-1 w-4 h-4 text-black bg-white rounded-full" />
+                <Icon icon="fluent:chevron-down-24-filled" className="absolute -bottom-1 -right-1 w-4 h-4 text-black bg-white rounded-full" />
               </button>
 
               {/* Profile Dropdown */}

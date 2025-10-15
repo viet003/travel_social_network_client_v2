@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { Skeleton } from 'antd';
+import { LeftSidebar, RightSidebar } from '../../components/common';
+import { PostCreateModal, PostModal } from '../../components/modal/post';
 import { authAction } from '../../stores/actions';
 import { path } from '../../utilities/path';
 
@@ -9,151 +10,181 @@ const HomePage: React.FC = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { user } = useSelector((state: any) => state.auth);
-  const [isLoading, setIsLoading] = useState(true);
-
-  // Simulate loading for demonstration
-  React.useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 1000);
-    return () => clearTimeout(timer);
-  }, []);
 
   const handleLogout = () => {
     dispatch(authAction.logout());
     navigate(path.LANDING);
   };
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-        <div className="container mx-auto px-4 py-8">
-          {/* Welcome Section Skeleton */}
-          <div className="text-center mb-12">
-            <Skeleton.Input active size="large" style={{ width: '600px', height: '80px', margin: '0 auto 16px' }} className="mx-auto" />
-            <Skeleton.Input active size="default" style={{ width: '500px', height: '30px', margin: '0 auto' }} className="mx-auto" />
-          </div>
+  // Mock posts data
+  const mockPosts = [
+    {
+      id: "1",
+      content: "Vừa khám phá Hội An - một thành phố cổ kính tuyệt đẹp! Những ngôi nhà màu vàng, đèn lồng đỏ rực rỡ và ẩm thực đặc sản làm tôi mê mẩn. Đặc biệt là món cao lầu và bánh mì Phượng, ngon không thể tả! 🌟",
+      media: [
+        {
+          id: "media1",
+          url: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=500&h=300&fit=crop",
+          type: "IMAGE" as const
+        },
+        {
+          id: "media2", 
+          url: "https://images.unsplash.com/photo-1528127269322-539801943592?w=500&h=300&fit=crop",
+          type: "IMAGE" as const
+        }
+      ],
+      location: "Hội An, Việt Nam",
+      tags: ["du lịch", "Hội An", "ẩm thực"],
+      privacy: "public",
+      createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), // 2 hours ago
+      updatedAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+      user: {
+        id: "user1",
+        name: "Nguyễn Minh Anh",
+        avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=100&h=100&fit=crop&crop=face"
+      },
+      group: null,
+      comments: [],
+      onComment: () => {},
+      likeCount: 24,
+      commentCount: 8,
+      shareCount: 3,
+      isLiked: false,
+      setIsLiked: () => {},
+      setPostLikeCount: () => {},
+      setPostCommentCount: () => {},
+      setPostShareCount: () => {}
+    },
+    {
+      id: "2", 
+      content: "Sapa vào mùa lúa chín vàng rực rỡ! Những thửa ruộng bậc thang như những chiếc thang trời, khung cảnh thật ngoạn mục. Khí hậu mát mẻ, không khí trong lành - đúng là thiên đường cho những ai muốn tránh xa ồn ào thành thị. 🏔️",
+      media: [
+        {
+          id: "media3",
+          url: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=500&h=400&fit=crop", 
+          type: "IMAGE" as const
+        }
+      ],
+      location: "Sapa, Lào Cai",
+      tags: ["Sapa", "ruộng bậc thang", "du lịch"],
+      privacy: "public",
+      createdAt: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(), // 5 hours ago
+      updatedAt: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(),
+      user: {
+        id: "user2",
+        name: "Trần Văn Hùng",
+        avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face"
+      },
+      group: null,
+      comments: [],
+      onComment: () => {},
+      likeCount: 156,
+      commentCount: 23,
+      shareCount: 12,
+      isLiked: true,
+      setIsLiked: () => {},
+      setPostLikeCount: () => {},
+      setPostCommentCount: () => {},
+      setPostShareCount: () => {}
+    },
+    {
+      id: "3",
+      content: "Phú Quốc không chỉ có biển xanh cát trắng mà còn có những khu rừng nguyên sinh tuyệt đẹp! Vừa đi trekking trong Vườn Quốc gia Phú Quốc, gặp được rất nhiều động vật hoang dã. Cảm giác được hòa mình vào thiên nhiên thật tuyệt vời! 🌴🐒",
+      media: [
+        {
+          id: "media4",
+          url: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=500&h=300&fit=crop",
+          type: "IMAGE" as const
+        },
+        {
+          id: "media5",
+          url: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=500&h=300&fit=crop", 
+          type: "IMAGE" as const
+        },
+        {
+          id: "media6",
+          url: "https://images.unsplash.com/photo-1506197603052-3cc9c3a201bd?w=500&h=300&fit=crop",
+          type: "IMAGE" as const
+        }
+      ],
+      location: "Phú Quốc, Kiên Giang",
+      tags: ["Phú Quốc", "trekking", "thiên nhiên"],
+      privacy: "public", 
+      createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(), // 1 day ago
+      updatedAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+      user: {
+        id: "user3",
+        name: "Lê Thị Mai",
+        avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&crop=face"
+      },
+      group: null,
+      comments: [],
+      onComment: () => {},
+      likeCount: 89,
+      commentCount: 15,
+      shareCount: 7,
+      isLiked: false,
+      setIsLiked: () => {},
+      setPostLikeCount: () => {},
+      setPostCommentCount: () => {},
+      setPostShareCount: () => {}
+    }
+  ];
 
-          {/* User Info Card Skeleton */}
-          <div className="bg-white rounded-2xl shadow-xl p-8 mb-8 max-w-2xl mx-auto">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center space-x-4">
-                <Skeleton.Avatar active size={64} />
-                <div>
-                  <Skeleton.Input active size="default" style={{ width: '200px', height: '24px', marginBottom: '8px' }} />
-                  <Skeleton.Input active size="default" style={{ width: '150px', height: '16px' }} />
-                </div>
-              </div>
-              <Skeleton.Button active size="default" style={{ width: '100px', height: '40px' }} />
-            </div>
-            <Skeleton.Input active size="default" style={{ width: '100%', height: '20px' }} />
-          </div>
+  return (
+    <div className="flex">
+      {/* Left Sidebar - Hidden on mobile and tablet */}
+      <div className="hidden lg:block">
+        <LeftSidebar user={user} onLogout={handleLogout} />
+      </div>
 
-          {/* Features Grid Skeleton */}
-          <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="bg-white rounded-xl p-6 shadow-lg">
-                <div className="w-12 h-12 bg-gray-200 rounded-lg mb-4"></div>
-                <Skeleton.Input active size="default" style={{ width: '100%', height: '24px', marginBottom: '8px' }} />
-                <Skeleton.Input active size="default" style={{ width: '100%', height: '16px', marginBottom: '4px' }} />
-                <Skeleton.Input active size="default" style={{ width: '80%', height: '16px' }} />
-              </div>
+      {/* Main Content Area */}
+      <div className="flex-1 bg-gray-50 min-h-screen py-6">
+        <div className="max-w-2xl mx-auto">
+          {/* Post Create Modal */}
+          <PostCreateModal 
+            location="home"
+            setCreateSuccess={(success) => {
+              if (success) {
+                console.log('Post created successfully!');
+                // You can add logic here to refresh the feed or show a success message
+              }
+            }}
+          />
+
+          {/* Mock Posts Feed */}
+          <div className="space-y-6">
+            {mockPosts.map((post) => (
+              <PostModal
+                key={post.id}
+                postId={post.id}
+                userId={post.user.id}
+                avatar={post.user.avatar}
+                userName={post.user.name}
+                location={post.location}
+                timeAgo={post.createdAt}
+                content={post.content}
+                mediaList={post.media}
+                likeCount={post.likeCount}
+                commentCount={post.commentCount}
+                shareCount={post.shareCount}
+                tags={post.tags}
+                privacy={post.privacy}
+                group={post.group}
+                comments={post.comments}
+                onImageClick={() => {}}
+                onShare={() => {}}
+                onComment={() => {}}
+                liked={post.isLiked}
+              />
             ))}
-          </div>
-
-          {/* Call to Action Skeleton */}
-          <div className="text-center mt-12">
-            <Skeleton.Button active size="large" style={{ width: '200px', height: '50px' }} />
           </div>
         </div>
       </div>
-    );
-  }
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      <div className="container mx-auto px-4 py-8">
-        {/* Welcome Section */}
-        <div className="text-center mb-12">
-          <h1 className="text-[70px] font-bold text-[var(--travel-primary-500)] mb-4">
-            Chào mừng đến với TravelNest!
-          </h1>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Khám phá thế giới, kết nối với những người bạn đồng hành và tạo ra những kỷ niệm đáng nhớ.
-          </p>
-        </div>
-
-        {/* User Info Card */}
-        <div className="bg-white rounded-2xl shadow-xl p-8 mb-8 max-w-2xl mx-auto">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center space-x-4">
-              <div className="w-16 h-16 bg-travel-primary-500 rounded-full flex items-center justify-center">
-                <span className="text-2xl font-bold text-white">
-                  {user?.firstName?.charAt(0) || user?.userName?.charAt(0) || 'U'}
-                </span>
-              </div>
-              <div>
-                <h2 className="text-2xl font-bold text-gray-900">
-                  Xin chào, {user?.firstName || user?.userName || 'Người dùng'}!
-                </h2>
-                <p className="text-gray-600">{user?.email}</p>
-              </div>
-            </div>
-            <button
-              onClick={handleLogout}
-              className="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-xl font-medium transition-all duration-300 hover:scale-105 hover:shadow-lg transform cursor-pointer"
-            >
-              Đăng xuất
-            </button>
-          </div>
-          
-          <div className="border-t pt-6">
-            <p className="text-gray-600 text-center">
-              Bạn đã đăng nhập thành công vào hệ thống TravelNest. 
-              Hãy bắt đầu khám phá những tính năng tuyệt vời của chúng tôi!
-            </p>
-          </div>
-        </div>
-
-        {/* Features Grid */}
-        <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
-          <div className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 transform cursor-pointer">
-            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
-              <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-              </svg>
-            </div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">Kết nối</h3>
-            <p className="text-gray-600">Tìm kiếm và kết nối với những người có cùng sở thích du lịch.</p>
-          </div>
-
-          <div className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 transform cursor-pointer">
-            <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
-              <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
-              </svg>
-            </div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">Chia sẻ</h3>
-            <p className="text-gray-600">Chia sẻ kinh nghiệm du lịch và những khoảnh khắc đáng nhớ.</p>
-          </div>
-
-          <div className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 transform cursor-pointer">
-            <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
-              <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">Khám phá</h3>
-            <p className="text-gray-600">Khám phá những điểm đến mới và tạo lịch trình du lịch hoàn hảo.</p>
-          </div>
-        </div>
-
-        {/* Call to Action */}
-        <div className="text-center mt-12">
-          <button className="bg-travel-primary-500 text-white px-8 py-3 rounded-xl font-medium hover:bg-travel-primary-700 hover:scale-105 hover:shadow-lg transition-all duration-300 transform cursor-pointer">
-            Bắt đầu khám phá ngay
-          </button>
-        </div>
+      {/* Right Sidebar - Hidden on mobile and tablet */}
+      <div className="hidden lg:block">
+        <RightSidebar />
       </div>
     </div>
   );
