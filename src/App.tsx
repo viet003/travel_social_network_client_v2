@@ -10,8 +10,15 @@ import {
   WatchPage,
   ExplorePage
 } from './pages';
-import { MainLayout, PublicLayout } from './layout';
-import FriendsPage from './pages/public/FriendsPage';
+import { MainLayout, PublicLayout, FriendsLayout } from './layout';
+import {
+  FriendsHomePage,
+  FriendRequestsPage,
+  FriendSuggestionsPage,
+  AllFriendsPage,
+  BirthdaysPage,
+  CustomListsPage
+} from './pages/public/friends';
 import GroupsPage from './pages/public/GroupsPage';
 import { LoginForm, SignUpForm, ForgotPasswordForm, ResetPasswordForm } from './components/auth';
 import { ToastContainer } from 'react-toastify';
@@ -56,7 +63,14 @@ function App() {
           }
         >
           <Route index element={<HomePage />} />
-          <Route path={path.FRIENDS} element={<FriendsPage />} />
+          <Route path={path.FRIENDS} element={<FriendsLayout />}>
+            <Route index element={<FriendsHomePage />} />
+            <Route path={path.FRIENDS_REQUESTS} element={<FriendRequestsPage />} />
+            <Route path={path.FRIENDS_SUGGESTIONS} element={<FriendSuggestionsPage />} />
+            <Route path={path.FRIENDS_ALL} element={<AllFriendsPage />} />
+            <Route path={path.FRIENDS_BIRTHDAYS} element={<BirthdaysPage />} />
+            <Route path={path.FRIENDS_CUSTOM_LISTS} element={<CustomListsPage />} />
+          </Route>
           <Route path={path.GROUPS} element={<GroupsPage />} />
           <Route path={path.WATCH} element={<WatchPage />} />
           <Route path={path.EXPLORE} element={<ExplorePage />} />
