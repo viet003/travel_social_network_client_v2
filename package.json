@@ -20,6 +20,10 @@
     "@testing-library/jest-dom": "^6.8.0",
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^14.6.1",
+    "@tiptap/extension-link": "^3.8.0",
+    "@tiptap/extension-placeholder": "^3.8.0",
+    "@tiptap/react": "^3.8.0",
+    "@tiptap/starter-kit": "^3.8.0",
     "antd": "^5.27.4",
     "axios": "^1.11.0",
     "crypto-js": "^4.2.0",
@@ -41,6 +45,7 @@
     "redux-thunk": "^3.1.0",
     "slick-carousel": "^1.8.1",
     "sweetalert2": "^11.22.4",
+    "swiper": "^12.0.3",
     "tailwindcss": "^4.1.12",
     "thunk": "^0.0.1",
     "web-vitals": "^5.1.0"

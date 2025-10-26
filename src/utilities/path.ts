@@ -18,6 +18,9 @@ export const path = {
     FRIENDS_BIRTHDAYS: "birthdays",
     FRIENDS_CUSTOM_LISTS: "custom-lists",
     GROUPS: "groups",
+    GROUPS_FEEDS: "feeds",
+    GROUPS_DISCOVER: "discover",
+    YOUR_GROUPS: "your-groups",
     WATCH: "watch",
     EXPLORE: "explore",
     STAR: "*"

@@ -9,8 +9,7 @@ import {
 
 import logo from '../../../assets/images/logo.png';
 import { path } from '../../../utilities/path';
-import SearchResults from '../dropdowns/SearchDropdown';
-import { ChatDropdown, NotificationsDropdown, ProfileDropdown, CreateDropdown } from '../dropdowns';
+import { SearchResultDropdown, ChatDropdown, NotificationsDropdown, ProfileDropdown, CreateDropdown } from '../dropdowns';
 
 // NavButton component for navigation items with active state
 interface NavButtonProps {
@@ -124,7 +123,7 @@ const Header: React.FC = () => {
           {/* Search Results Dropdown - Di chuyển vào trong search bar container */}
           {showSearchResults && (
             <div className="fixed top-0 left-0 z-50">
-              <SearchResults onClose={() => setShowSearchResults(false)} />
+              <SearchResultDropdown onClose={() => setShowSearchResults(false)} />
             </div>
           )}
         </div>

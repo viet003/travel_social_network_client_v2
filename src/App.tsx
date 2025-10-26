@@ -10,7 +10,7 @@ import {
   WatchPage,
   ExplorePage
 } from './pages';
-import { MainLayout, PublicLayout, FriendsLayout } from './layout';
+import { MainLayout, LandingLayout, FriendsLayout, GroupLayout } from './layout';
 import {
   FriendsHomePage,
   FriendRequestsPage,
@@ -19,7 +19,11 @@ import {
   BirthdaysPage,
   CustomListsPage
 } from './pages/public/friends';
-import GroupsPage from './pages/public/GroupsPage';
+import {
+  GroupFeedsPage,
+  YourGroupsPage,
+  GroupSuggestionsPage
+} from './pages/public/groups';
 import { LoginForm, SignUpForm, ForgotPasswordForm, ResetPasswordForm } from './components/auth';
 import { ToastContainer } from 'react-toastify';
 import { ProtectedRoute, ProtectedResetRoute } from './components/index';
@@ -29,12 +33,12 @@ function App() {
   return (
     <>
       <Routes>
-        {/* Public layout with nested routes */}
+        {/* Landing layout with nested routes */}
         <Route
           path="/"
           element={
             <ProtectedRoute isPublic={true}>
-              <PublicLayout />
+              <LandingLayout />
             </ProtectedRoute>
           }
         >
@@ -71,7 +75,12 @@ function App() {
             <Route path={path.FRIENDS_BIRTHDAYS} element={<BirthdaysPage />} />
             <Route path={path.FRIENDS_CUSTOM_LISTS} element={<CustomListsPage />} />
           </Route>
-          <Route path={path.GROUPS} element={<GroupsPage />} />
+          <Route path={path.GROUPS} element={<GroupLayout />}>
+            <Route index element={<Navigate to={path.GROUPS_FEEDS} />} />
+            <Route path={path.GROUPS_FEEDS} element={<GroupFeedsPage />} />
+            <Route path={path.YOUR_GROUPS} element={<YourGroupsPage />} />
+            <Route path={path.GROUPS_DISCOVER} element={<GroupSuggestionsPage />} />
+          </Route>
           <Route path={path.WATCH} element={<WatchPage />} />
           <Route path={path.EXPLORE} element={<ExplorePage />} />
         </Route>

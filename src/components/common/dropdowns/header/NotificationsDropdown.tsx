@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Icon } from '@iconify/react';
-import '../../../styles/main-header.css';
+import '../../../../styles/main-header.css';
 
 interface NotificationsDropdownProps {
   onClose?: () => void;

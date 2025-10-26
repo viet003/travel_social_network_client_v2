@@ -73,3 +73,28 @@
   border-color: var(--travel-primary-600) !important;
   box-shadow: none !important;
 }
+
+/* Like button animation */
+@keyframes likeAnimation {
+  0% {
+    transform: scale(1);
+  }
+  15% {
+    transform: scale(1.3) rotate(-10deg);
+  }
+  30% {
+    transform: scale(0.9) rotate(10deg);
+  }
+  45% {
+    transform: scale(1.2) rotate(-5deg);
+  }
+  60% {
+    transform: scale(0.95) rotate(5deg);
+  }
+  75% {
+    transform: scale(1.05) rotate(0deg);
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+  }
+}

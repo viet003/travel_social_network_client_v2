@@ -1,28 +1,26 @@
 import React from 'react';
 import { Icon } from '@iconify/react';
 
-export interface SearchResultItemProps {
+export interface GroupResultItemProps {
   id: string;
   name: string;
-  type: 'page' | 'person' | 'search';
   avatar?: string;
-  newMessages?: number;
   description?: string;
+  memberCount?: number;
   onRemove?: (id: string) => void;
   onClick?: () => void;
 }
 
-const SearchResultItem: React.FC<SearchResultItemProps> = ({
+const GroupResultItem: React.FC<GroupResultItemProps> = ({
   id,
   name,
-  type,
   avatar,
-  newMessages,
   description,
+  memberCount,
   onRemove,
   onClick
 }) => {
-  const getAvatarIcon = () => {
+  const getAvatar = () => {
     if (avatar) {
       return (
         <img
@@ -33,17 +31,9 @@ const SearchResultItem: React.FC<SearchResultItemProps> = ({
       );
     }
 
-    if (type === 'search') {
-      return (
-        <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
-          <Icon icon="fluent:clock-24-filled" className="w-5 h-5 text-black" />
-        </div>
-      );
-    }
-
     return (
       <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
-        <Icon icon="fluent:person-24-filled" className="w-5 h-5 text-black" />
+        <Icon icon="fluent:people-24-filled" className="w-5 h-5 text-black" />
       </div>
     );
   };
@@ -55,7 +45,7 @@ const SearchResultItem: React.FC<SearchResultItemProps> = ({
     >
       {/* Avatar */}
       <div className="flex-shrink-0 mr-3">
-        {getAvatarIcon()}
+        {getAvatar()}
       </div>
 
       {/* Content */}
@@ -64,17 +54,14 @@ const SearchResultItem: React.FC<SearchResultItemProps> = ({
           <p className="text-sm font-medium truncate">
             {name}
           </p>
-          {newMessages && (
-            <div className="flex items-center space-x-2">
-              <div className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0"></div>
-              <span className="text-xs text-gray-500 flex-shrink-0">
-                {description}
-              </span>
-            </div>
-          )}
-          {!newMessages && description && (
+          {description && (
             <p className="text-xs text-gray-500 mt-1">
               {description}
+            </p>
+          )}
+          {memberCount !== undefined && (
+            <p className="text-xs text-gray-500 mt-1">
+              {memberCount} thành viên
             </p>
           )}
         </div>
@@ -96,4 +83,4 @@ const SearchResultItem: React.FC<SearchResultItemProps> = ({
   );
 };
 
-export default SearchResultItem;
+export default GroupResultItem;

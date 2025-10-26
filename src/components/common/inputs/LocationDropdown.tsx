@@ -47,13 +47,13 @@ const LocationDropdown: React.FC<LocationDropdownProps> = ({
   };
 
   return (
-    <div className="relative">
+    <div className="relative flex-shrink-0">
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-3 py-1 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-full hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent min-w-[120px]"
+        className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1 text-xs sm:text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-full hover:bg-gray-200 focus:outline-none max-w-[140px] sm:max-w-none"
       >
-        <MapPin className="w-4 h-4 text-gray-500" />
+        <MapPin className="w-3 h-3 sm:w-4 sm:h-4 text-gray-500 flex-shrink-0" />
         <span className="truncate">
           {value || placeholder}
         </span>

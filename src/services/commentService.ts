@@ -9,6 +9,7 @@ interface ApiResponse<T = any> {
 interface CreateCommentPayload {
   postId: string;
   content: string;
+  parentCommentId?: string;
 }
 
 export const apiGetAllCommentsByPost = async (postId: string, page: number): Promise<ApiResponse> => {
@@ -16,6 +17,18 @@ export const apiGetAllCommentsByPost = async (postId: string, page: number): Pro
     const response = await axiosConfig({
       method: 'GET',
       url: `comment/${postId}?page=${page}`,
+    });
+    return response?.data;
+  } catch (error: any) {
+    throw error.response ? error.response.data : error;
+  }
+};
+
+export const apiGetRepliesByComment = async (commentId: string, page: number): Promise<ApiResponse> => {
+  try {
+    const response = await axiosConfig({
+      method: 'GET',
+      url: `comment/${commentId}/replies?page=${page}`,
     });
     return response?.data;
   } catch (error: any) {

@@ -42,11 +42,11 @@ const FriendCard: React.FC<FriendCardProps> = ({
 }) => {
   return (
     <div 
-      className="bg-white border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors cursor-pointer"
+      className="bg-white border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors cursor-pointer flex flex-col h-full"
       onClick={onCardClick}
     >
       {/* Profile Picture */}
-      <div className="mb-3">
+      <div className="mb-3 flex-shrink-0">
         <img
           src={avatar}
           alt={name}
@@ -56,7 +56,7 @@ const FriendCard: React.FC<FriendCardProps> = ({
 
       {/* Name */}
       <h3 
-        className="text-gray-900 font-medium text-sm mb-2 line-clamp-2 hover:transition-colors cursor-pointer"
+        className="text-gray-900 font-medium text-sm mb-2 line-clamp-2 hover:transition-colors cursor-pointer min-h-[2.5rem]"
         style={{ 
           transition: 'color 0.2s',
         }}
@@ -67,7 +67,7 @@ const FriendCard: React.FC<FriendCardProps> = ({
       </h3>
 
       {/* Connection Info */}
-      <div className="mb-4 min-h-[2.5rem]">
+      <div className="mb-4 min-h-[3rem] flex-1">
         {mutualFriends !== null && mutualFriends !== undefined && (
           <div className="flex items-center space-x-1 text-gray-600 text-xs mb-1">
             <Icon icon="fluent:people-24-filled" className="h-3 w-3" />
@@ -82,11 +82,11 @@ const FriendCard: React.FC<FriendCardProps> = ({
         )}
         
         {timeAgo && (
-          <div className="text-gray-500 text-xs">{timeAgo}</div>
+          <div className="text-gray-500 text-xs line-clamp-1">{timeAgo}</div>
         )}
         
         {reason && (
-          <div className="text-gray-500 text-xs mt-1">{reason}</div>
+          <div className="text-gray-500 text-xs mt-1 line-clamp-2">{reason}</div>
         )}
         
         {date && (
@@ -103,7 +103,7 @@ const FriendCard: React.FC<FriendCardProps> = ({
 
       {/* Action Buttons */}
       {(primaryAction || secondaryAction) && (
-        <div className="space-y-2">
+        <div className="space-y-2 mt-auto">
           {primaryAction && (
             <button
               onClick={(e) => {

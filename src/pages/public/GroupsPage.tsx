@@ -1,14 +1,43 @@
 import React, { useState } from 'react';
 import { Icon } from '@iconify/react';
+import { SearchGroupDropdown } from '../../components/common/dropdowns';
+import type { GroupResultItemProps } from '../../components/common/items/GroupResultItem';
 
 const GroupsPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState('joined');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showSearchDropdown, setShowSearchDropdown] = useState(false);
+  const [recentSearches, setRecentSearches] = useState<GroupResultItemProps[]>([
+    {
+      id: '1',
+      name: 'Du lịch Việt Nam',
+      avatar: 'https://images.unsplash.com/photo-1528127269322-539801943592?w=60&h=60&fit=crop',
+      description: 'Nhóm công khai',
+      memberCount: 15420
+    },
+    {
+      id: '2',
+      name: 'Phượt Miền Tây',
+      avatar: 'https://images.unsplash.com/photo-1564507592333-c60657eea523?w=60&h=60&fit=crop',
+      description: 'Nhóm công khai',
+      memberCount: 8560
+    }
+  ]);
 
   const tabs = [
     { id: 'joined', label: 'Đã tham gia', icon: 'fluent:people-community-24-filled' },
     { id: 'discover', label: 'Khám phá', icon: 'fluent:search-24-filled' },
     { id: 'suggested', label: 'Gợi ý', icon: 'fluent:lightbulb-24-filled' }
   ];
+
+  const handleRemoveSearch = (id: string) => {
+    setRecentSearches(recentSearches.filter(item => item.id !== id));
+  };
+
+  const handleSearchItemClick = (item: GroupResultItemProps) => {
+    console.log('Navigate to group:', item.name);
+    // TODO: Navigate to group detail page
+  };
 
   const joinedGroups = [
     {
@@ -78,7 +107,7 @@ const GroupsPage: React.FC = () => {
       <div className="max-w-6xl mx-auto p-6">
         {/* Header */}
         <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between mb-4">
             <div className="flex items-center space-x-3">
               <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
                 <Icon icon="fluent:people-community-24-filled" className="h-6 w-6 text-purple-600" />
@@ -92,6 +121,34 @@ const GroupsPage: React.FC = () => {
               <Icon icon="fluent:add-24-filled" className="h-5 w-5" />
               <span>Tạo nhóm</span>
             </button>
+          </div>
+          
+          {/* Search Bar */}
+          <div className="relative">
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <Icon icon="fluent:search-24-filled" className="h-5 w-5 text-gray-400" />
+              </div>
+              <input
+                type="text"
+                placeholder="Tìm kiếm nhóm..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onFocus={() => setShowSearchDropdown(true)}
+                onBlur={() => setShowSearchDropdown(false)}
+                className="w-full pl-12 pr-4 py-3 bg-gray-100 border-0 rounded-lg text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+              />
+            </div>
+            
+            {/* Search Dropdown */}
+            {showSearchDropdown && (
+              <SearchGroupDropdown
+                searchResults={recentSearches}
+                onRemove={handleRemoveSearch}
+                onItemClick={handleSearchItemClick}
+                onClose={() => setShowSearchDropdown(false)}
+              />
+            )}
           </div>
         </div>
 

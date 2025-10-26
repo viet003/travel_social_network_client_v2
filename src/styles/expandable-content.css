@@ -1,0 +1,305 @@
+/* Expandable Content HTML Formatting Styles */
+
+.expandable-content {
+  /* Typography base */
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: #374151;
+}
+
+/* Headings */
+.expandable-content h1,
+.expandable-content h2,
+.expandable-content h3,
+.expandable-content h4,
+.expandable-content h5,
+.expandable-content h6 {
+  font-weight: 700;
+  margin-top: 0.75rem;
+  margin-bottom: 0.5rem;
+  line-height: 1.4;
+  color: #1f2937;
+}
+
+.expandable-content h1 {
+  font-size: 1.5rem;
+}
+
+.expandable-content h2 {
+  font-size: 1.25rem;
+}
+
+.expandable-content h3 {
+  font-size: 1.125rem;
+}
+
+.expandable-content h4 {
+  font-size: 1rem;
+}
+
+.expandable-content h5 {
+  font-size: 0.875rem;
+}
+
+.expandable-content h6 {
+  font-size: 0.75rem;
+}
+
+/* First heading no top margin */
+.expandable-content h1:first-child,
+.expandable-content h2:first-child,
+.expandable-content h3:first-child,
+.expandable-content h4:first-child,
+.expandable-content h5:first-child,
+.expandable-content h6:first-child {
+  margin-top: 0;
+}
+
+/* Paragraphs */
+.expandable-content p {
+  margin-bottom: 0.75rem;
+  line-height: 1.6;
+}
+
+.expandable-content p:last-child {
+  margin-bottom: 0;
+}
+
+/* Text formatting */
+.expandable-content strong,
+.expandable-content b {
+  font-weight: 600;
+  color: #111827;
+}
+
+.expandable-content em,
+.expandable-content i {
+  font-style: italic;
+  color: #4b5563;
+}
+
+.expandable-content u {
+  text-decoration: underline;
+  text-decoration-color: #9ca3af;
+}
+
+.expandable-content s,
+.expandable-content del {
+  text-decoration: line-through;
+  color: #9ca3af;
+}
+
+.expandable-content mark {
+  background-color: #fef3c7;
+  color: #92400e;
+  padding: 0.125rem 0.25rem;
+  border-radius: 0.125rem;
+}
+
+.expandable-content small {
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+/* Links */
+.expandable-content a {
+  color: #2563eb;
+  text-decoration: underline;
+  transition: color 0.2s ease;
+}
+
+.expandable-content a:hover {
+  color: #1d4ed8;
+}
+
+/* Lists */
+.expandable-content ul,
+.expandable-content ol {
+  margin-top: 0.5rem;
+  margin-bottom: 0.75rem;
+  padding-left: 1.5rem;
+}
+
+.expandable-content ul {
+  list-style: none;
+}
+
+.expandable-content ul li::before {
+  content: "⭐";
+  margin-right: 0.5rem;
+  color: #3b82f6;
+}
+
+.expandable-content ol {
+  list-style-type: decimal;
+}
+
+.expandable-content ul ul {
+  margin-top: 0.25rem;
+  margin-bottom: 0.25rem;
+}
+
+.expandable-content ul ul li::before {
+  content: "✨";
+  margin-right: 0.5rem;
+  color: #8b5cf6;
+}
+
+.expandable-content ol ul {
+  list-style: none;
+  margin-top: 0.25rem;
+  margin-bottom: 0.25rem;
+}
+
+.expandable-content ol ul li::before {
+  content: "⭐";
+  margin-right: 0.5rem;
+  color: #3b82f6;
+}
+
+.expandable-content ol ol,
+.expandable-content ul ol {
+  list-style-type: lower-alpha;
+  margin-top: 0.25rem;
+  margin-bottom: 0.25rem;
+}
+
+.expandable-content li {
+  margin-bottom: 0.375rem;
+  line-height: 1.5;
+}
+
+.expandable-content li:last-child {
+  margin-bottom: 0;
+}
+
+.expandable-content li > p {
+  margin-bottom: 0.25rem;
+}
+
+/* Blockquotes */
+.expandable-content blockquote {
+  border-left: 4px solid #3b82f6;
+  padding-left: 1rem;
+  margin: 0.75rem 0;
+  font-style: italic;
+  color: #4b5563;
+  background-color: #f3f4f6;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  border-radius: 0.25rem;
+}
+
+.expandable-content blockquote p {
+  margin-bottom: 0.25rem;
+}
+
+.expandable-content blockquote p:last-child {
+  margin-bottom: 0;
+}
+
+/* Code */
+.expandable-content code {
+  background-color: #f3f4f6;
+  color: #dc2626;
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.25rem;
+  font-size: 0.875em;
+  font-family: 'Courier New', Courier, monospace;
+}
+
+.expandable-content pre {
+  background-color: #1f2937;
+  color: #f9fafb;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  overflow-x: auto;
+  margin: 0.75rem 0;
+  line-height: 1.5;
+}
+
+.expandable-content pre code {
+  background-color: transparent;
+  color: inherit;
+  padding: 0;
+  font-size: 0.875rem;
+}
+
+/* Horizontal Rule */
+.expandable-content hr {
+  border: none;
+  border-top: 1px solid #e5e7eb;
+  margin: 1rem 0;
+}
+
+/* Tables */
+.expandable-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.75rem 0;
+  font-size: 0.875rem;
+}
+
+.expandable-content table thead {
+  background-color: #f3f4f6;
+}
+
+.expandable-content table th {
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+  font-weight: 600;
+  color: #111827;
+  border-bottom: 2px solid #d1d5db;
+}
+
+.expandable-content table td {
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.expandable-content table tr:last-child td {
+  border-bottom: none;
+}
+
+.expandable-content table tr:hover {
+  background-color: #f9fafb;
+}
+
+/* Images */
+.expandable-content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.5rem;
+  margin: 0.5rem 0;
+}
+
+/* Responsive adjustments */
+@media (min-width: 640px) {
+  .expandable-content {
+    font-size: 1rem;
+  }
+  
+  .expandable-content h1 {
+    font-size: 1.875rem;
+  }
+  
+  .expandable-content h2 {
+    font-size: 1.5rem;
+  }
+  
+  .expandable-content h3 {
+    font-size: 1.25rem;
+  }
+}
+
+/* Utility classes for content */
+.expandable-content-collapsed {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Animation for expand/collapse */
+.expandable-content-transition {
+  transition: max-height 0.3s ease-in-out;
+}
