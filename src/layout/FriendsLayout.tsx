@@ -83,7 +83,7 @@ const FriendsLayout: React.FC = () => {
 
       {/* Left Sidebar */}
       <div className={`
-        w-80 bg-white border-r border-gray-200 
+        w-90 bg-white border-r border-gray-200 
         flex flex-col h-[calc(100vh-55px)]
         fixed lg:sticky top-0 z-40
         transform transition-transform duration-300 ease-in-out

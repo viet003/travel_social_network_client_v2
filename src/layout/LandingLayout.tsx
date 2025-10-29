@@ -12,7 +12,7 @@ import { Icon } from '@iconify/react';
 import { logo, subLogo } from '../assets/images';
 import { path } from '../utilities/path';
 
-const PublicLayout = () => {
+const LandingLayout = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
@@ -292,4 +292,4 @@ const PublicLayout = () => {
   );
 };
 
-export default PublicLayout;
+export default LandingLayout;

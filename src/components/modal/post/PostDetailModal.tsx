@@ -1,20 +1,24 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Icon } from '@iconify/react';
-import { CommentCreateModal } from '../comment';
-import { formatTimeAgo } from '../../../utilities/helper';
+import { CommentCreateModal, NestedComment } from '../comment';
+import { formatTimeAgo, formatPrivacy } from '../../../utilities/helper';
 import { LikeButton } from '../../common';
 import { useNavigate } from 'react-router-dom';
-import { TravelImage } from '../../ui/customize';
+import { TravelImage, ExpandableContent } from '../../ui';
 import avatardf from '../../../assets/images/avatar_default.png';
 import { apiGetAllCommentsByPost } from '../../../services/commentService';
 
 // Types
 interface Comment {
+  id?: string;
   avatarImg?: string;
   firstName: string;
   lastName: string;
   content: string;
   createdAt: string;
+  replyCount?: number;
+  level?: number;
+  parentCommentId?: string;
 }
 
 interface Group {
@@ -135,6 +139,7 @@ const PostDetailModal: React.FC<PostDetailModalProps> = ({
   useEffect(() => {
     if (!isOpen || !hasMore) return;
     fetchPostComments(page);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, isOpen]);
 
   useEffect(() => {
@@ -335,7 +340,7 @@ const PostDetailModal: React.FC<PostDetailModalProps> = ({
           <span className="flex items-center gap-1 text-xs text-gray-400">
             {formatTimeAgo(timeAgo)}
             <Icon icon="fluent:globe-24-filled" className="w-3 h-3" />
-            {privacy && <span className="ml-1 text-xs">• {privacy}</span>}
+            {privacy && <span className="ml-1 text-xs">• {formatPrivacy(privacy)}</span>}
           </span>
         </div>
       </div>
@@ -351,7 +356,7 @@ const PostDetailModal: React.FC<PostDetailModalProps> = ({
       onClick={onClose}
     >
       <div
-        className="relative w-full max-w-2xl mx-6 bg-white shadow-lg transition-all duration-300 ease-in-out rounded-xl overflow-hidden max-h-[95vh] overflow-y-auto"
+        className="relative w-full max-w-4xl mx-6 bg-white shadow-lg transition-all duration-300 ease-in-out rounded-xl overflow-hidden h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
@@ -392,9 +397,8 @@ const PostDetailModal: React.FC<PostDetailModalProps> = ({
             {renderGroupHeader()}
             {renderUserHeader()}
 
-            <div className="mb-3 text-gray-700">
-              {content}
-            </div>
+            {/* Content with HTML and "See more" functionality */}
+            <ExpandableContent content={content} maxLines={3} />
 
             {/* Tags */}
             {renderTags()}
@@ -430,46 +434,48 @@ const PostDetailModal: React.FC<PostDetailModalProps> = ({
 
           {/* Comments List */}
           <div className="p-6 space-y-3">
-            {comments.map((ucomment, idx) => {
-              if (comments.length === idx + 1) {
-                return (
-                   <div ref={lastCommentElementRef} key={idx} className="flex w-full gap-3">
-                    <img src={ucomment?.avatarImg || avatardf} alt="avatar" className="flex-shrink-0 object-cover w-8 h-8 mt-3 rounded-full" />
-                    <div className="flex-1">
-                      <div className="px-3 py-2 bg-gray-100 rounded-2xl">
-                        <span className="text-sm font-semibold text-gray-800">{ucomment?.firstName} {ucomment?.lastName}</span>
-                        <p className="mt-1 text-sm text-gray-700">{ucomment?.content}</p>
-                      </div>
-                      <div className="flex items-center gap-4 mt-1 text-xs text-gray-500">
-                        <span className="transition-colors cursor-pointer hover:text-blue-500">Thích</span>
-                        <span className="transition-colors cursor-pointer hover:text-blue-500">Trả lời</span>
-                        <span>{formatTimeAgo(ucomment?.createdAt) || '2 hours ago'}</span>
-                      </div>
-                    </div>
+            {/* Comments Header */}
+            <div className="flex items-center gap-2 mb-6">
+              <Icon icon="fluent:comment-multiple-24-filled" className="w-6 h-6 text-blue-600" />
+              <h2 className="text-xl font-bold text-gray-800">
+                Comments ({comments.length})
+              </h2>
+            </div>
+            {comments.length === 0 ? (
+              <div className="flex flex-col items-center justify-center text-center">
+                <div className="mb-4">
+                  <Icon icon="fluent:comment-24-regular" className="w-16 h-16 text-gray-300" />
+                </div>
+                <h3 className="mb-2 text-lg font-semibold text-gray-700">Chưa có bình luận nào</h3>
+                <p className="text-sm text-gray-500">Hãy là người đầu tiên bình luận.</p>
+              </div>
+            ) : (
+              <>
+                {comments.map((comment, idx) => (
+                  <div key={comment.id || idx} ref={comments.length === idx + 1 ? lastCommentElementRef : null}>
+                    <NestedComment
+                      comment={comment}
+                      level={0}
+                      maxLevel={2}
+                      postId={postId}
+                      onReply={(parentId, content) => {
+                        console.log('Reply to:', parentId, 'Content:', content);
+                        // Handle reply logic here
+                      }}
+                    />
                   </div>
-                );
-              } else {
-                return (
-                   <div key={idx} className="flex w-full gap-3">
-                    <img src={ucomment?.avatarImg || avatardf} alt="avatar" className="flex-shrink-0 object-cover w-8 h-8 mt-3 rounded-full" />
-                    <div className="flex-1">
-                      <div className="px-3 py-2 bg-gray-100 rounded-2xl">
-                        <span className="text-sm font-semibold text-gray-800">{ucomment?.firstName} {ucomment?.lastName}</span>
-                        <p className="mt-1 text-sm text-gray-700">{ucomment?.content}</p>
-                      </div>
-                      <div className="flex items-center gap-4 mt-1 text-xs text-gray-500">
-                        <span className="transition-colors cursor-pointer hover:text-blue-500">Thích</span>
-                        <span className="transition-colors cursor-pointer hover:text-blue-500">Trả lời</span>
-                        <span>{formatTimeAgo(ucomment?.createdAt) || '2 hours ago'}</span>
-                      </div>
-                    </div>
+                ))}
+                {loading && (
+                  <div className="flex items-center justify-center py-4">
+                    <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                    <span className="ml-2 text-sm text-gray-500">Đang tải thêm bình luận...</span>
                   </div>
-                );
-              }
-            })}
+                )}
+              </>
+            )}
           </div>
 
-          <div className='h-[70px]'></div>
+          <div className='h-[10px]'></div>
           {/* Comment Input */}
           <div className='absolute bottom-0 left-0 w-full bg-white rounded-b-xl'>
              <CommentCreateModal 

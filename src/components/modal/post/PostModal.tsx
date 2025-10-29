@@ -1,12 +1,17 @@
 import React, { useState } from 'react';
 import { Icon } from '@iconify/react';
 import PostDetailModal from './PostDetailModal';
+import { ExpandableContent } from '../../ui';
 import { useSelector } from 'react-redux';
 import avatardf from '../../../assets/images/avatar_default.png';
-import { formatTimeAgo } from "../../../utilities/helper";
+import { formatTimeAgo, formatPrivacy } from "../../../utilities/helper";
 import { useNavigate } from 'react-router-dom';
 import { LikeButton } from '../../common';
 import { TravelImage } from '../../ui/customize';
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Navigation, Pagination } from 'swiper/modules';
+import { PostOptionsDropdown } from '../../common/dropdowns';
+import '../../../styles/post-modal.css';
 
 // Types
 interface MediaItem {
@@ -86,6 +91,7 @@ const PostModal: React.FC<PostModalProps> = ({
   const [showCommentModal, setShowCommentModal] = useState<boolean>(false);
   const [isLiked, setIsLiked] = useState<boolean>(liked);
   const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
+  const [showOptionsDropdown, setShowOptionsDropdown] = useState<boolean>(false);
   const { avatar: currentUserAvatar } = useSelector((state: { auth: AuthState }) => state.auth);
   const [postLikeCount, setPostLikeCount] = useState<number>(likeCount);
   const [postCommentCount, setPostCommentCount] = useState<number>(commentCount);
@@ -106,18 +112,6 @@ const PostModal: React.FC<PostModalProps> = ({
     if (onImageClick) {
       onImageClick(img, index);
     }
-  };
-
-  const handlePrevImage = () => {
-    setCurrentImageIndex((prev) =>
-      prev === 0 ? displayImages.length - 1 : prev - 1
-    );
-  };
-
-  const handleNextImage = () => {
-    setCurrentImageIndex((prev) =>
-      prev === displayImages.length - 1 ? 0 : prev + 1
-    );
   };
 
   const handleComment = () => {
@@ -156,7 +150,7 @@ const PostModal: React.FC<PostModalProps> = ({
       <video
         src={videoUrl}
         controls
-        className="object-cover w-full max-h-[350px] rounded-xl"
+        className="object-cover w-full max-h-[50vh] sm:max-h-[60vh] lg:max-h-[70vh] rounded-xl"
         poster=""
       >
         Your browser does not support the video tag.
@@ -173,37 +167,36 @@ const PostModal: React.FC<PostModalProps> = ({
 
     return (
       <div className="relative mb-3">
-        {/* Main Image */}
-        <div style={{ position: 'relative', overflow: 'hidden', borderRadius: '12px', maxHeight: '350px' }}>
-          <TravelImage
-            src={displayImages[currentImageIndex]}
-            alt={`post-${currentImageIndex}`}
-            onClick={() => handleImageClick(displayImages[currentImageIndex], currentImageIndex)}
-            preview={{
-              mask: 'Xem ảnh',
-            }}
-          />
-
-          {/* Navigation Arrows */}
-          <button
-            onClick={handlePrevImage}
-            className="absolute p-2 text-white transition-all duration-200 transform -translate-y-1/2 bg-black bg-opacity-50 rounded-full left-2 top-1/2 hover:bg-opacity-70 hover:scale-110 cursor-pointer active:scale-95"
-          >
-            <Icon icon="fluent:chevron-left-20-filled" className="w-5 h-5" />
-          </button>
-
-          <button
-            onClick={handleNextImage}
-            className="absolute p-2 text-white transition-all duration-200 transform -translate-y-1/2 bg-black bg-opacity-50 rounded-full right-2 top-1/2 hover:bg-opacity-70 hover:scale-110 cursor-pointer active:scale-95"
-          >
-            <Icon icon="fluent:chevron-right-20-filled" className="w-5 h-5" />
-          </button>
-
-          {/* Image Counter */}
-          <div className="absolute px-2 py-1 text-sm text-white bg-black bg-opacity-50 rounded-full bottom-2 right-2">
-            {currentImageIndex + 1} / {displayImages.length}
-          </div>
-        </div>
+        <Swiper
+          modules={[Navigation, Pagination]}
+          navigation
+          pagination={{ 
+            clickable: true,
+            dynamicBullets: true
+          }}
+          spaceBetween={0}
+          slidesPerView={1}
+          onSlideChange={(swiper) => setCurrentImageIndex(swiper.activeIndex)}
+          className="post-swiper rounded-xl"
+          style={{ 
+            borderRadius: '12px',
+            '--swiper-navigation-size': '20px'
+          } as React.CSSProperties}
+        >
+          {displayImages.map((img, index) => (
+            <SwiperSlide key={index}>
+              <TravelImage
+                src={img}
+                alt={`post-${index}`}
+                className="w-full"
+                style={{ borderRadius: '12px' }}
+                preview={{
+                  mask: 'Xem ảnh',
+                }}
+              />
+            </SwiperSlide>
+          ))}
+        </Swiper>
       </div>
     );
   };
@@ -229,40 +222,40 @@ const PostModal: React.FC<PostModalProps> = ({
 
     return (
       <div className="mb-3">
-        <div className="flex items-center gap-3 p-2">
+        <div className="flex items-center gap-2 sm:gap-3 p-1 sm:p-2">
           {/* Group Cover with Avatar Overlay */}
-          <div className="relative">
+          <div className="relative flex-shrink-0">
             <img
               src={group.coverImageUrl || avatardf}
               alt={group.groupName}
-              className="w-12 h-12 object-cover rounded-lg"
+              className="w-10 h-10 sm:w-12 sm:h-12 object-cover rounded-lg"
             />
             {/* User Avatar Overlay */}
             <img
               src={avatar || avatardf}
               alt="avatar"
-              className="absolute -bottom-1 -right-1 w-7 h-7 object-cover rounded-full border-2 border-white cursor-pointer"
+              className="absolute -bottom-1 -right-1 w-6 h-6 sm:w-7 sm:h-7 object-cover rounded-full border-2 border-white cursor-pointer"
               onClick={() => { console.log(userId); navigate(`/user/${userId}`) }}
             />
           </div>
 
           {/* Group and User Info */}
-          <div className="flex-1">
-            <div className="flex items-center gap-2">
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
               <span
-                className="font-semibold text-gray-800 hover:underline cursor-pointer"
+                className="font-semibold text-sm sm:text-base text-gray-800 hover:underline cursor-pointer truncate"
                 onClick={handleGroupClick}
               >
                 {group.groupName}
               </span>
-              <span className="text-gray-500">•</span>
-              <span className="text-sm text-gray-500">{formatTimeAgo(timeAgo)}</span>
-              <span className="text-gray-500">•</span>
-              <Icon icon="fluent:globe-24-filled" className="w-4 h-4 text-gray-500" />
+              <span className="text-gray-500 text-xs sm:text-sm">•</span>
+              <span className="text-xs sm:text-sm text-gray-500 whitespace-nowrap">{formatTimeAgo(timeAgo)}</span>
+              <span className="text-gray-500 text-xs sm:text-sm">•</span>
+              <Icon icon="fluent:globe-24-filled" className="w-3 h-3 sm:w-4 sm:h-4 text-gray-500" />
             </div>
-            <div className="flex items-center gap-1 text-sm text-gray-600 mt-1">
+            <div className="flex items-center gap-1 text-xs sm:text-sm text-gray-600 mt-1">
               <span
-                className="hover:underline cursor-pointer"
+                className="hover:underline cursor-pointer truncate"
                 onClick={() => { navigate(`/user/${userId}`) }}
               >
                 {userName}
@@ -270,21 +263,31 @@ const PostModal: React.FC<PostModalProps> = ({
               {location && (
                 <>
                   <span className="text-gray-400">•</span>
-                  <span className="text-xs text-gray-500">{location}</span>
+                  <span className="text-xs text-gray-500 truncate">{location}</span>
                 </>
               )}
             </div>
           </div>
 
           {/* Menu button */}
-          <div className="ml-auto">
-            <button className="text-gray-400 hover:text-gray-600 p-2 rounded-full hover:bg-gray-100 transition-colors">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+          <div className="ml-auto flex-shrink-0 relative">
+            <button 
+              className="text-gray-400 hover:text-gray-600 p-1 sm:p-2 rounded-full hover:bg-gray-100 transition-colors"
+              onClick={() => setShowOptionsDropdown(!showOptionsDropdown)}
+            >
+              <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                 <circle cx="12" cy="6" r="1.5" />
                 <circle cx="12" cy="12" r="1.5" />
                 <circle cx="12" cy="18" r="1.5" />
               </svg>
             </button>
+            {showOptionsDropdown && (
+              <PostOptionsDropdown 
+                onClose={() => setShowOptionsDropdown(false)}
+                postId={postId}
+                isOwner={false}
+              />
+            )}
           </div>
         </div>
       </div>
@@ -293,11 +296,11 @@ const PostModal: React.FC<PostModalProps> = ({
 
   return (
     <>
-      <div className="w-full p-4 mb-6 bg-white shadow rounded-xl">
+      <div className="w-full p-3 sm:p-4 mb-4 sm:mb-6 bg-white shadow rounded-xl">
         {/* Share indicator */}
         {isShare && (
-          <div className="flex items-center gap-2 mb-2 text-sm text-gray-500">
-            <Icon icon="fluent:arrow-reply-24-filled" className="w-4 h-4" />
+          <div className="flex items-center gap-2 mb-2 text-xs sm:text-sm text-gray-500">
+            <Icon icon="fluent:arrow-reply-24-filled" className="w-3 h-3 sm:w-4 sm:h-4" />
             <span>Đã chia sẻ một bài viết</span>
           </div>
         )}
@@ -307,41 +310,50 @@ const PostModal: React.FC<PostModalProps> = ({
 
         {/* User info for non-group posts only */}
         {!group && (
-          <div className="flex items-center gap-3 mb-2">
+          <div className="flex items-center gap-2 sm:gap-3 mb-2">
             <img
               src={avatar || avatardf}
               alt="avatar"
-              className="object-cover w-10 h-10 rounded-full cursor-pointer"
+              className="object-cover w-8 h-8 sm:w-10 sm:h-10 rounded-full cursor-pointer flex-shrink-0"
               onClick={() => { console.log(userId); navigate(`/user/${userId}`) }}
             />
-            <div className='flex flex-col'>
-              <div className="flex items-center gap-2">
-                <span className="font-semibold text-gray-800 cursor-pointer hover:underline hover:text-blue-600"
+            <div className='flex flex-col flex-1 min-w-0'>
+              <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
+                <span className="font-semibold text-sm sm:text-base text-gray-800 cursor-pointer hover:underline hover:text-blue-600 truncate"
                   onClick={() => { navigate(`/user/${userId}`) }}
                 >{userName}</span>
-                {location && <span className="text-xs text-gray-500">• {location}</span>}
+                {location && <span className="text-xs text-gray-500 truncate">• {location}</span>}
               </div>
-              <div className="flex items-center gap-1 text-xs text-gray-400">
+              <div className="flex items-center gap-1 text-xs text-gray-400 flex-wrap">
                 <span>{formatTimeAgo(timeAgo)}</span>
                 <Icon icon="fluent:globe-24-filled" className="w-3 h-3 ml-1" />
-                {privacy && <span className="ml-1">• {privacy}</span>}
+                {privacy && <span className="ml-1">• {formatPrivacy(privacy)}</span>}
               </div>
             </div>
-            <div className="ml-auto">
-              <button className="text-gray-400 hover:text-gray-600 p-2 rounded-full hover:bg-gray-100 transition-colors cursor-pointer">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+            <div className="ml-auto flex-shrink-0 relative">
+              <button 
+                className="text-gray-400 hover:text-gray-600 p-1 sm:p-2 rounded-full hover:bg-gray-100 transition-colors cursor-pointer"
+                onClick={() => setShowOptionsDropdown(!showOptionsDropdown)}
+              >
+                <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                   <circle cx="12" cy="6" r="1.5" />
                   <circle cx="12" cy="12" r="1.5" />
                   <circle cx="12" cy="18" r="1.5" />
                 </svg>
               </button>
+              {showOptionsDropdown && (
+                <PostOptionsDropdown 
+                  onClose={() => setShowOptionsDropdown(false)}
+                  postId={postId}
+                  isOwner={false}
+                />
+              )}
             </div>
           </div>
         )}
 
-        <div className="mb-3 text-gray-700 leading-relaxed">
-          {content}
-        </div>
+        {/* Content with expandable functionality */}
+        <ExpandableContent content={content} maxLines={3} className="text-sm sm:text-base leading-relaxed break-words" />
 
         {/* Tags */}
         {renderTags()}
@@ -351,9 +363,9 @@ const PostModal: React.FC<PostModalProps> = ({
         {displayImages.length > 0 && renderImageSlider()}
 
         {/* Action buttons */}
-        <div className="flex items-center gap-6 pt-3 text-sm text-gray-500">
+        <div className="flex items-center gap-3 sm:gap-6 pt-3 text-xs sm:text-sm text-gray-500">
           <div className="flex items-center gap-1">
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+            <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M14 9l-2-2-2 2m0 6l2 2 2-2" />
             </svg>
           </div>
@@ -364,31 +376,33 @@ const PostModal: React.FC<PostModalProps> = ({
             likeCount={postLikeCount}
             setLikeCount={setPostLikeCount}
           />
-          <div className="flex items-center gap-1 transition-colors cursor-pointer hover:text-blue-500">
-            <Icon icon="fluent:chat-24-filled" className="w-5 h-5" />
-            {postCommentCount}
+          <div className="flex items-center gap-1 transition-colors cursor-pointer hover:text-blue-500" onClick={openCommentModal}>
+            <Icon icon="fluent:chat-24-filled" className="w-4 h-4 sm:w-5 sm:h-5" />
+            <span className="hidden xs:inline">{postCommentCount}</span>
+            <span className="xs:hidden">{postCommentCount > 99 ? '99+' : postCommentCount}</span>
           </div>
           <div className="flex items-center gap-1 transition-colors cursor-pointer hover:text-green-500" onClick={onShare}>
-            <Icon icon="fluent:arrow-reply-24-filled" className="w-5 h-5" />
-            {postShareCount}
+            <Icon icon="fluent:arrow-reply-24-filled" className="w-4 h-4 sm:w-5 sm:h-5" />
+            <span className="hidden xs:inline">{postShareCount}</span>
+            <span className="xs:hidden">{postShareCount > 99 ? '99+' : postShareCount}</span>
           </div>
         </div>
 
         {/* Comment input section */}
         <div className="mt-3 pt-3 border-t border-gray-100">
           <button className="w-full cursor-pointer" onClick={openCommentModal}>
-            <div className="flex items-center gap-3 p-2 transition-colors rounded-lg hover:bg-gray-50">
+            <div className="flex items-center gap-2 sm:gap-3 p-1 sm:p-2 transition-colors rounded-lg hover:bg-gray-50">
               <img
                 src={currentUserAvatar || avatardf}
                 alt="current user"
-                className="flex-shrink-0 object-cover w-8 h-8 rounded-full border-2 border-gray-200"
+                className="flex-shrink-0 object-cover w-7 h-7 sm:w-8 sm:h-8 rounded-full border-2 border-gray-200"
               />
               <div className="relative flex-1">
-                <div className="w-full px-4 py-2 text-left text-gray-500 bg-gray-100 rounded-full cursor-pointer hover:bg-gray-200 transition-colors">
+                <div className="w-full px-3 py-1.5 sm:px-4 sm:py-2 text-left text-xs sm:text-sm text-gray-500 bg-gray-100 rounded-full cursor-pointer hover:bg-gray-200 transition-colors">
                   Viết bình luận...
                 </div>
-                <div className="absolute text-gray-400 transform -translate-y-1/2 right-3 top-1/2">
-                  <Icon icon="fluent:emoji-happy-24-filled" className="w-5 h-5" />
+                <div className="absolute text-gray-400 transform -translate-y-1/2 right-2 sm:right-3 top-1/2">
+                  <Icon icon="fluent:emoji-happy-24-filled" className="w-4 h-4 sm:w-5 sm:h-5" />
                 </div>
               </div>
             </div>
@@ -410,7 +424,6 @@ const PostModal: React.FC<PostModalProps> = ({
         displayImages={displayImages}
         displayVideo={displayVideo}
         selectedImageIndex={selectedImageIndex}
-        // comments={comments}
         postLikeCount={postLikeCount}
         setPostLikeCount={setPostLikeCount}
         isLiked={isLiked}
@@ -430,5 +443,3 @@ const PostModal: React.FC<PostModalProps> = ({
 };
 
 export default PostModal;
-
-

@@ -42,8 +42,8 @@ const TravelButton: React.FC<TravelButtonProps> = ({
             defaultShadow: 'none',
             primaryColor: '#ffffff',
             defaultColor: '#374151',
-            defaultBg: '#f3f4f6',
-            defaultBorderColor: 'transparent',
+            defaultBg: '#f9fafb',
+            defaultBorderColor: '#e5e7eb',
           },
         },
       }}
@@ -72,8 +72,8 @@ const TravelButton: React.FC<TravelButtonProps> = ({
           }
         }}
         style={{
-          background: type === 'primary' ? 'var(--travel-primary-500)' : '#f3f4f6',
-          border: 'none',
+          background: type === 'primary' ? 'var(--travel-primary-500)' : '#f9fafb',
+          border: type === 'primary' ? 'none' : '1px solid #e5e7eb',
           borderRadius: '12px',
           height: '40px',
           fontSize: '14px',

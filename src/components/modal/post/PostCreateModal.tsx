@@ -2,9 +2,12 @@ import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Icon } from '@iconify/react';
 import LocationDropdown from "../../common/inputs/LocationDropdown";
+import TiptapEditor from '../../ui/TiptapEditor';
+import { PrivacyDropdown } from '../../common/dropdowns';
 import avatardf from '../../../assets/images/avatar_default.png'
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import '../../../styles/tiptap-editor.css';
 
 // Types
 interface MediaItem {
@@ -243,7 +246,7 @@ const PostCreateModal: React.FC<PostCreateModalProps> = ({
            navigate(`/user/${userId}`);
          } else {
            handleClose();
-           setCreateSuccess && setCreateSuccess(true);
+          //  setCreateSuccess && setCreateSuccess(true);
            toast.success('Tạo bài viết thành công!');
          }
        } else {
@@ -268,66 +271,76 @@ const PostCreateModal: React.FC<PostCreateModalProps> = ({
     <>
       {/* Trigger Button */}
       <div
-        className="flex items-center gap-3 p-4 mb-6 transition-colors bg-white shadow cursor-pointer rounded-xl hover:bg-gray-50 w-full"
+        className="flex items-center gap-2 sm:gap-3 p-3 sm:p-4 mb-4 sm:mb-6 transition-colors bg-white shadow cursor-pointer rounded-xl hover:bg-gray-50 w-full"
         onClick={handleOpen}
       >
         <img
           src={`${avatar !== null ? avatar : avatardf}`}
           alt="avatar"
-          className="object-cover w-10 h-10 rounded-full"
+          className="object-cover w-8 h-8 sm:w-10 sm:h-10 rounded-full flex-shrink-0"
         />
          <input
-           className="flex-1 px-4 py-2 bg-gray-100 rounded-full outline-none pointer-events-none"
-           placeholder="Chia sẻ câu chuyện du lịch của bạn..."
+           className="flex-1 px-3 py-1.5 sm:px-4 sm:py-2 text-sm sm:text-base bg-gray-100 rounded-full outline-none pointer-events-none min-w-0"
+           placeholder="Chia sẻ câu chuyện..."
            readOnly
          />
          <button
-           className="flex items-center gap-1 px-3 py-1 font-medium text-blue-600 rounded bg-blue-50 hover:bg-blue-100 cursor-pointer"
+           className="hidden sm:flex items-center gap-1 px-3 py-1 text-sm font-medium text-blue-600 rounded bg-blue-50 hover:bg-blue-100 cursor-pointer flex-shrink-0"
            onClick={(e) => {
              e.stopPropagation();
              handleOpen();
            }}
          >
-           <Icon icon="fluent:image-24-filled" className="w-5 h-5" />
-           Hình ảnh
+           <Icon icon="fluent:image-24-filled" className="w-4 h-4 sm:w-5 sm:h-5" />
+           <span className="hidden md:inline">Hình ảnh</span>
          </button>
          <button
-           className="flex items-center gap-1 px-3 py-1 font-medium text-blue-600 rounded bg-blue-50 hover:bg-blue-100 cursor-pointer"
+           className="hidden sm:flex items-center gap-1 px-3 py-1 text-sm font-medium text-blue-600 rounded bg-blue-50 hover:bg-blue-100 cursor-pointer flex-shrink-0"
            onClick={(e) => {
              e.stopPropagation();
              handleOpen();
            }}
          >
-           <Icon icon="fluent:location-24-filled" className="w-5 h-5" />
-           Địa điểm
+           <Icon icon="fluent:location-24-filled" className="w-4 h-4 sm:w-5 sm:h-5" />
+           <span className="hidden md:inline">Địa điểm</span>
+         </button>
+         {/* Mobile: Single action button */}
+         <button
+           className="flex sm:hidden items-center justify-center p-2 text-blue-600 rounded-full bg-blue-50 hover:bg-blue-100 cursor-pointer flex-shrink-0"
+           onClick={(e) => {
+             e.stopPropagation();
+             handleOpen();
+           }}
+         >
+           <Icon icon="fluent:add-24-filled" className="w-5 h-5" />
          </button>
       </div>
 
       {/* Modal */}
       {isOpen && (
         <div
-          className="fixed inset-0 flex items-center justify-center transition-opacity duration-300 ease-in-out bg-black/50"
+          className="fixed inset-0 h-[100vh] flex items-center justify-center transition-opacity duration-300 ease-in-out bg-black/50 px-4"
           style={{ zIndex: 1000 }}
           onClick={handleClose}
         >
           <div
-            className="relative w-full max-w-2xl mx-6 bg-white shadow-lg transition-all duration-300 ease-in-out rounded-xl overflow-hidden max-h-[95vh] overflow-y-auto"
+            className="relative w-full max-w-4xl bg-white shadow-lg transition-all duration-300 ease-in-out rounded-xl overflow-hidden max-h-[95vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
             role="dialog"
             aria-modal="true"
           >
             {/* Header */}
-            <div className="sticky top-0 z-10 flex items-center justify-between p-6 bg-white border-b border-gray-200">
-              <div className="flex flex-col items-start">
-                <span className="flex items-center mb-2 text-xl font-bold text-blue-600">
-                  <Icon icon="fluent:compass-northwest-24-regular" className="text-blue-600 w-7 h-7" />
+            <div className="sticky top-0 z-10 flex items-center justify-between p-4 sm:p-5 bg-white border-b border-gray-200">
+              <div className="flex flex-col items-start pr-8">
+                <span className="flex items-center mb-1 text-base sm:text-lg font-bold text-blue-600">
+                  <Icon icon="fluent:compass-northwest-24-regular" className="text-blue-600 w-4 h-4 sm:w-6 sm:h-6" />
                   TravelNest
                 </span>
-                 <h2 className="text-2xl font-bold text-gray-800">Tạo Bài Viết</h2>
-                 <p className="text-sm text-gray-500">Chia sẻ câu chuyện du lịch của bạn với cộng đồng</p>
+                 <h2 className="text-lg sm:text-xl font-bold text-gray-800">Tạo Bài Viết</h2>
+                 <p className="text-xs text-gray-500 hidden sm:block">Chia sẻ câu chuyện du lịch của bạn với cộng đồng</p>
               </div>
                <button
-                 className="absolute flex items-center justify-center w-8 h-8 text-gray-600 rounded-full bg-gray-white right-6 top-6 hover:bg-gray-300 cursor-pointer"
+                 className="absolute flex items-center justify-center w-8 h-8 text-gray-600 rounded-full bg-gray-white right-4 sm:right-5 top-4 sm:top-5 hover:bg-gray-300 cursor-pointer"
                  onClick={handleClose}
                  aria-label="Đóng"
                >
@@ -335,19 +348,19 @@ const PostCreateModal: React.FC<PostCreateModalProps> = ({
               </button>
             </div>
 
-            <form onSubmit={handlePost} className="p-6 space-y-6">
+            <form onSubmit={handlePost} className="p-4 sm:p-5 space-y-3 sm:space-y-4">
               {/* User Profile Section */}
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 overflow-hidden rounded-full">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="w-9 h-9 sm:w-10 sm:h-10 overflow-hidden rounded-full flex-shrink-0">
                   <img
                     src={`${avatar !== null ? avatar : avatardf}`}
                     alt="User Avatar"
                     className="object-cover w-full h-full"
                   />
                 </div>
-                <div className="flex flex-col flex-1">
-                  <span className="text-base font-semibold text-gray-800">{firstName} {lastName}</span>
-                  <div className="flex items-center gap-3 mt-1">
+                <div className="flex flex-col flex-1 min-w-0">
+                  <span className="text-xs sm:text-sm font-semibold text-gray-800 truncate">{firstName} {lastName}</span>
+                  <div className="flex items-center gap-2 mt-1 flex-wrap">
                      <LocationDropdown
                        value={selectedLocation}
                        onChange={setSelectedLocation}
@@ -355,47 +368,33 @@ const PostCreateModal: React.FC<PostCreateModalProps> = ({
                        type={true}
                      />
 
-                    {/* Privacy Dropdown */}
-                    <div className="relative">
-                      <select
-                        value={privacy}
-                        onChange={(e) => setPrivacy(e.target.value)}
-                        className="flex items-center gap-2 px-3 py-1 pr-8 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-full appearance-none cursor-pointer hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      >
-                        {privacyOptions.map((option) => (
-                          <option key={option.value} value={option.value}>
-                            {option.label}
-                          </option>
-                        ))}
-                      </select>
-                      <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
-                        <Icon icon="fluent:globe-24-filled" className="w-4 h-4 text-gray-500" />
-                      </div>
-                    </div>
+                    {/* Privacy Selector */}
+                    <PrivacyDropdown
+                      value={privacy}
+                      onChange={setPrivacy}
+                      options={privacyOptions}
+                    />
                   </div>
                 </div>
               </div>
 
               {/* Privacy Info */}
-              <div className="flex items-center gap-2 p-3 rounded-lg bg-blue-50">
-                <Icon icon="fluent:globe-24-filled" className="w-4 h-4 text-blue-600" />
-                <span className="text-sm text-blue-700">
+              <div className="flex items-center gap-2 p-2 rounded-lg bg-blue-50">
+                <Icon icon="fluent:globe-24-filled" className="w-3 h-3 sm:w-4 sm:h-4 text-blue-600 flex-shrink-0" />
+                <span className="text-xs text-blue-700">
                   <strong>{currentPrivacy?.label}:</strong> {currentPrivacy?.description}
                 </span>
               </div>
 
-               {/* Content Input */}
+               {/* Content Input with Tiptap Editor */}
                <div>
-                 <label className="block mb-2 text-sm font-medium text-gray-700">Bạn đang nghĩ gì?</label>
-                 <textarea
-                   className="w-full px-4 py-3 text-base border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                   value={postContent}
-                   onChange={(e) => setPostContent(e.target.value)}
-                   rows={4}
-                   placeholder="Chia sẻ trải nghiệm du lịch, suy nghĩ hoặc kỷ niệm của bạn..."
+                 <label className="block mb-2 text-xs font-medium text-gray-700">Nội dung bài viết</label>
+                 <TiptapEditor
+                   content={postContent}
+                   onChange={setPostContent}
+                   placeholder="Hôm nay bạn muốn chia sẻ điều gì?"
                    maxLength={2000}
                  />
-                 <p className="mt-1 text-xs text-gray-500">{postContent.length}/2000 ký tự</p>
                </div>
 
               {/* Tags Section */}

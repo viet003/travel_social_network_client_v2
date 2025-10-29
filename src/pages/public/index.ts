@@ -5,3 +5,10 @@ export { default as DesktopAppPage } from './static/DesktopAppPage';
 export { default as FAQPage } from './static/FAQPage';
 export { default as WatchPage } from './WatchPage';
 export { default as ExplorePage } from './ExplorePage';
+export { 
+  UserProfilePage,
+  UserProfilePostsPage,
+  UserProfileAlbumsPage,
+  UserProfileReviewsPage,
+  UserProfileFriendsPage
+} from './user';
