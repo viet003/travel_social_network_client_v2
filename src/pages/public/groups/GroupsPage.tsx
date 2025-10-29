@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Icon } from '@iconify/react';
-import { SearchGroupDropdown } from '../../components/common/dropdowns';
-import type { GroupResultItemProps } from '../../components/common/items/GroupResultItem';
+import { SearchGroupDropdown } from '../../../components/common/dropdowns';
+import type { GroupResultItemProps } from '../../../components/common/items/GroupResultItem';
 
 const GroupsPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState('joined');

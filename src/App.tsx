@@ -8,7 +8,12 @@ import {
   DesktopAppPage, 
   FAQPage,
   WatchPage,
-  ExplorePage
+  ExplorePage,
+  UserProfilePage,
+  UserProfilePostsPage,
+  UserProfileAlbumsPage,
+  UserProfileReviewsPage,
+  UserProfileFriendsPage
 } from './pages';
 import { MainLayout, LandingLayout, FriendsLayout, GroupLayout } from './layout';
 import {
@@ -61,7 +66,7 @@ function App() {
         <Route
           path={path.HOME}
           element={
-            <ProtectedRoute isPublic={false}>
+            <ProtectedRoute isPublic={true}>
               <MainLayout />
             </ProtectedRoute>
           }
@@ -83,6 +88,12 @@ function App() {
           </Route>
           <Route path={path.WATCH} element={<WatchPage />} />
           <Route path={path.EXPLORE} element={<ExplorePage />} />
+          <Route path={path.USER} element={<UserProfilePage />}>
+            <Route index element={<UserProfilePostsPage />} />
+            <Route path={path.USER_PHOTOS} element={<UserProfileAlbumsPage />} />
+            <Route path={path.USER_REVIEWS} element={<UserProfileReviewsPage />} />
+            <Route path={path.USER_FRIENDS} element={<UserProfileFriendsPage />} />
+          </Route>
         </Route>
         <Route path={path.STAR} element={<Navigate to="/" replace />} />
       </Routes>

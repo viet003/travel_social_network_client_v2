@@ -33,24 +33,24 @@ const TravelDatePicker: React.FC<TravelDatePickerProps> = ({
           // Seed Token
           colorPrimary: 'var(--travel-primary-600)',
           borderRadius: 12,
-          colorBgContainer: '#f3f4f6',
+          colorBgContainer: '#f9fafb',
           colorText: '#111827',
-          colorTextPlaceholder: '#374151',
-          colorBorder: 'transparent',
+          colorTextPlaceholder: '#9ca3af',
+          colorBorder: '#e5e7eb',
           controlHeight: 40,
           fontSize: 14,
         },
         components: {
           DatePicker: {
-            colorBgContainer: '#f3f4f6',
-            colorBorder: 'transparent',
+            colorBgContainer: '#f9fafb',
+            colorBorder: '#e5e7eb',
             colorText: '#111827',
-            colorTextPlaceholder: '#374151',
+            colorTextPlaceholder: '#9ca3af',
             borderRadius: 12,
             controlHeight: 40,
             fontSize: 14,
             boxShadow: 'none',
-            hoverBorderColor: 'var(--travel-primary-600)',
+            hoverBorderColor: '#d1d5db',
             activeBorderColor: 'var(--travel-primary-600)',
             activeShadow: 'none',
           },
@@ -65,8 +65,8 @@ const TravelDatePicker: React.FC<TravelDatePickerProps> = ({
         disabled={disabled}
         className={`w-full ${className}`}
         style={{
-          backgroundColor: '#f3f4f6',
-          border: 'none',
+          backgroundColor: '#f9fafb',
+          border: '1px solid #e5e7eb',
           borderRadius: '12px',
           height: '40px',
           fontSize: '14px',

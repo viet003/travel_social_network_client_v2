@@ -319,28 +319,28 @@ const PostCreateModal: React.FC<PostCreateModalProps> = ({
       {/* Modal */}
       {isOpen && (
         <div
-          className="fixed inset-0 flex items-center justify-center transition-opacity duration-300 ease-in-out bg-black/50 px-4"
+          className="fixed inset-0 h-[100vh] flex items-center justify-center transition-opacity duration-300 ease-in-out bg-black/50 px-4"
           style={{ zIndex: 1000 }}
           onClick={handleClose}
         >
           <div
-            className="relative w-full max-w-2xl bg-white shadow-lg transition-all duration-300 ease-in-out rounded-xl overflow-hidden max-h-[95vh] overflow-y-auto"
+            className="relative w-full max-w-4xl bg-white shadow-lg transition-all duration-300 ease-in-out rounded-xl overflow-hidden max-h-[95vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
             role="dialog"
             aria-modal="true"
           >
             {/* Header */}
-            <div className="sticky top-0 z-10 flex items-center justify-between p-4 sm:p-6 bg-white border-b border-gray-200">
+            <div className="sticky top-0 z-10 flex items-center justify-between p-4 sm:p-5 bg-white border-b border-gray-200">
               <div className="flex flex-col items-start pr-8">
-                <span className="flex items-center mb-1 sm:mb-2 text-lg sm:text-xl font-bold text-blue-600">
-                  <Icon icon="fluent:compass-northwest-24-regular" className="text-blue-600 w-5 h-5 sm:w-7 sm:h-7" />
+                <span className="flex items-center mb-1 text-base sm:text-lg font-bold text-blue-600">
+                  <Icon icon="fluent:compass-northwest-24-regular" className="text-blue-600 w-4 h-4 sm:w-6 sm:h-6" />
                   TravelNest
                 </span>
-                 <h2 className="text-xl sm:text-2xl font-bold text-gray-800">Tạo Bài Viết</h2>
-                 <p className="text-xs sm:text-sm text-gray-500 hidden sm:block">Chia sẻ câu chuyện du lịch của bạn với cộng đồng</p>
+                 <h2 className="text-lg sm:text-xl font-bold text-gray-800">Tạo Bài Viết</h2>
+                 <p className="text-xs text-gray-500 hidden sm:block">Chia sẻ câu chuyện du lịch của bạn với cộng đồng</p>
               </div>
                <button
-                 className="absolute flex items-center justify-center w-8 h-8 text-gray-600 rounded-full bg-gray-white right-4 sm:right-6 top-4 sm:top-6 hover:bg-gray-300 cursor-pointer"
+                 className="absolute flex items-center justify-center w-8 h-8 text-gray-600 rounded-full bg-gray-white right-4 sm:right-5 top-4 sm:top-5 hover:bg-gray-300 cursor-pointer"
                  onClick={handleClose}
                  aria-label="Đóng"
                >
@@ -348,10 +348,10 @@ const PostCreateModal: React.FC<PostCreateModalProps> = ({
               </button>
             </div>
 
-            <form onSubmit={handlePost} className="p-4 sm:p-6 space-y-4 sm:space-y-6">
+            <form onSubmit={handlePost} className="p-4 sm:p-5 space-y-3 sm:space-y-4">
               {/* User Profile Section */}
               <div className="flex items-center gap-2 sm:gap-3">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 overflow-hidden rounded-full flex-shrink-0">
+                <div className="w-9 h-9 sm:w-10 sm:h-10 overflow-hidden rounded-full flex-shrink-0">
                   <img
                     src={`${avatar !== null ? avatar : avatardf}`}
                     alt="User Avatar"
@@ -359,8 +359,8 @@ const PostCreateModal: React.FC<PostCreateModalProps> = ({
                   />
                 </div>
                 <div className="flex flex-col flex-1 min-w-0">
-                  <span className="text-sm sm:text-base font-semibold text-gray-800 truncate">{firstName} {lastName}</span>
-                  <div className="flex items-center gap-2 sm:gap-3 mt-1 flex-wrap">
+                  <span className="text-xs sm:text-sm font-semibold text-gray-800 truncate">{firstName} {lastName}</span>
+                  <div className="flex items-center gap-2 mt-1 flex-wrap">
                      <LocationDropdown
                        value={selectedLocation}
                        onChange={setSelectedLocation}
@@ -379,20 +379,20 @@ const PostCreateModal: React.FC<PostCreateModalProps> = ({
               </div>
 
               {/* Privacy Info */}
-              <div className="flex items-center gap-2 p-2 sm:p-3 rounded-lg bg-blue-50">
-                <Icon icon="fluent:globe-24-filled" className="w-4 h-4 text-blue-600 flex-shrink-0" />
-                <span className="text-xs sm:text-sm text-blue-700">
+              <div className="flex items-center gap-2 p-2 rounded-lg bg-blue-50">
+                <Icon icon="fluent:globe-24-filled" className="w-3 h-3 sm:w-4 sm:h-4 text-blue-600 flex-shrink-0" />
+                <span className="text-xs text-blue-700">
                   <strong>{currentPrivacy?.label}:</strong> {currentPrivacy?.description}
                 </span>
               </div>
 
                {/* Content Input with Tiptap Editor */}
                <div>
-                 <label className="block mb-2 text-xs sm:text-sm font-medium text-gray-700">Bạn đang nghĩ gì?</label>
+                 <label className="block mb-2 text-xs font-medium text-gray-700">Nội dung bài viết</label>
                  <TiptapEditor
                    content={postContent}
                    onChange={setPostContent}
-                   placeholder="Chia sẻ trải nghiệm du lịch của bạn... Bạn có thể định dạng văn bản, thêm danh sách, trích dẫn và nhiều hơn nữa!"
+                   placeholder="Hôm nay bạn muốn chia sẻ điều gì?"
                    maxLength={2000}
                  />
                </div>

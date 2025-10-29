@@ -4,6 +4,7 @@ import { Icon } from '@iconify/react';
 import { path } from '../utilities/path';
 import { SearchGroupDropdown } from '../components/common/dropdowns';
 import type { GroupResultItemProps } from '../components/common/items/GroupResultItem';
+import { GroupCreateModal } from '../components/modal';
 // import { subLogo } from '../assets/images';
 
 const GroupLayout: React.FC = () => {
@@ -228,10 +229,9 @@ const GroupLayout: React.FC = () => {
             </nav>
 
             {/* Create New Group Button */}
-            <button className="w-full mt-3 mb-4 mx-auto flex items-center justify-center space-x-2 py-2.5 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors cursor-pointer">
-              <Icon icon="fluent:add-24-filled" className="h-5 w-5 text-blue-600" />
-              <span className="font-medium text-[15px] text-blue-600">Tạo nhóm mới</span>
-            </button>
+            <div className="w-full mt-3 mb-4">
+              <GroupCreateModal />
+            </div>
           </div>
 
           {/* Groups You've Joined */}

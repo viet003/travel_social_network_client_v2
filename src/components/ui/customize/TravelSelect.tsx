@@ -25,23 +25,23 @@ const TravelSelect: React.FC<TravelSelectProps> = ({
         token: {
           colorPrimary: 'var(--travel-primary-600)',
           borderRadius: 12,
-          colorBgContainer: '#f3f4f6',
+          colorBgContainer: '#f9fafb',
           colorText: '#111827',
-          colorTextPlaceholder: '#374151',
-          colorBorder: 'transparent',
+          colorTextPlaceholder: '#9ca3af',
+          colorBorder: '#e5e7eb',
           controlHeight: 40,
           fontSize: 14,
         },
         components: {
           Select: {
-            selectorBg: '#f3f4f6',
+            selectorBg: '#f9fafb',
             borderRadius: 12,
-            // borderColor: 'transparent', // mặc định
-            hoverBorderColor: 'var(--travel-primary-600)', // hover
-            activeBorderColor: 'var(--travel-primary-600)', // focus
+            colorBorder: '#e5e7eb',
+            hoverBorderColor: '#d1d5db',
+            activeBorderColor: 'var(--travel-primary-600)',
             optionSelectedColor: '#1f2937',
             optionSelectedBg: '#e6f4ff',
-            optionActiveBg: '#f3f4f6',
+            optionActiveBg: '#f9fafb',
           },
         },
       }}
@@ -54,7 +54,8 @@ const TravelSelect: React.FC<TravelSelectProps> = ({
         disabled={disabled}
         className={`w-full focus:outline-none focus:ring-0 ${className}`}
         style={{
-          backgroundColor: '#f3f4f6',
+          backgroundColor: '#f9fafb',
+          border: '1px solid #e5e7eb',
           borderRadius: '12px',
           height: '40px',
           fontSize: '14px',
