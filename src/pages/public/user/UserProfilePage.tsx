@@ -296,8 +296,8 @@ const UserProfilePage: React.FC = () => {
 
       {/* Navigation Bar */}
       <div className="bg-white overflow-x-auto">
-        <div className="flex justify-center min-w-max px-3 sm:px-0">
-          <div className="flex gap-2 sm:gap-4 lg:gap-8">
+        <div className="max-w-[1200px] mx-auto p-3 sm:px-6 lg:px-[50px]">
+          <div className="flex space-x-1">
             {[
               { id: "posts", label: "Bài viết", icon: "lucide:camera" },
               { id: "photos", label: "Ảnh", icon: "lucide:image" },
@@ -307,24 +307,14 @@ const UserProfilePage: React.FC = () => {
               <button
                 key={id}
                 onClick={() => handleTabClick(id)}
-                className={`group relative flex items-center gap-1.5 sm:gap-2 py-3 sm:py-4 px-2 sm:px-3 lg:px-4 transition-all duration-300 cursor-pointer flex-shrink-0 ${
+                className={`flex cursor-pointer items-center space-x-2 px-3 sm:px-4 py-3 font-medium transition-colors flex-shrink-0 whitespace-nowrap ${
                   activeTab === id
-                    ? "text-blue-600 bg-blue-50/50"
-                    : "text-gray-900 hover:text-gray-900 hover:bg-gray-50/50"
+                    ? "text-blue-600 border-b-2 border-blue-600"
+                    : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
                 }`}
               >
-                <Icon icon={icon} width={16} className="sm:w-[18px] sm:h-[18px] transition-transform duration-200 flex-shrink-0" />
-                <span className="font-medium text-xs sm:text-sm lg:text-base whitespace-nowrap">{label}</span>
-                <div
-                  className={`absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${
-                    activeTab === id
-                      ? "bg-gradient-to-r from-blue-100/50 to-blue-200/50"
-                      : "bg-gradient-to-r from-gray-100/50 to-gray-200/50"
-                  }`}
-                ></div>
-                {activeTab === id && (
-                  <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-full h-1 bg-gradient-to-r from-blue-400 to-blue-600"></div>
-                )}
+                <Icon icon={icon} className="h-5 w-5" />
+                <span className="text-xs sm:text-sm">{label}</span>
               </button>
             ))}
           </div>

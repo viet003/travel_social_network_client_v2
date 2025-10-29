@@ -93,7 +93,7 @@ const PostDetailModal: React.FC<PostDetailModalProps> = ({
 
   const handleGroupClick = () => {
     if (group?.groupId) {
-      navigate(`/groups/${group.groupId}`);
+      navigate(`/home/groups/${group.groupId}`);
     }
   };
 

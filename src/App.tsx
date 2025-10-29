@@ -27,8 +27,15 @@ import {
 import {
   GroupFeedsPage,
   YourGroupsPage,
-  GroupSuggestionsPage
+  GroupSuggestionsPage,
+  GroupDetailPage
 } from './pages/public/groups';
+import {
+  GroupAboutPage,
+  GroupDiscussionPage,
+  GroupMembersPage,
+  GroupMediaPage
+} from './pages/public/groups/groupdetail';
 import { LoginForm, SignUpForm, ForgotPasswordForm, ResetPasswordForm } from './components/auth';
 import { ToastContainer } from 'react-toastify';
 import { ProtectedRoute, ProtectedResetRoute } from './components/index';
@@ -85,6 +92,12 @@ function App() {
             <Route path={path.GROUPS_FEEDS} element={<GroupFeedsPage />} />
             <Route path={path.YOUR_GROUPS} element={<YourGroupsPage />} />
             <Route path={path.GROUPS_DISCOVER} element={<GroupSuggestionsPage />} />
+          </Route>
+          <Route path={`${path.GROUPS}/${path.GROUP_DETAIL}`} element={<GroupDetailPage />}>
+            <Route index element={<GroupDiscussionPage />} />
+            <Route path={path.GROUP_ABOUT} element={<GroupAboutPage />} />
+            <Route path={path.GROUP_MEMBERS} element={<GroupMembersPage />} />
+            <Route path={path.GROUP_MEDIA} element={<GroupMediaPage />} />
           </Route>
           <Route path={path.WATCH} element={<WatchPage />} />
           <Route path={path.EXPLORE} element={<ExplorePage />} />
