@@ -2,18 +2,10 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useSelector } from 'react-redux';
 import { Icon } from '@iconify/react';
-import { Skeleton, Image } from 'antd';
+import { Skeleton, Image, Tabs, message } from 'antd';
+import { apiGetUserFriendshipLists, apiAcceptFriendRequest, apiRejectFriendRequest } from '../../../services/friendshipService';
+import type { UserFriendshipListsResponse, FriendshipResponse, UserResponse } from '../../../types/friendship.types';
 import avatardf from '../../../assets/images/avatar_default.png';
-
-// Types
-interface Friend {
-  userId: string;
-  firstName: string;
-  lastName: string;
-  avatarImg?: string;
-  mutualFriends?: number;
-  location?: string;
-}
 
 interface AuthState {
   userId: string;
@@ -23,52 +15,92 @@ const UserProfileFriendsPage: React.FC = () => {
   const { userId } = useParams<{ userId: string }>();
   const navigate = useNavigate();
   const currentUserId = useSelector((state: { auth: AuthState }) => state.auth.userId);
-  const [friends, setFriends] = useState<Friend[]>([]);
+  const [friendshipData, setFriendshipData] = useState<UserFriendshipListsResponse | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>("");
+  const [activeTab, setActiveTab] = useState<string>('friends');
   const [imageLoading, setImageLoading] = useState<{ [key: string]: boolean }>({});
 
-  // Fetch user friends
-  const fetchFriends = async () => {
+  // Fetch user friendship lists
+  const fetchFriendshipLists = async () => {
+    if (!userId) return;
+    
     setLoading(true);
     try {
-      // Mock API call - replace with actual API
-      await new Promise(resolve => setTimeout(resolve, 500));
-      const mockFriends: Friend[] = Array.from({ length: 12 }, (_, i) => ({
-        userId: `friend-${i}`,
-        firstName: `Nguyễn ${String.fromCharCode(65 + i)}`,
-        lastName: `User`,
-        avatarImg: "",
-        mutualFriends: Math.floor(Math.random() * 50),
-        location: `Thành phố ${i + 1}`,
-      }));
-      setFriends(mockFriends);
-      
-      // Initialize image loading states
-      const loadingStates: { [key: string]: boolean } = {};
-      mockFriends.forEach(friend => {
-        loadingStates[friend.userId] = true;
-      });
-      setImageLoading(loadingStates);
+      const response = await apiGetUserFriendshipLists(userId);
+      if (response.data) {
+        setFriendshipData(response.data);
+        
+        // Initialize image loading states
+        const loadingStates: { [key: string]: boolean } = {};
+        response.data.friends.forEach(friend => {
+          if (friend.userId) loadingStates[friend.userId] = true;
+        });
+        response.data.pendingRequests.forEach(req => {
+          if (req.friendProfile.userId) loadingStates[req.friendProfile.userId] = true;
+        });
+        response.data.blockedUsers.forEach(user => {
+          if (user.userId) loadingStates[user.userId] = true;
+        });
+        setImageLoading(loadingStates);
+      }
     } catch (err) {
-      console.error("Error fetching friends:", err);
+      console.error("Error fetching friendship lists:", err);
+      message.error('Không thể tải danh sách');
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    if (!userId) return;
-    fetchFriends();
+    fetchFriendshipLists();
   }, [userId]);
+
+  const handleAcceptRequest = async (friendshipId: string) => {
+    try {
+      await apiAcceptFriendRequest(friendshipId);
+      message.success('Đã chấp nhận lời mời kết bạn');
+      fetchFriendshipLists();
+    } catch (err) {
+      console.error('Error accepting request:', err);
+      message.error('Không thể chấp nhận lời mời');
+    }
+  };
+
+  const handleRejectRequest = async (friendshipId: string) => {
+    try {
+      await apiRejectFriendRequest(friendshipId);
+      message.success('Đã từ chối lời mời kết bạn');
+      fetchFriendshipLists();
+    } catch (err) {
+      console.error('Error rejecting request:', err);
+      message.error('Không thể từ chối lời mời');
+    }
+  };
 
   const handleFriendClick = (friendId: string) => {
     navigate(`/user/${friendId}`);
   };
 
-  const filteredFriends = friends.filter(friend => {
-    const fullName = `${friend.firstName} ${friend.lastName}`.toLowerCase();
-    return fullName.includes(searchQuery.toLowerCase());
+  // Get data based on active tab
+  const getDisplayData = () => {
+    if (!friendshipData) return [];
+    
+    switch (activeTab) {
+      case 'pending':
+        return friendshipData.pendingRequests.map(req => req.friendProfile);
+      case 'blocked':
+        return friendshipData.blockedUsers;
+      default:
+        return friendshipData.friends;
+    }
+  };
+
+  const displayData = getDisplayData();
+  
+  const filteredData = displayData.filter(user => {
+    const fullName = user.userProfile.fullName || '';
+    return fullName.toLowerCase().includes(searchQuery.toLowerCase());
   });
 
   if (loading) {
@@ -81,46 +113,64 @@ const UserProfileFriendsPage: React.FC = () => {
 
   return (
     <div className="space-y-4 sm:space-y-6">
-      {/* Search bar */}
-      <div className="relative">
-        <Icon 
-          icon="lucide:search" 
-          className="absolute w-4 h-4 sm:w-5 sm:h-5 text-gray-400 transform -translate-y-1/2 left-2.5 sm:left-3 top-1/2" 
+      {/* Tabs and Search */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <Tabs
+          activeKey={activeTab}
+          onChange={setActiveTab}
+          className="flex-1"
+          items={[
+            {
+              key: 'friends',
+              label: `Bạn bè (${friendshipData?.friends.length || 0})`,
+            },
+            {
+              key: 'pending',
+              label: `Lời mời (${friendshipData?.pendingRequests.length || 0})`,
+            },
+            {
+              key: 'blocked',
+              label: `Đã chặn (${friendshipData?.blockedUsers.length || 0})`,
+            },
+          ]}
         />
-        <input
-          type="text"
-          placeholder="Tìm kiếm bạn bè..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full py-2.5 sm:py-3 pl-9 sm:pl-10 pr-3 sm:pr-4 text-sm sm:text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-        />
+
+        {/* Search bar */}
+        <div className="relative sm:w-80">
+          <Icon 
+            icon="lucide:search" 
+            className="absolute w-4 h-4 text-gray-400 transform -translate-y-1/2 left-3 top-1/2" 
+          />
+          <input
+            type="text"
+            placeholder="Tìm kiếm..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full h-10 py-2 pl-9 pr-3 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
+        </div>
       </div>
 
-      {/* Friends count */}
-      <div className="flex items-center justify-between">
-        <h3 className="text-base sm:text-lg font-semibold text-gray-800">
-          Tất cả bạn bè ({filteredFriends.length})
-        </h3>
-      </div>
-
-      {filteredFriends.length === 0 ? (
+      {filteredData.length === 0 ? (
         <div className="py-8 sm:py-12 text-center">
           <Icon icon="lucide:users" width={40} className="sm:w-12 sm:h-12 mx-auto mb-3 sm:mb-4 text-gray-400" />
           <p className="text-sm sm:text-base text-gray-500">
-            {searchQuery ? "Không tìm thấy bạn bè nào" : "Chưa có bạn bè nào"}
+            {searchQuery ? "Không tìm thấy" : "Chưa có dữ liệu"}
           </p>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-          {filteredFriends.map((friend) => (
+          {activeTab === 'pending' && friendshipData?.pendingRequests.filter(req => {
+            const fullName = req.friendProfile.userProfile.fullName || '';
+            return fullName.toLowerCase().includes(searchQuery.toLowerCase());
+          }).map((request) => (
             <div
-              key={friend.userId}
-              className="p-3 sm:p-4 transition-shadow bg-white border border-gray-200 rounded-lg hover:shadow-md cursor-pointer"
-              onClick={() => handleFriendClick(friend.userId)}
+              key={request.friendshipId}
+              className="p-3 sm:p-4 transition-shadow bg-white border border-gray-200 rounded-lg hover:shadow-md"
             >
               <div className="flex items-center gap-2.5 sm:gap-3 mb-2.5 sm:mb-3">
                 <div className="relative w-12 h-12 sm:w-16 sm:h-16 flex-shrink-0">
-                  {imageLoading[friend.userId] && (
+                  {imageLoading[request.friendProfile.userId || ''] && (
                     <Skeleton.Avatar 
                       active 
                       size={64} 
@@ -129,46 +179,99 @@ const UserProfileFriendsPage: React.FC = () => {
                     />
                   )}
                   <Image
-                    src={friend.avatarImg || avatardf}
-                    alt={`${friend.firstName} ${friend.lastName}`}
+                    src={request.friendProfile.avatarImg || avatardf}
+                    alt={request.friendProfile.userProfile.fullName || ''}
                     className="w-12 h-12 sm:w-16 sm:h-16 rounded-full"
                     preview={false}
-                    onLoad={() => setImageLoading(prev => ({ ...prev, [friend.userId]: false }))}
-                    onError={() => setImageLoading(prev => ({ ...prev, [friend.userId]: false }))}
+                    onLoad={() => setImageLoading(prev => ({ ...prev, [request.friendProfile.userId || '']: false }))}
+                    onError={() => setImageLoading(prev => ({ ...prev, [request.friendProfile.userId || '']: false }))}
                     style={{ 
-                      display: imageLoading[friend.userId] ? 'none' : 'block',
+                      display: imageLoading[request.friendProfile.userId || ''] ? 'none' : 'block',
                       objectFit: 'cover'
                     }}
                   />
                 </div>
                 <div className="flex-1 min-w-0">
                   <h4 className="font-semibold text-sm sm:text-base text-gray-800 truncate">
-                    {friend.firstName} {friend.lastName}
+                    {request.friendProfile.userProfile.fullName}
                   </h4>
-                  {friend.location && (
+                  {request.friendProfile.userProfile.location && (
                     <div className="flex items-center gap-1 text-xs sm:text-sm text-gray-500">
                       <Icon icon="lucide:map-pin" className="w-3 h-3 flex-shrink-0" />
-                      <span className="truncate">{friend.location}</span>
+                      <span className="truncate">{request.friendProfile.userProfile.location}</span>
                     </div>
                   )}
                 </div>
               </div>
               
-              {friend.mutualFriends && friend.mutualFriends > 0 && (
-                <div className="flex items-center gap-1 text-[11px] sm:text-xs text-gray-500 mb-2.5 sm:mb-3">
-                  <Icon icon="lucide:users" className="w-3 h-3 flex-shrink-0" />
-                  <span>{friend.mutualFriends} bạn chung</span>
+              <div className="flex gap-2">
+                <button 
+                  className="flex items-center justify-center flex-1 gap-1.5 px-2.5 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-white transition bg-blue-500 rounded-lg hover:bg-blue-600"
+                  onClick={() => handleAcceptRequest(request.friendshipId)}
+                >
+                  <Icon icon="lucide:check" className="w-4 h-4" />
+                  Chấp nhận
+                </button>
+                <button 
+                  className="flex items-center justify-center flex-1 gap-1.5 px-2.5 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-gray-700 transition bg-gray-100 rounded-lg hover:bg-gray-200"
+                  onClick={() => handleRejectRequest(request.friendshipId)}
+                >
+                  <Icon icon="lucide:x" className="w-4 h-4" />
+                  Từ chối
+                </button>
+              </div>
+            </div>
+          ))}
+
+          {(activeTab === 'friends' || activeTab === 'blocked') && filteredData.map((user) => (
+            <div
+              key={user.userId}
+              className="p-3 sm:p-4 transition-shadow bg-white border border-gray-200 rounded-lg hover:shadow-md cursor-pointer"
+              onClick={() => handleFriendClick(user.userId || '')}
+            >
+              <div className="flex items-center gap-2.5 sm:gap-3 mb-2.5 sm:mb-3">
+                <div className="relative w-12 h-12 sm:w-16 sm:h-16 flex-shrink-0">
+                  {imageLoading[user.userId || ''] && (
+                    <Skeleton.Avatar 
+                      active 
+                      size={64} 
+                      shape="circle"
+                      className="absolute inset-0"
+                    />
+                  )}
+                  <Image
+                    src={user.avatarImg || avatardf}
+                    alt={user.userProfile.fullName || ''}
+                    className="w-12 h-12 sm:w-16 sm:h-16 rounded-full"
+                    preview={false}
+                    onLoad={() => setImageLoading(prev => ({ ...prev, [user.userId || '']: false }))}
+                    onError={() => setImageLoading(prev => ({ ...prev, [user.userId || '']: false }))}
+                    style={{ 
+                      display: imageLoading[user.userId || ''] ? 'none' : 'block',
+                      objectFit: 'cover'
+                    }}
+                  />
                 </div>
-              )}
+                <div className="flex-1 min-w-0">
+                  <h4 className="font-semibold text-sm sm:text-base text-gray-800 truncate">
+                    {user.userProfile.fullName}
+                  </h4>
+                  {user.userProfile.location && (
+                    <div className="flex items-center gap-1 text-xs sm:text-sm text-gray-500">
+                      <Icon icon="lucide:map-pin" className="w-3 h-3 flex-shrink-0" />
+                      <span className="truncate">{user.userProfile.location}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
               
               <div className="flex gap-2">
-                {currentUserId === userId ? (
+                {currentUserId === userId && activeTab === 'friends' ? (
                   <button 
                     className="flex items-center justify-center flex-1 gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-gray-700 transition bg-gray-100 rounded-lg hover:bg-gray-200 cursor-pointer"
                     onClick={(e) => {
                       e.stopPropagation();
-                      // Handle message action
-                      console.log('Send message to', friend.userId);
+                      console.log('Send message to', user.userId);
                     }}
                   >
                     <Icon icon="lucide:message-circle" className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
@@ -180,7 +283,7 @@ const UserProfileFriendsPage: React.FC = () => {
                     className="flex items-center justify-center flex-1 gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-gray-700 transition bg-gray-100 rounded-lg hover:bg-gray-200 cursor-pointer"
                     onClick={(e) => {
                       e.stopPropagation();
-                      navigate(`/home/user/${friend.userId}`);
+                      navigate(`/home/user/${user.userId}`);
                     }}
                   >
                     <Icon icon="lucide:user" className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />

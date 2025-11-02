@@ -24,6 +24,11 @@ export const path = {
     GROUPS_FEEDS: "feeds",
     GROUPS_DISCOVER: "discover",
     YOUR_GROUPS: "your-groups",
+    GROUP_DETAIL: ":groupId",
+    GROUP_ABOUT: "about",
+    GROUP_DISCUSSION: "discussion",
+    GROUP_MEMBERS: "members",
+    GROUP_MEDIA: "media",
     WATCH: "watch",
     EXPLORE: "explore",
     STAR: "*"

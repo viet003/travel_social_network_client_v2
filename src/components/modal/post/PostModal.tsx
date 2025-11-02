@@ -128,7 +128,7 @@ const PostModal: React.FC<PostModalProps> = ({
 
   const handleGroupClick = () => {
     if (group?.groupId) {
-      navigate(`/groups/${group.groupId}`);
+      navigate(`/home/groups/${group.groupId}`);
     }
   };
 
@@ -235,7 +235,7 @@ const PostModal: React.FC<PostModalProps> = ({
               src={avatar || avatardf}
               alt="avatar"
               className="absolute -bottom-1 -right-1 w-6 h-6 sm:w-7 sm:h-7 object-cover rounded-full border-2 border-white cursor-pointer"
-              onClick={() => { console.log(userId); navigate(`/user/${userId}`) }}
+              onClick={() => { console.log(userId); navigate(`/home/user/${userId}`) }}
             />
           </div>
 
@@ -256,7 +256,7 @@ const PostModal: React.FC<PostModalProps> = ({
             <div className="flex items-center gap-1 text-xs sm:text-sm text-gray-600 mt-1">
               <span
                 className="hover:underline cursor-pointer truncate"
-                onClick={() => { navigate(`/user/${userId}`) }}
+                onClick={() => { navigate(`/home/user/${userId}`) }}
               >
                 {userName}
               </span>
@@ -315,12 +315,12 @@ const PostModal: React.FC<PostModalProps> = ({
               src={avatar || avatardf}
               alt="avatar"
               className="object-cover w-8 h-8 sm:w-10 sm:h-10 rounded-full cursor-pointer flex-shrink-0"
-              onClick={() => { console.log(userId); navigate(`/user/${userId}`) }}
+              onClick={() => { console.log(userId); navigate(`/home/user/${userId}`) }}
             />
             <div className='flex flex-col flex-1 min-w-0'>
               <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
                 <span className="font-semibold text-sm sm:text-base text-gray-800 cursor-pointer hover:underline hover:text-blue-600 truncate"
-                  onClick={() => { navigate(`/user/${userId}`) }}
+                  onClick={() => { navigate(`/home/user/${userId}`) }}
                 >{userName}</span>
                 {location && <span className="text-xs text-gray-500 truncate">• {location}</span>}
               </div>

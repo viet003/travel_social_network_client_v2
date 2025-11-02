@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Icon } from '@iconify/react';
 import { SearchGroupDropdown } from '../../../components/common/dropdowns';
 import type { GroupResultItemProps } from '../../../components/common/items/GroupResultItem';
 
 const GroupsPage: React.FC = () => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('joined');
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearchDropdown, setShowSearchDropdown] = useState(false);
@@ -221,7 +223,10 @@ const GroupsPage: React.FC = () => {
                       </div>
                       
                       <div className="flex space-x-3">
-                        <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                        <button 
+                          onClick={() => navigate(`/home/groups/${group.id}`)}
+                          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                        >
                           Xem nhóm
                         </button>
                         <button className="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors">
@@ -240,7 +245,11 @@ const GroupsPage: React.FC = () => {
         {activeTab === 'discover' && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {discoverGroups.map((group) => (
-              <div key={group.id} className="bg-white rounded-lg shadow-sm p-6">
+              <div 
+                key={group.id} 
+                className="bg-white rounded-lg shadow-sm p-6 cursor-pointer hover:shadow-md transition-shadow"
+                onClick={() => navigate(`/home/groups/${group.id}`)}
+              >
                 <div className="flex items-center space-x-4 mb-4">
                   <img
                     src={group.avatar}
@@ -260,7 +269,13 @@ const GroupsPage: React.FC = () => {
                     <Icon icon="fluent:people-24-filled" className="h-4 w-4" />
                     <span>{group.members.toLocaleString()} thành viên</span>
                   </div>
-                  <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm">
+                  <button 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate(`/home/groups/${group.id}`);
+                    }}
+                    className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm"
+                  >
                     Tham gia
                   </button>
                 </div>

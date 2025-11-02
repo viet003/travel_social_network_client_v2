@@ -1,166 +1,72 @@
-import React from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import React, { useEffect, useState } from 'react';
+import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { LeftSidebar, RightSidebar } from '../../components/common';
 import { PostCreateModal, PostModal } from '../../components/modal/post';
 import { authAction } from '../../stores/actions';
 import { path } from '../../utilities/path';
+import { apiGetNewsFeed } from '../../services/suggestionService';
+import type { PostResponse } from '../../types/post.types';
 
 const HomePage: React.FC = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { user } = useSelector((state: any) => state.auth);
+  
+  const [posts, setPosts] = useState<PostResponse[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+  const [page, setPage] = useState<number>(1);
+  const [hasMore, setHasMore] = useState<boolean>(true);
 
   const handleLogout = () => {
     dispatch(authAction.logout());
     navigate(path.LANDING);
   };
 
-  // Mock posts data
-  const mockPosts = [
-    {
-      id: "1",
-      content: `<p><strong>Vừa khám phá Hội An - một thành phố cổ kính tuyệt đẹp!</strong> 🌟</p>
-<p>Những ngôi nhà màu vàng, đèn lồng đỏ rực rỡ và ẩm thực đặc sản làm tôi mê mẩn. Đặc biệt là món <em>cao lầu</em> và <em>bánh mì Phượng</em>, ngon không thể tả!</p>
-<p>Hội An thực sự là một <strong>điểm đến tuyệt vời</strong> cho những ai yêu thích văn hóa và lịch sử. Từng con phố cổ đều mang trong mình câu chuyện riêng, từng ngôi nhà đều toát lên nét kiến trúc độc đáo pha trộn giữa Việt Nam, Nhật Bản và Trung Quốc.</p>
-<p>Buổi tối đi dạo bên bờ sông Hoài, ngắm đèn lồng lung linh rực rỡ phản chiếu trên mặt nước, cảm giác thật yên bình và lãng mạn. Không khí mát mẻ, tiếng nhạc truyền thống du dương, và mùi hương thơm từ những quán ăn ven đường khiến tôi không muốn rời xa nơi đây! 💕</p>`,
-      media: [
-        {
-          id: "media1",
-          url: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=500&h=300&fit=crop",
-          type: "IMAGE" as const
-        },
-        {
-          id: "media2", 
-          url: "https://images.unsplash.com/photo-1528127269322-539801943592?w=500&h=300&fit=crop",
-          type: "IMAGE" as const
+  // Fetch news feed from API
+  const fetchNewsFeed = async (pageNum: number = 1) => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await apiGetNewsFeed(pageNum, 20);
+      
+      if (response.success && response.data) {
+        if (pageNum === 1) {
+          setPosts(response.data);
+        } else {
+          setPosts(prev => [...prev, ...response.data]);
         }
-      ],
-      location: "Hội An, Việt Nam",
-      tags: ["du lịch", "Hội An", "ẩm thực"],
-      privacy: "public",
-      createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), // 2 hours ago
-      updatedAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-      user: {
-        id: "user1",
-        name: "Nguyễn Minh Anh",
-        avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=100&h=100&fit=crop&crop=face"
-      },
-      group: null,
-      comments: [],
-      onComment: () => {},
-      likeCount: 24,
-      commentCount: 8,
-      shareCount: 3,
-      isLiked: false,
-      setIsLiked: () => {},
-      setPostLikeCount: () => {},
-      setPostCommentCount: () => {},
-      setPostShareCount: () => {}
-    },
-    {
-      id: "2", 
-      content: `<h3>🏔️ Sapa - Thiên đường của những ruộng bậc thang</h3>
-<p>Sapa vào mùa lúa chín vàng rực rỡ! Những thửa ruộng bậc thang như những <strong>chiếc thang trời</strong>, khung cảnh thật ngoạn mục.</p>
-<p>Khí hậu mát mẻ, không khí trong lành - đúng là thiên đường cho những ai muốn tránh xa ồn ào thành thị.</p>
-<ul>
-<li>Leo núi Fansipan - <em>"Nóc nhà Đông Dương"</em></li>
-<li>Thăm các bản làng dân tộc thiểu số</li>
-<li>Thưởng thức ẩm thực đặc sản như cá hồi, măng chua, và thịt trâu gác bếp</li>
-<li>Chụp ảnh với những thửa ruộng bậc thang tuyệt đẹp</li>
-</ul>
-<p>Đặc biệt, được giao lưu và tìm hiểu về văn hóa của người H'Mông, Dao Đỏ thật thú vị. Họ rất hiền lành và mến khách, luôn sẵn sàng chia sẻ về cuộc sống và truyền thống của mình. Tôi đã mua được vài món đồ thủ công mỹ nghệ rất đẹp làm quà! �</p>`,
-      media: [
-        {
-          id: "media3",
-          url: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=500&h=400&fit=crop", 
-          type: "IMAGE" as const
-        }
-      ],
-      location: "Sapa, Lào Cai",
-      tags: ["Sapa", "ruộng bậc thang", "du lịch"],
-      privacy: "public",
-      createdAt: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(), // 5 hours ago
-      updatedAt: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(),
-      user: {
-        id: "user2",
-        name: "Trần Văn Hùng",
-        avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face"
-      },
-      group: null,
-      comments: [],
-      onComment: () => {},
-      likeCount: 156,
-      commentCount: 23,
-      shareCount: 12,
-      isLiked: true,
-      setIsLiked: () => {},
-      setPostLikeCount: () => {},
-      setPostCommentCount: () => {},
-      setPostShareCount: () => {}
-    },
-    {
-      id: "3",
-      content: `<h3>🌴 Khám phá Phú Quốc - Đảo Ngọc của Việt Nam 🐒</h3>
-<p><strong>Phú Quốc không chỉ có biển xanh cát trắng</strong> mà còn có những khu rừng nguyên sinh tuyệt đẹp!</p>
-<p>Vừa đi trekking trong <em>Vườn Quốc gia Phú Quốc</em>, gặp được rất nhiều động vật hoang dã. Cảm giác được hòa mình vào thiên nhiên thật tuyệt vời!</p>
-<blockquote>
-<p>"Thiên nhiên là nơi ta tìm thấy sự bình yên cho tâm hồn"</p>
-</blockquote>
-<p><strong>Điểm nổi bật trong chuyến đi:</strong></p>
-<ol>
-<li><strong>Bãi Sao</strong> - Bãi biển đẹp nhất với cát trắng mịn màng và nước trong xanh</li>
-<li><strong>Dinh Cậu</strong> - Ngôi đền nhỏ xinh bên bờ biển, nơi ngư dân cầu nguyện bình an</li>
-<li><strong>Chợ đêm Phú Quốc</strong> - Thiên đường ẩm thực hải sản tươi ngon</li>
-<li><strong>Vườn tiêu</strong> - Tìm hiểu quy trình trồng và chế biến hạt tiêu</li>
-</ol>
-<p>Ngoài ra, tôi còn được thử <em>lặn ngắm san hô</em> ở Nam Đảo, cảnh biển dưới nước đẹp như tranh vẽ với những rạn san hô đầy màu sắc và đàn cá nhiệt đới bơi lội tung tăng. Thật sự là một trải nghiệm khó quên! �🪸</p>`,
-      media: [
-        {
-          id: "media4",
-          url: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=500&h=300&fit=crop",
-          type: "IMAGE" as const
-        },
-        {
-          id: "media5",
-          url: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=500&h=300&fit=crop", 
-          type: "IMAGE" as const
-        },
-        {
-          id: "media6",
-          url: "https://images.unsplash.com/photo-1506197603052-3cc9c3a201bd?w=500&h=300&fit=crop",
-          type: "IMAGE" as const
-        }
-      ],
-      location: "Phú Quốc, Kiên Giang",
-      tags: ["Phú Quốc", "trekking", "thiên nhiên"],
-      privacy: "public", 
-      createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(), // 1 day ago
-      updatedAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
-      user: {
-        id: "user3",
-        name: "Lê Thị Mai",
-        avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&crop=face"
-      },
-      group: null,
-      comments: [],
-      onComment: () => {},
-      likeCount: 89,
-      commentCount: 15,
-      shareCount: 7,
-      isLiked: false,
-      setIsLiked: () => {},
-      setPostLikeCount: () => {},
-      setPostCommentCount: () => {},
-      setPostShareCount: () => {}
+        
+        // Check if there are more posts to load
+        setHasMore(response.data.length === 20);
+      }
+    } catch (err) {
+      console.error('Error fetching news feed:', err);
+      setError('Không thể tải bảng tin. Vui lòng thử lại.');
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
+
+  // Load initial news feed
+  useEffect(() => {
+    fetchNewsFeed(1);
+  }, []);
+
+  // Load more posts
+  const handleLoadMore = () => {
+    if (!loading && hasMore) {
+      const nextPage = page + 1;
+      setPage(nextPage);
+      fetchNewsFeed(nextPage);
+    }
+  };
 
   return (
     <div className="flex">
       {/* Left Sidebar - Hidden on mobile and tablet */}
       <div className="hidden lg:block">
-        <LeftSidebar user={user} onLogout={handleLogout} />
+        <LeftSidebar onLogout={handleLogout} />
       </div>
 
       {/* Main Content Area */}
@@ -172,37 +78,85 @@ const HomePage: React.FC = () => {
             setCreateSuccess={(success) => {
               if (success) {
                 console.log('Post created successfully!');
-                // You can add logic here to refresh the feed or show a success message
+                // Reload news feed after creating a post
+                fetchNewsFeed(1);
+                setPage(1);
               }
             }}
           />
 
-          {/* Mock Posts Feed */}
+          {/* Error Message */}
+          {error && (
+            <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
+              <p>{error}</p>
+              <button 
+                onClick={() => fetchNewsFeed(1)}
+                className="mt-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+              >
+                Thử lại
+              </button>
+            </div>
+          )}
+
+          {/* Posts Feed */}
           <div className="space-y-4 sm:space-y-6">
-            {mockPosts.map((post) => (
-              <PostModal
-                key={post.id}
-                postId={post.id}
-                userId={post.user.id}
-                avatar={post.user.avatar}
-                userName={post.user.name}
-                location={post.location}
-                timeAgo={post.createdAt}
-                content={post.content}
-                mediaList={post.media}
-                likeCount={post.likeCount}
-                commentCount={post.commentCount}
-                shareCount={post.shareCount}
-                tags={post.tags}
-                privacy={post.privacy}
-                group={post.group}
-                comments={post.comments}
-                onImageClick={() => {}}
-                onShare={() => {}}
-                onComment={() => {}}
-                liked={post.isLiked}
-              />
-            ))}
+            {posts.length > 0 ? (
+              <>
+                {posts.map((post) => (
+                  <PostModal
+                    key={post.postId}
+                    postId={post.postId}
+                    userId={post.userId}
+                    avatar={post.avatarImg || ''}
+                    userName={post.fullName}
+                    location={post.location || ''}
+                    timeAgo={post.createdAt}
+                    content={post.content}
+                    mediaList={post.mediaList.map(media => ({
+                      id: media.mediaId,
+                      url: media.url,
+                      type: media.type
+                    }))}
+                    likeCount={post.likeCount}
+                    commentCount={post.commentCount}
+                    shareCount={post.shareCount}
+                    tags={post.tags}
+                    privacy={post.privacy}
+                    group={post.group ? {
+                      groupId: post.group.groupId,
+                      groupName: post.group.groupName,
+                      coverImageUrl: post.group.coverImageUrl || undefined
+                    } : null}
+                    comments={[]}
+                    onImageClick={() => {}}
+                    onShare={() => {}}
+                    onComment={() => {}}
+                    liked={post.isLiked}
+                  />
+                ))}
+                
+                {/* Load More Button */}
+                {hasMore && (
+                  <div className="flex justify-center py-4">
+                    <button
+                      onClick={handleLoadMore}
+                      disabled={loading}
+                      className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                    >
+                      {loading ? 'Đang tải...' : 'Tải thêm'}
+                    </button>
+                  </div>
+                )}
+              </>
+            ) : loading ? (
+              <div className="flex justify-center items-center py-8">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+              </div>
+            ) : (
+              <div className="text-center py-8 text-gray-500">
+                <p>Không có bài viết nào để hiển thị</p>
+              </div>
+            )}
           </div>
         </div>
       </div>

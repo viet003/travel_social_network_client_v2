@@ -1,12 +1,40 @@
 import React from 'react';
+import { useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import { Icon } from '@iconify/react';
+import avatardf from '../../../assets/images/avatar_default.png';
 
-interface LeftSidebarProps {
-  user: any;
-  onLogout: () => void;
+interface AuthState {
+  userId: string | null;
+  userName: string | null;
+  fullName: string | null;
+  firstName: string | null;
+  lastName: string | null;
+  avatar: string | null;
+  isLoggedIn: boolean;
 }
 
-const LeftSidebar: React.FC<LeftSidebarProps> = ({ user, onLogout }) => {
+interface LeftSidebarProps {
+  onLogout?: () => void;
+}
+
+const LeftSidebar: React.FC<LeftSidebarProps> = ({ onLogout }) => {
+  const navigate = useNavigate();
+  const { userId, userName, fullName, firstName, lastName, avatar } = useSelector((state: { auth: AuthState }) => state.auth);
+
+  // Handle profile click - redirect to user profile page
+  const handleProfileClick = () => {
+    if (userId) {
+      navigate(`/home/user/${userId}`);
+    }
+  };
+
+  // Display name priority: fullName > firstName + lastName > firstName or lastName > userName > default
+  const displayName = fullName || 
+    (firstName && lastName ? `${firstName} ${lastName}` : firstName || lastName) || 
+    userName || 
+    'Người dùng';
+
   // Main Menu items
   const mainMenuItems = [
     {
@@ -53,24 +81,23 @@ const LeftSidebar: React.FC<LeftSidebarProps> = ({ user, onLogout }) => {
   return (
     <div className="w-80 p-4 flex flex-col sticky top-0 h-[calc(100vh-55px)] overflow-y-auto">
       {/* User Profile */}
-      <div className="flex items-center mb-6">
-        <div className="w-10 h-10 rounded-full overflow-hidden mr-3">
+      <div 
+        className="flex items-center mb-6 cursor-pointer hover:bg-gray-100 rounded-lg p-2 -mx-2 transition-colors"
+        onClick={handleProfileClick}
+      >
+        <div className="w-10 h-10 rounded-full overflow-hidden mr-3 flex-shrink-0">
           <img
-            src={user?.avatar || user?.profilePicture || '/default-avatar.png'}
-            alt={user?.firstName || user?.userName || 'User'}
+            src={avatar || avatardf}
+            alt={displayName}
             className="w-full h-full object-cover"
             onError={(e) => {
               const target = e.target as HTMLImageElement;
-              target.style.display = 'none';
-              const parent = target.parentElement;
-              if (parent) {
-                parent.innerHTML = `<span class="text-white font-semibold text-sm bg-blue-500 w-full h-full flex items-center justify-center">${user?.firstName?.charAt(0) || user?.userName?.charAt(0) || 'U'}</span>`;
-              }
+              target.src = avatardf;
             }}
           />
         </div>
-        <span className="font-semibold text-sm text-black">
-          {user?.firstName || user?.userName || 'Đinh Viet Anh'}
+        <span className="font-semibold text-sm text-black truncate">
+          {displayName}
         </span>
       </div>
 

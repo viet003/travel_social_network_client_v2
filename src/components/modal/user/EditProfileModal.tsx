@@ -32,9 +32,9 @@ interface EditProfileModalProps {
 }
 
 const GENDER_OPTIONS = [
-  { value: "male", label: "Nam" },
-  { value: "female", label: "Nữ" },
-  { value: "other", label: "Khác" },
+  { value: "MALE", label: "Nam" },
+  { value: "FEMALE", label: "Nữ" },
+  { value: "OTHER", label: "Khác" },
 ];
 
 const EditProfileModal: React.FC<EditProfileModalProps> = ({ 

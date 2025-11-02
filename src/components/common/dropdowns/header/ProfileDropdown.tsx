@@ -1,12 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { Icon } from '@iconify/react';
+import { useSelector, useDispatch } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+import { logout } from '../../../../stores/actions/authAction';
+import avatardf from '../../../../assets/images/avatar_default.png';
+
+interface AuthState {
+  userId: string | null;
+  userName: string | null;
+  fullName: string | null;
+  firstName: string | null;
+  lastName: string | null;
+  avatar: string | null;
+  isLoggedIn: boolean;
+}
 
 interface ProfileDropdownProps {
   onClose?: () => void;
-  user?: {
-    name: string;
-    avatar: string;
-  };
 }
 
 interface MenuItem {
@@ -18,13 +28,37 @@ interface MenuItem {
   onClick?: () => void;
 }
 
-const ProfileDropdown: React.FC<ProfileDropdownProps> = ({ onClose, user }) => {
+const ProfileDropdown: React.FC<ProfileDropdownProps> = ({ onClose }) => {
   const [showAllPages, setShowAllPages] = useState(false);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
-  // Sample user data
-  const currentUser = user || {
-    name: 'Đinh Viet Anh',
-    avatar: 'https://images.unsplash.com/photo-1574158622682-e40e69881006?w=40&h=40&fit=crop&crop=face'
+  // Get user data from Redux
+  const { userId, userName, fullName, firstName, lastName, avatar } = useSelector((state: { auth: AuthState }) => state.auth);
+
+  // Current user data from Redux or props
+  const currentUser = {
+    name: fullName || (firstName && lastName ? `${firstName} ${lastName}` : firstName || lastName || userName || 'Người dùng'),
+    avatar: avatar || avatardf
+  };
+
+  // Handle logout
+  const handleLogout = () => {
+    dispatch(logout());
+    navigate('/');
+    if (onClose) {
+      onClose();
+    }
+  };
+
+  // Handle profile click
+  const handleProfileClick = () => {
+    if (userId) {
+      navigate(`/home/user/${userId}`);
+      if (onClose) {
+        onClose();
+      }
+    }
   };
 
   // Sample pages/profiles
@@ -73,7 +107,7 @@ const ProfileDropdown: React.FC<ProfileDropdownProps> = ({ onClose, user }) => {
       icon: <Icon icon="fluent:sign-out-24-filled" className="w-6 h-6 text-black" />,
       title: 'Đăng xuất',
       hasArrow: false,
-      onClick: () => console.log('Logout clicked')
+      onClick: handleLogout
     }
   ];
 
@@ -114,11 +148,18 @@ const ProfileDropdown: React.FC<ProfileDropdownProps> = ({ onClose, user }) => {
     <div className="fixed px-2 top-[55px] right-[13px] w-80 bg-white border border-gray-200 rounded-2xl shadow-xl z-50 max-h-[600px] flex flex-col">
       {/* User Profile Section */}
       <div className="py-4">
-        <div className="flex items-center space-x-3 mb-3 p-2 hover:bg-gray-100 rounded-xl transition-colors cursor-pointer">
+        <div 
+          className="flex items-center space-x-3 mb-3 p-2 hover:bg-gray-100 rounded-xl transition-colors cursor-pointer"
+          onClick={handleProfileClick}
+        >
           <img
             src={currentUser.avatar}
             alt={currentUser.name}
             className="w-10 h-10 rounded-full object-cover"
+            onError={(e) => {
+              const target = e.target as HTMLImageElement;
+              target.src = avatardf;
+            }}
           />
           <div className="flex-1">
             <h3 className="font-semibold text-gray-900">{currentUser.name}</h3>

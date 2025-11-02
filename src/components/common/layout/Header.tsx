@@ -8,8 +8,19 @@ import {
 } from 'lucide-react';
 
 import logo from '../../../assets/images/logo.png';
+import avatardf from '../../../assets/images/avatar_default.png';
 import { path } from '../../../utilities/path';
 import { SearchResultDropdown, ChatDropdown, NotificationsDropdown, ProfileDropdown, CreateDropdown } from '../dropdowns';
+
+interface AuthState {
+  userId: string | null;
+  userName: string | null;
+  fullName: string | null;
+  firstName: string | null;
+  lastName: string | null;
+  avatar: string | null;
+  isLoggedIn: boolean;
+}
 
 // NavButton component for navigation items with active state
 interface NavButtonProps {
@@ -41,7 +52,7 @@ const NavButton: React.FC<NavButtonProps> = ({ icon, tooltip, onClick, isActive 
 };
 
 const Header: React.FC = () => {
-  const { user } = useSelector((state : any) => state.auth);
+  const { avatar } = useSelector((state: { auth: AuthState }) => state.auth);
   const [showSearchResults, setShowSearchResults] = useState(false);
   const [showChatDropdown, setShowChatDropdown] = useState(false);
   const [showNotificationsDropdown, setShowNotificationsDropdown] = useState(false);
@@ -236,9 +247,13 @@ const Header: React.FC = () => {
                 onClick={() => setShowProfileDropdown(!showProfileDropdown)}
               >
                 <img
-                  src={user?.avatar || "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face"}
+                  src={avatar || avatardf}
                   alt="Profile"
                   className="w-full h-full object-cover rounded-full"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.src = avatardf;
+                  }}
                 />
                 {/* Dropdown arrow */}
                 <Icon icon="fluent:chevron-down-24-filled" className="absolute -bottom-1 -right-1 w-4 h-4 text-black bg-white rounded-full" />
@@ -248,7 +263,6 @@ const Header: React.FC = () => {
               {showProfileDropdown && (
                 <ProfileDropdown 
                   onClose={() => setShowProfileDropdown(false)}
-                  user={user}
                 />
               )}
             </div>
