@@ -2,6 +2,8 @@ import actionTypes from "../types/actionTypes";
 
 const initState = {
     userId: null,
+    userName: null,
+    fullName: null,
     firstName: null,
     lastName: null,
     avatar: null,
@@ -17,6 +19,8 @@ const authReducer = (state = initState, action: any) => {
             return {
                 ...state,
                 userId: action?.data?.userId,
+                userName: action?.data?.userName,
+                fullName: action?.data?.userProfile?.fullName,
                 firstName: action?.data?.userProfile?.firstName,
                 lastName: action?.data?.userProfile?.lastName,
                 avatar: action?.data?.avatarImg,
@@ -29,6 +33,8 @@ const authReducer = (state = initState, action: any) => {
             return {
                 ...state,
                 userId: null,
+                userName: null,
+                fullName: null,
                 firstName: null,
                 lastName: null,
                 avatar: null,
@@ -41,6 +47,8 @@ const authReducer = (state = initState, action: any) => {
             return {
                 ...state,
                 userId: null,
+                userName: null,
+                fullName: null,
                 firstName: null,
                 lastName: null,
                 avatar: null,
@@ -53,6 +61,8 @@ const authReducer = (state = initState, action: any) => {
             return {
                 ...state,
                 userId: null,
+                userName: null,
+                fullName: null,
                 firstName: null,
                 lastName: null,
                 avatar: null,

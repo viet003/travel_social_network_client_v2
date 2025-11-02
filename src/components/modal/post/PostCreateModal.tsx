@@ -8,6 +8,8 @@ import avatardf from '../../../assets/images/avatar_default.png'
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import '../../../styles/tiptap-editor.css';
+import { apiCreatePost, apiCreatePostInGroup } from '../../../services/postService';
+import type { UpdatePostDto } from '../../../types/post.types';
 
 // Types
 interface MediaItem {
@@ -120,7 +122,7 @@ const PostCreateModal: React.FC<PostCreateModalProps> = ({
   const handleMediaSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []);
 
-    for (let file of files) {
+    for (const file of files) {
        // Check file size (20MB = 20 * 1024 * 1024 bytes)
        if (file.size > 20 * 1024 * 1024) {
          toast.error('Tệp quá lớn! Vui lòng chọn tệp nhỏ hơn 20MB.');
@@ -166,7 +168,7 @@ const PostCreateModal: React.FC<PostCreateModalProps> = ({
     const processFiles = async (files: File[]) => {
       const newMedia: MediaItem[] = [];
 
-      for (let file of files) {
+      for (const file of files) {
         const mediaItem: MediaItem = {
           file: file,
           type: file.type,
@@ -211,51 +213,69 @@ const PostCreateModal: React.FC<PostCreateModalProps> = ({
     setIsUploading(true);
 
     try {
-      const formData = new FormData();
-      formData.append('content', postContent);
-      formData.append('privacy', privacy);
+      // Map privacy values to match API expectations
+      const privacyMap: { [key: string]: 'PUBLIC' | 'FRIENDS_ONLY' | 'PRIVATE' } = {
+        'public': 'PUBLIC',
+        'friend': 'FRIENDS_ONLY',
+        'private': 'PRIVATE'
+      };
 
-      // Add all media files
-      selectedMedia.forEach((media) => {
-        formData.append(`media`, media.file);
+      // Prepare post data
+      const postData: UpdatePostDto = {
+        content: postContent,
+        privacy: privacyMap[privacy] || 'PUBLIC',
+        location: selectedLocation || undefined,
+        tags: tags.length > 0 ? tags : undefined,
+        mediaFiles: selectedMedia.length > 0 ? selectedMedia.map(media => media.file) : undefined
+      };
+
+      // Debug log
+      console.log('📤 Sending post data:', {
+        content: postContent,
+        privacy: postData.privacy,
+        location: postData.location,
+        tags: postData.tags,
+        mediaCount: postData.mediaFiles?.length || 0,
+        mediaFiles: postData.mediaFiles?.map(f => ({ name: f.name, size: f.size, type: f.type }))
       });
-
-      formData.append('mediaCount', selectedMedia.length.toString());
-
-      if (selectedLocation) {
-        formData.append('location', selectedLocation);
-      }
-      if (tags.length > 0) {
-        formData.append('tags', JSON.stringify(tags));
-      }
 
        // Call API to create post
        let response;
        if (groupId) {
-         formData.append('groupId', groupId);
-         console.log('Tạo bài viết cho nhóm:', groupId, formData);
-         response = { status: "SUCCESS" }; // Mock response
+         // Create post in group
+         response = await apiCreatePostInGroup(groupId, postData);
        } else {
-         console.log('Tạo bài viết cho người dùng:', formData);
-         response = { status: "SUCCESS" }; // Mock response
+         // Create post on user profile
+         response = await apiCreatePost(postData);
        }
 
-       if (response?.status === "SUCCESS") {
+      console.log('✅ Post created successfully:', response);
+
+       if (response?.success) {
+         toast.success('Tạo bài viết thành công!');
+         
          // Reset form and close modal
+         handleClose();
+         
+         // Trigger success callback if provided
+         if (setCreateSuccess) {
+           setCreateSuccess(true);
+         }
+         
+         // Navigate if needed
          if (location === "home") {
            navigate(`/user/${userId}`);
-         } else {
-           handleClose();
-          //  setCreateSuccess && setCreateSuccess(true);
-           toast.success('Tạo bài viết thành công!');
          }
        } else {
-         throw new Error('Không thể tạo bài viết');
+         throw new Error(response?.message || 'Không thể tạo bài viết');
        }
 
-     } catch (error) {
-       console.error('Lỗi khi tạo bài viết:', error);
-       toast.error('Đã xảy ra lỗi khi tạo bài viết. Vui lòng thử lại!');
+     } catch (error: unknown) {
+       console.error('❌ Lỗi khi tạo bài viết:', error);
+       const errorMessage = error && typeof error === 'object' && 'message' in error 
+         ? (error as { message: string }).message 
+         : 'Đã xảy ra lỗi khi tạo bài viết. Vui lòng thử lại!';
+       toast.error(errorMessage);
      } finally {
        setIsUploading(false);
      }

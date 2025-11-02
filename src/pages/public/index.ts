@@ -8,7 +8,7 @@ export { default as ExplorePage } from './ExplorePage';
 export { 
   UserProfilePage,
   UserProfilePostsPage,
-  UserProfileAlbumsPage,
+  UserProfilePhotosPage,
   UserProfileReviewsPage,
   UserProfileFriendsPage
 } from './user';
