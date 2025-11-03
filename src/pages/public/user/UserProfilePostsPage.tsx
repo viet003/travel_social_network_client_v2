@@ -30,6 +30,7 @@ interface Post {
   shareCount?: number;
   tags?: string[];
   isShare?: boolean;
+  sharedPost?: PostResponse | null;
   privacy?: string;
   liked?: boolean;
 }
@@ -114,9 +115,9 @@ const UserProfilePostsPage: React.FC<UserProfilePostsPageProps> = ({
         const mappedPosts: Post[] = postsData.content.map(
           (post: PostResponse) => ({
             postId: post.postId,
-            userId: post.userId,
-            fullName: post.fullName || "Người dùng",
-            avatarImg: post.avatarImg || undefined,
+            userId: post.user?.userId || '',
+            fullName: post.user?.fullName || "Người dùng",
+            avatarImg: post.user?.avatarImg || undefined,
             location: post.location || undefined,
             createdAt: post.createdAt,
             content: post.content,
@@ -129,6 +130,7 @@ const UserProfilePostsPage: React.FC<UserProfilePostsPageProps> = ({
             shareCount: post.shareCount,
             tags: post.tags || [],
             isShare: post.isShare || false,
+            sharedPost: post.sharedPost || null,
             privacy: post.privacy,
             liked: post.isLiked,
           })
@@ -187,9 +189,9 @@ const UserProfilePostsPage: React.FC<UserProfilePostsPageProps> = ({
           const mappedPosts: Post[] = postsData.content.map(
             (post: PostResponse) => ({
               postId: post.postId,
-              userId: post.userId,
-              fullName: post.fullName || "Người dùng",
-              avatarImg: post.avatarImg || undefined,
+              userId: post.user?.userId || '',
+              fullName: post.user?.fullName || "Người dùng",
+              avatarImg: post.user?.avatarImg || undefined,
               location: post.location || undefined,
               createdAt: post.createdAt,
               content: post.content,
@@ -202,6 +204,7 @@ const UserProfilePostsPage: React.FC<UserProfilePostsPageProps> = ({
               shareCount: post.shareCount,
               tags: post.tags || [],
               isShare: post.isShare || false,
+              sharedPost: post.sharedPost || null,
               privacy: post.privacy,
               liked: post.isLiked,
             })
@@ -363,7 +366,7 @@ const UserProfilePostsPage: React.FC<UserProfilePostsPageProps> = ({
               Xem tất cả bạn bè
             </button>
           </div>
-          <div className="grid grid-cols-3 gap-2 bg-gray-50 rounded-xl">
+          <div className="grid grid-cols-3 gap-2 bg-gray-50 rounded-xl p-2">
             {friends.length > 0 ? (
               friends.map((friend, i) => (
                 <div key={friend.userId || i} className="text-center">
@@ -375,10 +378,21 @@ const UserProfilePostsPage: React.FC<UserProfilePostsPageProps> = ({
                         friend.userName ||
                         `Friend ${i + 1}`
                       }
-                      className="w-full h-full object-cover"
+                      className="cursor-pointer"
+                      width="100%"
+                      height="100%"
+                      style={{
+                        objectFit: "cover",
+                        display: "block",
+                        minHeight: "100%",
+                        minWidth: "100%",
+                      }}
                       preview={false}
                       placeholder={
-                        <Skeleton.Avatar active size={100} shape="square" />
+                        <Skeleton.Image
+                          active
+                          style={{ width: "100%", height: "100%" }}
+                        />
                       }
                     />
                   </div>
@@ -443,6 +457,7 @@ const UserProfilePostsPage: React.FC<UserProfilePostsPageProps> = ({
                     shareCount={post.shareCount || 0}
                     tags={post.tags || []}
                     isShare={post.isShare}
+                    sharedPost={post.sharedPost}
                     privacy={post.privacy}
                     comments={[]}
                     liked={post.liked}
@@ -466,6 +481,7 @@ const UserProfilePostsPage: React.FC<UserProfilePostsPageProps> = ({
                 shareCount={post.shareCount || 0}
                 tags={post.tags || []}
                 isShare={post.isShare}
+                sharedPost={post.sharedPost}
                 privacy={post.privacy}
                 comments={[]}
                 liked={post.liked}

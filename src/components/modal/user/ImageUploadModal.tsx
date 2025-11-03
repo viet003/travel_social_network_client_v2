@@ -199,25 +199,21 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
                 htmlType="button"
                 onClick={handleClose}
                 disabled={isUploading}
-                className="w-full sm:w-auto"
+                className="px-6"
               >
                 Hủy
               </TravelButton>
               <TravelButton
-                type="primary"
+                type="default"
                 htmlType="submit"
                 disabled={isUploading || !selectedFile}
                 loading={isUploading}
-                className="w-full sm:w-auto"
+                className="px-6"
               >
-                {isUploading ? (
-                  'Đang tải lên...'
-                ) : (
-                  <div className="flex items-center gap-2">
-                    <Icon icon="lucide:check" className="w-4 h-4" />
-                    Tải ảnh lên
-                  </div>
-                )}
+                <div className="flex items-center gap-2">
+                  <Icon icon="lucide:check" className="w-4 h-4" />
+                  Tải ảnh lên
+                </div>
               </TravelButton>
             </div>
           </div>

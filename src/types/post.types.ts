@@ -6,22 +6,26 @@ export interface PostMedia {
     type: 'IMAGE' | 'VIDEO';
 }
 
+export interface PostUserResponse {
+    userId: string;
+    fullName: string;
+    avatarImg: string | null;
+}
+
 export interface PostResponse {
     postId: string;
     content: string;
     location: string | null;
     privacy: 'PUBLIC' | 'FRIENDS_ONLY' | 'PRIVATE';
     createdAt: string;
-    userId: string;
-    avatarImg: string | null;
-    coverImg: string | null;
-    fullName: string;
+    user: PostUserResponse | null;
     likeCount: number;
     commentCount: number;
     shareCount: number;
     mediaList: PostMedia[];
     tags: string[];
     isShare: boolean;
+    sharedPost: PostResponse | null;
     group: {
         groupId: string;
         groupName: string;

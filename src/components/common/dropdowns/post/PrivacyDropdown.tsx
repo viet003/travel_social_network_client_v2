@@ -46,30 +46,29 @@ const PrivacyDropdown: React.FC<PrivacyDropdownProps> = ({
   };
   
   return (
-    <div className="relative" ref={dropdownRef}>
+    <div className="relative inline-block" ref={dropdownRef}>
       {/* Trigger Button */}
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-2 sm:px-3 py-1.5 pr-6 sm:pr-8 text-xs sm:text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-full cursor-pointer hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+        className="flex items-center gap-1.5 py-1 px-2 sm:px-3 text-xs sm:text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-full cursor-pointer hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
       >
-        <span className="flex items-center gap-1.5">
-          {currentOption?.icon && (
-            <span className="flex-shrink-0">
-              {currentOption.icon()}
-            </span>
-          )}
-          <span>{currentOption?.label}</span>
-        </span>
-      </button>
-
-      {/* Dropdown Icon */}
-      <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+        {/* Privacy Icon */}
+        {currentOption?.icon && (
+          <span className="flex-shrink-0">
+            {currentOption.icon()}
+          </span>
+        )}
+        
+        {/* Label */}
+        <span>{currentOption?.label}</span>
+        
+        {/* Dropdown Icon */}
         <Icon 
           icon={isOpen ? "mingcute:up-line" : "mingcute:down-line"} 
-          className="w-3 h-3 sm:w-4 sm:h-4 text-gray-500 transition-transform" 
+          className="w-3 h-3 sm:w-4 sm:h-4 text-gray-500 transition-transform flex-shrink-0" 
         />
-      </div>
+      </button>
 
       {/* Dropdown Menu */}
       {isOpen && (

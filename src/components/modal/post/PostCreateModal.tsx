@@ -10,6 +10,7 @@ import { toast } from 'react-toastify';
 import '../../../styles/tiptap-editor.css';
 import { apiCreatePost, apiCreatePostInGroup } from '../../../services/postService';
 import type { UpdatePostDto } from '../../../types/post.types';
+import TravelButton from '../../ui/customize/TravelButton';
 
 // Types
 interface MediaItem {
@@ -665,23 +666,17 @@ const PostCreateModal: React.FC<PostCreateModalProps> = ({
 
               {/* Submit Button */}
               <div className="pt-4 border-t border-gray-200">
-                 <button
-                   type="submit"
-                   disabled={isUploading || (!postContent.trim() && selectedMedia.length === 0)}
-                   className={`w-full py-3 text-base font-semibold rounded-lg transition-all duration-200 ${(postContent.trim() || selectedMedia.length > 0) && !isUploading
-                     ? "bg-blue-500 hover:bg-blue-600 text-white shadow-md hover:shadow-lg cursor-pointer"
-                     : "bg-gray-300 text-gray-500 cursor-not-allowed"
-                     }`}
-                 >
-                   {isUploading ? (
-                     <div className="flex items-center justify-center gap-2">
-                       <div className="w-5 h-5 border-2 border-white rounded-full border-t-transparent animate-spin"></div>
-                       Đang tạo bài viết...
-                     </div>
-                   ) : (
-                     'Tạo Bài Viết'
-                   )}
-                 </button>
+                <div className="flex justify-end">
+                  <TravelButton
+                    type="default"
+                    htmlType="submit"
+                    loading={isUploading}
+                    disabled={isUploading || (!postContent.trim() && selectedMedia.length === 0)}
+                    className="px-6"
+                  >
+                    Tạo Bài Viết
+                  </TravelButton>
+                </div>
               </div>
             </form>
           </div>

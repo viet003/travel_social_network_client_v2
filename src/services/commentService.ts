@@ -28,7 +28,7 @@ export const apiGetRepliesByComment = async (commentId: string, page: number): P
   try {
     const response = await axiosConfig({
       method: 'GET',
-      url: `comment/${commentId}/replies?page=${page}`,
+      url: `comment/replies/${commentId}?page=${page}`,
     });
     return response?.data;
   } catch (error: any) {
@@ -44,7 +44,25 @@ export const apiCreateCommentService = async (payload: CreateCommentPayload): Pr
       url: "comment",
     });
     return response?.data;
-  } catch (error: any) {
-    throw error.response ? error.response.data : error;
+  } catch (error: unknown) {
+    if (error && typeof error === 'object' && 'response' in error) {
+      throw (error as { response: { data: unknown } }).response.data;
+    }
+    throw error;
+  }
+};
+
+export const apiToggleLikeComment = async (commentId: string): Promise<ApiResponse> => {
+  try {
+    const response = await axiosConfig({
+      method: 'PUT',
+      url: `comment/like/${commentId}`,
+    });
+    return response?.data;
+  } catch (error: unknown) {
+    if (error && typeof error === 'object' && 'response' in error) {
+      throw (error as { response: { data: unknown } }).response.data;
+    }
+    throw error;
   }
 };

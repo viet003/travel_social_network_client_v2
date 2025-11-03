@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Icon } from '@iconify/react';
 import PostDetailModal from './PostDetailModal';
+import SharePostModal from './SharePostModal';
 import { ExpandableContent } from '../../ui';
 import { useSelector } from 'react-redux';
 import avatardf from '../../../assets/images/avatar_default.png';
@@ -11,6 +12,7 @@ import { TravelImage } from '../../ui/customize';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination } from 'swiper/modules';
 import { PostOptionsDropdown } from '../../common/dropdowns';
+import type { PostResponse } from '../../../types/post.types';
 import '../../../styles/post-modal.css';
 
 // Types
@@ -36,6 +38,8 @@ interface Comment {
 
 interface AuthState {
   avatar?: string;
+  firstName?: string;
+  lastName?: string;
 }
 
 interface PostModalProps {
@@ -54,6 +58,7 @@ interface PostModalProps {
   shareCount?: number;
   tags?: string[];
   isShare?: boolean;
+  sharedPost?: PostResponse | null;
   privacy?: string;
   group?: Group | null;
   comments?: Comment[];
@@ -79,6 +84,7 @@ const PostModal: React.FC<PostModalProps> = ({
   shareCount = 0,
   tags = [],
   isShare = false,
+  sharedPost = null,
   privacy,
   group = null,
   comments: _comments = [],
@@ -89,15 +95,19 @@ const PostModal: React.FC<PostModalProps> = ({
 }) => {
   const [selectedImageIndex, setSelectedImageIndex] = useState<number>(0);
   const [showCommentModal, setShowCommentModal] = useState<boolean>(false);
+  const [showShareModal, setShowShareModal] = useState<boolean>(false);
   const [isLiked, setIsLiked] = useState<boolean>(liked);
-  const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
   const [showOptionsDropdown, setShowOptionsDropdown] = useState<boolean>(false);
-  const { avatar: currentUserAvatar } = useSelector((state: { auth: AuthState }) => state.auth);
+  const { avatar: currentUserAvatar, firstName, lastName } = useSelector((state: { auth: AuthState }) => state.auth);
+  const currentUserName = `${firstName || ''} ${lastName || ''}`.trim() || 'Bạn';
   const [postLikeCount, setPostLikeCount] = useState<number>(likeCount);
   const [postCommentCount, setPostCommentCount] = useState<number>(commentCount);
-  const [postShareCount, _setPostShareCount] = useState<number>(shareCount);
+  const [postShareCount, setPostShareCount] = useState<number>(shareCount);
 
   const navigate = useNavigate();
+
+  // Debug logging
+  console.log('PostModal render:', { isShare, hasSharedPost: !!sharedPost, sharedPost });
 
   // Process mediaList to separate images and videos
   const imageMedia = mediaList.filter(media => media.type === 'IMAGE');
@@ -124,6 +134,19 @@ const PostModal: React.FC<PostModalProps> = ({
 
   const closeCommentModal = () => {
     setShowCommentModal(false);
+  };
+
+  const handleShareClick = () => {
+    setShowShareModal(true);
+  };
+
+  const closeShareModal = () => {
+    setShowShareModal(false);
+  };
+
+  const handleShareSuccess = () => {
+    setPostShareCount(prev => prev + 1);
+    onShare?.();
   };
 
   const handleGroupClick = () => {
@@ -176,7 +199,6 @@ const PostModal: React.FC<PostModalProps> = ({
           }}
           spaceBetween={0}
           slidesPerView={1}
-          onSlideChange={(swiper) => setCurrentImageIndex(swiper.activeIndex)}
           className="post-swiper rounded-xl"
           style={{ 
             borderRadius: '12px',
@@ -213,6 +235,117 @@ const PostModal: React.FC<PostModalProps> = ({
             #{tag}
           </span>
         ))}
+      </div>
+    );
+  };
+
+  const renderSharedPost = () => {
+    if (!sharedPost || !sharedPost.user) return null;
+
+    const sharedImages = sharedPost.mediaList?.filter(m => m.type === 'IMAGE').map(m => m.url) || [];
+    const sharedVideo = sharedPost.mediaList?.find(m => m.type === 'VIDEO')?.url;
+
+    return (
+      <div className="mb-3 border border-gray-200 rounded-xl overflow-hidden hover:bg-gray-50 transition-colors">
+        {/* Shared post header */}
+        <div className="flex items-center gap-2 p-3 bg-gray-50">
+          <img
+            src={sharedPost.user.avatarImg || avatardf}
+            alt={sharedPost.user.fullName}
+            className="w-8 h-8 rounded-full object-cover cursor-pointer"
+            onClick={() => navigate(`/home/user/${sharedPost.user!.userId}`)}
+          />
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2">
+              <span 
+                className="font-semibold text-sm text-gray-800 hover:underline cursor-pointer truncate"
+                onClick={() => navigate(`/home/user/${sharedPost.user!.userId}`)}
+              >
+                {sharedPost.user.fullName}
+              </span>
+              <span className="text-xs text-gray-500">•</span>
+              <span className="text-xs text-gray-500">{formatTimeAgo(sharedPost.createdAt)}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Shared post content */}
+        <div className="p-3">
+          <ExpandableContent 
+            content={sharedPost.content} 
+            maxLines={3} 
+            className="text-sm leading-relaxed break-words mb-2" 
+          />
+
+          {/* Shared post tags */}
+          {sharedPost.tags && sharedPost.tags.length > 0 && (
+            <div className="flex flex-wrap gap-2 mb-2">
+              {sharedPost.tags.map((tag, index) => (
+                <span
+                  key={index}
+                  className="px-2 py-1 text-xs text-blue-600 bg-blue-100 rounded-full"
+                >
+                  #{tag}
+                </span>
+              ))}
+            </div>
+          )}
+
+          {/* Shared post media */}
+          {sharedVideo && (
+            <div className="relative mb-2">
+              <video
+                src={sharedVideo}
+                controls
+                className="w-full max-h-[500px] object-cover rounded-lg"
+              >
+                Your browser does not support the video tag.
+              </video>
+            </div>
+          )}
+
+          {sharedImages.length > 0 && (
+            <div className={`grid gap-2 ${
+              sharedImages.length === 1 ? 'grid-cols-1' : 
+              sharedImages.length === 2 ? 'grid-cols-2' : 
+              'grid-cols-2'
+            }`}>
+              {sharedImages.slice(0, 4).map((img, idx) => (
+                <div key={idx} className="relative w-full h-[400px] overflow-hidden rounded-lg">
+                  <img
+                    src={img}
+                    alt={`shared-${idx}`}
+                    className="w-full h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                    onClick={() => handleImageClick(img, idx)}
+                  />
+                  {idx === 3 && sharedImages.length > 4 && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-lg">
+                      <span className="text-2xl font-bold text-white">
+                        +{sharedImages.length - 4}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Shared post stats */}
+          <div className="flex items-center gap-4 mt-3 text-xs text-gray-500 border-t border-gray-200 pt-2">
+            <div className="flex items-center gap-1">
+              <Icon icon="fluent:heart-24-regular" className="w-4 h-4" />
+              <span>{sharedPost.likeCount}</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <Icon icon="fluent:chat-24-filled" className="w-4 h-4" />
+              <span>{sharedPost.commentCount}</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <Icon icon="fluent:arrow-reply-24-filled" className="w-4 h-4" />
+              <span>{sharedPost.shareCount}</span>
+            </div>
+          </div>
+        </div>
       </div>
     );
   };
@@ -358,9 +491,12 @@ const PostModal: React.FC<PostModalProps> = ({
         {/* Tags */}
         {renderTags()}
 
-        {/* Media rendering logic */}
-        {displayVideo && renderVideo(displayVideo)}
-        {displayImages.length > 0 && renderImageSlider()}
+        {/* Shared Post Preview - Only show if this is a share post */}
+        {isShare && sharedPost && renderSharedPost()}
+
+        {/* Media rendering logic - Only show if NOT a share post */}
+        {!isShare && displayVideo && renderVideo(displayVideo)}
+        {!isShare && displayImages.length > 0 && renderImageSlider()}
 
         {/* Action buttons */}
         <div className="flex items-center gap-3 sm:gap-6 pt-3 text-xs sm:text-sm text-gray-500">
@@ -381,7 +517,7 @@ const PostModal: React.FC<PostModalProps> = ({
             <span className="hidden xs:inline">{postCommentCount}</span>
             <span className="xs:hidden">{postCommentCount > 99 ? '99+' : postCommentCount}</span>
           </div>
-          <div className="flex items-center gap-1 transition-colors cursor-pointer hover:text-green-500" onClick={onShare}>
+          <div className="flex items-center gap-1 transition-colors cursor-pointer hover:text-green-500" onClick={handleShareClick}>
             <Icon icon="fluent:arrow-reply-24-filled" className="w-4 h-4 sm:w-5 sm:h-5" />
             <span className="hidden xs:inline">{postShareCount}</span>
             <span className="xs:hidden">{postShareCount > 99 ? '99+' : postShareCount}</span>
@@ -430,13 +566,29 @@ const PostModal: React.FC<PostModalProps> = ({
         setIsLiked={setIsLiked}
         postCommentCount={postCommentCount}
         handleComment={handleComment}
+        onCommentCountChange={handleComment}
         currentUserAvatar={currentUserAvatar}
         tags={tags}
         isShare={isShare}
         privacy={privacy}
         group={group}
         postShareCount={postShareCount}
-        onShare={onShare}
+        onShare={handleShareClick}
+        sharedPost={sharedPost}
+      />
+
+      {/* Share Post Modal */}
+      <SharePostModal
+        isOpen={showShareModal}
+        onClose={closeShareModal}
+        postId={postId}
+        originalPostContent={content}
+        originalPostAuthor={userName}
+        originalPostAuthorId={userId}
+        originalPostImages={displayImages}
+        currentUserAvatar={currentUserAvatar}
+        currentUserName={currentUserName}
+        onShareSuccess={handleShareSuccess}
       />
     </>
   );
