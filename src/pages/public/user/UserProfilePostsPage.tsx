@@ -21,6 +21,7 @@ interface Post {
   location?: string;
   createdAt: string;
   content: string;
+  postType?: 'NORMAL' | 'AVATAR_UPDATE' | 'COVER_UPDATE';
   mediaList?: Array<{
     type: "IMAGE" | "VIDEO";
     url: string;
@@ -30,6 +31,7 @@ interface Post {
   shareCount?: number;
   tags?: string[];
   isShare?: boolean;
+  sharedPost?: PostResponse | null;
   privacy?: string;
   liked?: boolean;
 }
@@ -114,12 +116,13 @@ const UserProfilePostsPage: React.FC<UserProfilePostsPageProps> = ({
         const mappedPosts: Post[] = postsData.content.map(
           (post: PostResponse) => ({
             postId: post.postId,
-            userId: post.userId,
-            fullName: post.fullName || "Người dùng",
-            avatarImg: post.avatarImg || undefined,
+            userId: post.user?.userId || '',
+            fullName: post.user?.fullName || "Người dùng",
+            avatarImg: post.user?.avatarImg || undefined,
             location: post.location || undefined,
             createdAt: post.createdAt,
             content: post.content,
+            postType: post.postType,
             mediaList: post.mediaList.map((media) => ({
               type: media.type,
               url: media.url,
@@ -129,8 +132,9 @@ const UserProfilePostsPage: React.FC<UserProfilePostsPageProps> = ({
             shareCount: post.shareCount,
             tags: post.tags || [],
             isShare: post.isShare || false,
+            sharedPost: post.sharedPost || null,
             privacy: post.privacy,
-            liked: post.isLiked,
+            liked: post.liked,
           })
         );
 
@@ -187,27 +191,27 @@ const UserProfilePostsPage: React.FC<UserProfilePostsPageProps> = ({
           const mappedPosts: Post[] = postsData.content.map(
             (post: PostResponse) => ({
               postId: post.postId,
-              userId: post.userId,
-              fullName: post.fullName || "Người dùng",
-              avatarImg: post.avatarImg || undefined,
+              userId: post.user?.userId || '',
+              fullName: post.user?.fullName || "Người dùng",
+              avatarImg: post.user?.avatarImg || undefined,
               location: post.location || undefined,
               createdAt: post.createdAt,
               content: post.content,
+              postType: post.postType,
               mediaList: post.mediaList.map((media) => ({
                 type: media.type,
-                url: media.url,
-              })),
-              likeCount: post.likeCount,
-              commentCount: post.commentCount,
-              shareCount: post.shareCount,
-              tags: post.tags || [],
-              isShare: post.isShare || false,
-              privacy: post.privacy,
-              liked: post.isLiked,
-            })
-          );
-
-          if (pageNum === 0) {
+              url: media.url,
+            })),
+            likeCount: post.likeCount,
+            commentCount: post.commentCount,
+            shareCount: post.shareCount,
+            tags: post.tags || [],
+            isShare: post.isShare || false,
+            sharedPost: post.sharedPost || null,
+            privacy: post.privacy,
+            liked: post.liked,
+          })
+        );          if (pageNum === 0) {
             setPosts(mappedPosts);
             onPostsLoaded?.(postsData.totalElements);
           } else {
@@ -363,7 +367,7 @@ const UserProfilePostsPage: React.FC<UserProfilePostsPageProps> = ({
               Xem tất cả bạn bè
             </button>
           </div>
-          <div className="grid grid-cols-3 gap-2 bg-gray-50 rounded-xl">
+          <div className="grid grid-cols-3 gap-2 bg-gray-50 rounded-xl p-2">
             {friends.length > 0 ? (
               friends.map((friend, i) => (
                 <div key={friend.userId || i} className="text-center">
@@ -375,10 +379,21 @@ const UserProfilePostsPage: React.FC<UserProfilePostsPageProps> = ({
                         friend.userName ||
                         `Friend ${i + 1}`
                       }
-                      className="w-full h-full object-cover"
+                      className="cursor-pointer"
+                      width="100%"
+                      height="100%"
+                      style={{
+                        objectFit: "cover",
+                        display: "block",
+                        minHeight: "100%",
+                        minWidth: "100%",
+                      }}
                       preview={false}
                       placeholder={
-                        <Skeleton.Avatar active size={100} shape="square" />
+                        <Skeleton.Image
+                          active
+                          style={{ width: "100%", height: "100%" }}
+                        />
                       }
                     />
                   </div>
@@ -443,8 +458,9 @@ const UserProfilePostsPage: React.FC<UserProfilePostsPageProps> = ({
                     shareCount={post.shareCount || 0}
                     tags={post.tags || []}
                     isShare={post.isShare}
+                    sharedPost={post.sharedPost}
                     privacy={post.privacy}
-                    comments={[]}
+                    postType={post.postType}
                     liked={post.liked}
                   />
                 </div>
@@ -459,22 +475,21 @@ const UserProfilePostsPage: React.FC<UserProfilePostsPageProps> = ({
                 userName={post.fullName}
                 location={post.location}
                 timeAgo={post.createdAt}
-                content={post.content}
-                mediaList={post.mediaList || []}
-                likeCount={post.likeCount || 0}
-                commentCount={post.commentCount || 0}
-                shareCount={post.shareCount || 0}
-                tags={post.tags || []}
-                isShare={post.isShare}
-                privacy={post.privacy}
-                comments={[]}
-                liked={post.liked}
-              />
-            );
-          })
-        )}
-
-        {/* Show spinner when loading more posts (not first page) */}
+              content={post.content}
+              mediaList={post.mediaList || []}
+              likeCount={post.likeCount || 0}
+              commentCount={post.commentCount || 0}
+              shareCount={post.shareCount || 0}
+              tags={post.tags || []}
+              isShare={post.isShare}
+              sharedPost={post.sharedPost}
+              privacy={post.privacy}
+              postType={post.postType}
+              liked={post.liked}
+            />
+          );
+        })
+      )}        {/* Show spinner when loading more posts (not first page) */}
         {loading && page > 0 && (
           <div className="flex items-center justify-center w-full py-8">
             <Icon

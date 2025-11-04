@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { MapPin } from 'lucide-react';
+import { searchCities, getPopularCities, formatCityData } from '../../../services/geoService';
 
 interface LocationDropdownProps {
   value: string | null;
@@ -8,35 +9,75 @@ interface LocationDropdownProps {
   type?: boolean;
 }
 
+interface CityData {
+  value: string;
+  label: string;
+  city: string;
+  country: string;
+  region?: string;
+  population?: number;
+}
+
 const LocationDropdown: React.FC<LocationDropdownProps> = ({
   value,
   onChange,
   placeholder = "Add location...",
-  type = false
 }) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>('');
+  const [locations, setLocations] = useState<CityData[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  // Mock locations data
-  const locations = [
-    "Hà Nội, Việt Nam",
-    "TP. Hồ Chí Minh, Việt Nam",
-    "Đà Nẵng, Việt Nam",
-    "Hội An, Việt Nam",
-    "Sapa, Việt Nam",
-    "Phú Quốc, Việt Nam",
-    "Nha Trang, Việt Nam",
-    "Đà Lạt, Việt Nam",
-    "Huế, Việt Nam",
-    "Hạ Long, Việt Nam"
-  ];
+  // Load popular cities on mount
+  useEffect(() => {
+    const loadPopularCities = async () => {
+      setIsLoading(true);
+      try {
+        const cities = await getPopularCities(5);
+        const formattedCities = formatCityData(cities);
+        setLocations(formattedCities);
+      } catch (error) {
+        console.error('Error loading popular cities:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-  const filteredLocations = locations.filter(location =>
-    location.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+    loadPopularCities();
+  }, []);
 
-  const handleLocationSelect = (location: string) => {
-    onChange(location);
+  // Search cities when search term changes
+  useEffect(() => {
+    const searchForCities = async () => {
+      if (searchTerm.length < 2) {
+        // Load popular cities if search term is too short
+        const cities = await getPopularCities(5);
+        const formattedCities = formatCityData(cities);
+        setLocations(formattedCities);
+        return;
+      }
+
+      setIsLoading(true);
+      try {
+        const cities = await searchCities(searchTerm, 5);
+        const formattedCities = formatCityData(cities);
+        setLocations(formattedCities);
+      } catch (error) {
+        console.error('Error searching cities:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    const debounceTimer = setTimeout(() => {
+      searchForCities();
+    }, 1000);
+
+    return () => clearTimeout(debounceTimer);
+  }, [searchTerm]);
+
+  const handleLocationSelect = (location: CityData) => {
+    onChange(location.value);
     setIsOpen(false);
     setSearchTerm('');
   };
@@ -51,7 +92,7 @@ const LocationDropdown: React.FC<LocationDropdownProps> = ({
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1 text-xs sm:text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-full hover:bg-gray-200 focus:outline-none max-w-[140px] sm:max-w-none"
+        className="flex cursor-pointer items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1 text-xs sm:text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-full hover:bg-gray-200 focus:outline-none max-w-[140px] sm:max-w-none"
       >
         <MapPin className="w-3 h-3 sm:w-4 sm:h-4 text-gray-500 flex-shrink-0" />
         <span className="truncate">
@@ -63,7 +104,7 @@ const LocationDropdown: React.FC<LocationDropdownProps> = ({
               e.stopPropagation();
               handleClear();
             }}
-            className="text-gray-400 hover:text-gray-600"
+            className="text-gray-400 hover:text-gray-600 cursor-pointer"
           >
             ×
           </button>
@@ -77,26 +118,36 @@ const LocationDropdown: React.FC<LocationDropdownProps> = ({
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Search locations..."
+              placeholder="Tìm kiếm..."
               className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
           <div className="max-h-48 overflow-y-auto">
-            {filteredLocations.map((location, index) => (
-              <button
-                key={index}
-                onClick={() => handleLocationSelect(location)}
-                className="w-full px-3 py-2 text-left text-sm hover:bg-gray-100 transition-colors"
-              >
-                <div className="flex items-center gap-2">
-                  <MapPin className="w-4 h-4 text-gray-400" />
-                  <span>{location}</span>
-                </div>
-              </button>
-            ))}
-            {filteredLocations.length === 0 && (
+            {isLoading ? (
+              <div className="px-3 py-4 text-center text-sm text-gray-500">
+                Loading...
+              </div>
+            ) : locations.length > 0 ? (
+              locations.map((location, index) => (
+                <button
+                  key={index}
+                  onClick={() => handleLocationSelect(location)}
+                  className="w-full px-3 py-2 text-left text-sm hover:bg-gray-100 transition-colors"
+                >
+                  <div className="flex items-center gap-2">
+                    <MapPin className="w-4 h-4 text-gray-400" />
+                    <div className="flex flex-col">
+                      <span className="font-medium">{location.city}</span>
+                      <span className="text-xs text-gray-500">
+                        {location.region ? `${location.region}, ${location.country}` : location.country}
+                      </span>
+                    </div>
+                  </div>
+                </button>
+              ))
+            ) : (
               <div className="px-3 py-2 text-sm text-gray-500">
-                No locations found
+                Không tìm thấy địa điểm
               </div>
             )}
           </div>

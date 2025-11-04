@@ -56,10 +56,10 @@ export const formatPrivacy = (privacy: string | null | undefined): string => {
   if (!privacy) return 'Công khai';
   
   const privacyMap: { [key: string]: string } = {
-    'public': 'Công khai',
-    'friend': 'Bạn bè',
-    'friends': 'Bạn bè',
-    'private': 'Chỉ mình tôi',
+    'PUBLIC': 'Công khai',
+    'FRIEND': 'Bạn bè',
+    'FRIENDS': 'Bạn bè',
+    'PRIVATE': 'Chỉ mình tôi',
     'only_me': 'Chỉ mình tôi',
     'Công khai': 'Công khai',
     'Bạn bè': 'Bạn bè',

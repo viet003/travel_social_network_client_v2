@@ -134,14 +134,14 @@ const GroupCreateModal: React.FC<GroupCreateModalProps> = ({ setCreateSuccess })
 
       if (response?.status === "SUCCESS") {
         handleClose();
-        setCreateSuccess && setCreateSuccess(true);
-        toast.success('Tạo nhóm thành công!');
+        if (setCreateSuccess) {
+          setCreateSuccess(true);
+        }
       } else {
         throw new Error('Không thể tạo nhóm');
       }
     } catch (error) {
       console.error('Lỗi khi tạo nhóm:', error);
-      toast.error('Đã xảy ra lỗi khi tạo nhóm. Vui lòng thử lại!');
     } finally {
       setIsCreating(false);
     }
@@ -321,15 +321,17 @@ const GroupCreateModal: React.FC<GroupCreateModalProps> = ({ setCreateSuccess })
 
               {/* Submit Button */}
               <div className="pt-4 border-t border-gray-200">
-                <TravelButton
-                  type="primary"
-                  htmlType="submit"
-                  disabled={isCreating || !groupName.trim() || groupName.trim().length < 3}
-                  loading={isCreating}
-                  className="w-full"
-                >
-                  {isCreating ? 'Đang tạo nhóm...' : 'Tạo Nhóm'}
-                </TravelButton>
+                <div className="flex justify-end">
+                  <TravelButton
+                    type="default"
+                    htmlType="submit"
+                    disabled={isCreating || !groupName.trim() || groupName.trim().length < 3}
+                    loading={isCreating}
+                    className="px-6"
+                  >
+                    Tạo Nhóm
+                  </TravelButton>
+                </div>
               </div>
             </form>
           </div>

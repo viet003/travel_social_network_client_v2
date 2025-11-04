@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { Icon } from '@iconify/react';
 import avatardf from '../../../assets/images/avatar_default.png';
+import { path } from '../../../utilities/path';
 
 interface AuthState {
   userId: string | null;
@@ -18,7 +19,7 @@ interface LeftSidebarProps {
   onLogout?: () => void;
 }
 
-const LeftSidebar: React.FC<LeftSidebarProps> = ({ onLogout }) => {
+const LeftSidebar: React.FC<LeftSidebarProps> = () => {
   const navigate = useNavigate();
   const { userId, userName, fullName, firstName, lastName, avatar } = useSelector((state: { auth: AuthState }) => state.auth);
 
@@ -35,30 +36,45 @@ const LeftSidebar: React.FC<LeftSidebarProps> = ({ onLogout }) => {
     userName || 
     'Người dùng';
 
+  // Handler for menu item click
+  const handleMenuClick = (route?: string) => {
+    if (route) {
+      navigate(route);
+    } else {
+      // Redirect to home if no route is defined
+      navigate(path.HOME);
+    }
+  };
+
   // Main Menu items
   const mainMenuItems = [
     {
       icon: <Icon icon="fluent:chat-bubbles-question-16-filled" className="w-7 h-7 text-blue-500" />,
       text: 'Tin nhắn',
       hasNotification: true,
-      notificationCount: 12
+      notificationCount: 12,
+      route: undefined // No route defined, will redirect to home
     },
     {
       icon: <Icon icon="fluent:people-16-filled" className="w-7 h-7 text-green-500" />,
-      text: 'Bạn bè'
+      text: 'Bạn bè',
+      route: `${path.HOME}/${path.FRIENDS}`
     },
     {
       icon: <Icon icon="fluent:news-16-filled" className="w-7 h-7 text-orange-500" />,
       text: 'Bảng tin',
-      isActive: true
+      isActive: true,
+      route: path.HOME
     },
     {
       icon: <Icon icon="fluent:person-24-filled" className="w-7 h-7 text-purple-500" />,
-      text: 'Trang cá nhân'
+      text: 'Trang cá nhân',
+      route: userId ? `/home/user/${userId}` : path.HOME
     },
     {
       icon: <Icon icon="fluent:people-community-16-filled" className="w-7 h-7 text-indigo-500" />,
-      text: 'Nhóm'
+      text: 'Nhóm',
+      route: `${path.HOME}/${path.GROUPS}`
     },
   ];
 
@@ -66,15 +82,18 @@ const LeftSidebar: React.FC<LeftSidebarProps> = ({ onLogout }) => {
   const exploreMenuItems = [
     {
       icon: <Icon icon="fluent:globe-16-filled" className="w-7 h-7 text-green-500" />,
-      text: 'Du lịch'
+      text: 'Du lịch',
+      route: `${path.HOME}/${path.EXPLORE}`
     },
     {
       icon: <Icon icon="fluent:bookmark-16-filled" className="w-7 h-7 text-yellow-500" />,
-      text: 'Đã lưu'
+      text: 'Đã lưu',
+      route: undefined // No route defined, will redirect to home
     },
     {
       icon: <Icon icon="fluent:thumb-like-16-filled" className="w-7 h-7 text-pink-500" />,
-      text: 'Gợi ý'
+      text: 'Gợi ý',
+      route: undefined // No route defined, will redirect to home
     },
   ];
 
@@ -111,7 +130,9 @@ const LeftSidebar: React.FC<LeftSidebarProps> = ({ onLogout }) => {
           <ul className="space-y-1">
             {mainMenuItems.map((item, index) => (
               <li key={index}>
-                <button className={`w-full flex items-center p-3 text-left rounded-lg transition-colors cursor-pointer ${item.isActive
+                <button 
+                  onClick={() => handleMenuClick(item.route)}
+                  className={`w-full flex items-center p-3 text-left rounded-lg transition-colors cursor-pointer ${item.isActive
                   ? 'bg-gray-100 text-black'
                   : 'hover:bg-gray-200 text-black'
                   }`}>
@@ -138,7 +159,9 @@ const LeftSidebar: React.FC<LeftSidebarProps> = ({ onLogout }) => {
           <ul className="space-y-1">
             {exploreMenuItems.map((item, index) => (
               <li key={index}>
-                <button className="w-full flex items-center p-3 text-left hover:bg-gray-100 rounded-lg transition-colors text-black cursor-pointer">
+                <button 
+                  onClick={() => handleMenuClick(item.route)}
+                  className="w-full flex items-center p-3 text-left hover:bg-gray-100 rounded-lg transition-colors text-black cursor-pointer">
                   <span className="mr-3">
                     {item.icon}
                   </span>

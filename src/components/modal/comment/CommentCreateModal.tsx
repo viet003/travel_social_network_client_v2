@@ -2,14 +2,20 @@ import React, { useState } from 'react';
 import { Icon } from '@iconify/react';
 import { TravelInput } from '../../ui/customize';
 import avatardf from '../../../assets/images/avatar_default.png';
+import { apiCreateCommentService } from '../../../services/commentService';
+import { message } from 'antd';
 
 // Types
 interface Comment {
+  commentId?: string;
   avatarImg?: string;
-  firstName: string;
-  lastName: string;
+  firstName?: string;
+  lastName?: string;
+  fullName?: string;
   content: string;
   createdAt: string;
+  replyCount?: number;
+  parentCommentId?: string;
 }
 
 interface CommentCreateModalProps {
@@ -17,16 +23,14 @@ interface CommentCreateModalProps {
   handleComment?: (comment: Comment) => void;
   setNewComment: (comment: Comment) => void;
   currentUserAvatar?: string;
-  loading?: boolean;
   setLoading?: (loading: boolean) => void;
 }
 
 const CommentCreateModal: React.FC<CommentCreateModalProps> = ({
-  postId: _postId,
+  postId,
   handleComment,
   setNewComment,
   currentUserAvatar,
-  loading: _externalLoading = false,
   setLoading: setExternalLoading
 }) => {
   const [commentText, setCommentText] = useState<string>('');
@@ -41,23 +45,37 @@ const CommentCreateModal: React.FC<CommentCreateModalProps> = ({
     setExternalLoading?.(true);
 
     try {
-      // Simulate comment creation
-      const newComment: Comment = {
-        avatarImg: currentUserAvatar,
-        firstName: "Current",
-        lastName: "User",
-        content: commentText,
-        createdAt: new Date().toISOString()
-      };
+      // Call API to create comment
+      const response = await apiCreateCommentService({
+        postId: postId,
+        content: commentText
+      });
 
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      console.log('Comment created:', response);
 
-      setNewComment(newComment);
-      handleComment?.(newComment);
-      setCommentText('');
+      if (response.success && response.data) {
+        // Create comment object from API response
+        const newComment: Comment = {
+          commentId: response.data.commentId,
+          avatarImg: response.data.avatarImg,
+          fullName: response.data.fullName,
+          content: response.data.content,
+          createdAt: response.data.createdAt,
+          replyCount: response.data.replyCount || 0,
+          parentCommentId: response.data.parentCommentId
+        };
+
+        setNewComment(newComment);
+        handleComment?.(newComment);
+        setCommentText('');
+        
+        message.success('Đã đăng bình luận!');
+      } else {
+        message.error('Không thể đăng bình luận. Vui lòng thử lại!');
+      }
     } catch (error) {
       console.error('Error posting comment:', error);
+      message.error('Không thể đăng bình luận. Vui lòng thử lại!');
     } finally {
       setIsSubmitting(false);
       setExternalLoading?.(false);
@@ -70,7 +88,7 @@ const CommentCreateModal: React.FC<CommentCreateModalProps> = ({
         <img
           src={currentUserAvatar || avatardf}
           alt="current user"
-          className="flex-shrink-0 object-cover w-8 h-8 rounded-full border-2 border-gray-200"
+          className="flex-shrink-0 object-cover w-10 h-10 rounded-full border-2 border-gray-200"
         />
         <div className="flex-1">
           <TravelInput
@@ -84,13 +102,10 @@ const CommentCreateModal: React.FC<CommentCreateModalProps> = ({
         <button
           type="submit"
           disabled={!commentText.trim() || isSubmitting}
-          className="px-4 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95"
+          className="flex items-center justify-center w-10 h-10 bg-blue-500 text-white rounded-full hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95"
         >
           {isSubmitting ? (
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-              <span>Đang đăng...</span>
-            </div>
+            <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
           ) : (
             <Icon icon="fluent:send-24-filled" className="w-5 h-5" />
           )}

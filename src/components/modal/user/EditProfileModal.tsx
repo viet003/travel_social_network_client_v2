@@ -239,18 +239,18 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
                 htmlType="button"
                 onClick={handleClose}
                 disabled={isSubmitting}
-                className="w-full sm:w-auto"
+                className="px-6"
               >
                 Hủy
               </TravelButton>
               <TravelButton
-                type="primary"
+                type="default"
                 htmlType="submit"
                 disabled={isSubmitting || !form.firstName.trim() || !form.lastName.trim() || !form.userName.trim()}
                 loading={isSubmitting}
-                className="w-full sm:w-auto"
+                className="px-6"
               >
-                {isSubmitting ? 'Đang lưu...' : 'Lưu thay đổi'}
+                Lưu thay đổi
               </TravelButton>
             </div>
           </div>

@@ -110,6 +110,10 @@ export const apiCreatePost = async (
     formData.append('content', postData.content);
     formData.append('privacy', postData.privacy);
     
+    if (postData.postType) {
+      formData.append('postType', postData.postType);
+    }
+    
     if (postData.location) {
       formData.append('location', postData.location);
     }
@@ -163,6 +167,10 @@ export const apiCreatePostInGroup = async (
     const formData = new FormData();
     formData.append('content', postData.content);
     formData.append('privacy', postData.privacy);
+    
+    if (postData.postType) {
+      formData.append('postType', postData.postType);
+    }
     
     if (postData.location) {
       formData.append('location', postData.location);
@@ -270,6 +278,39 @@ export const apiSearchPostsInGroup = async (
       method: 'GET',
       url: `/post/group/${groupId}/search`,
       params: { keyword, page, size }
+    });
+    return response.data;
+  } catch (error: unknown) {
+    if (error && typeof error === 'object' && 'response' in error) {
+      throw (error as { response: { data: unknown } }).response.data;
+    }
+    throw error;
+  }
+};
+
+/**
+ * Share a post
+ * Endpoint: POST /post/{postId}/share
+ * Description: Share an existing post to your timeline with optional additional content and privacy settings.
+ * @param postId - Post UUID to share
+ * @param shareData - Share content and privacy settings
+ * @returns Created shared post response
+ */
+export const apiSharePost = async (
+  postId: string,
+  shareData: {
+    content?: string;
+    privacy: 'PUBLIC' | 'FRIENDS_ONLY' | 'PRIVATE';
+  }
+): Promise<ApiResponse<PostResponse>> => {
+  try {
+    const response = await axiosConfig({
+      method: 'POST',
+      url: `/post/${postId}/share`,
+      params: {
+        content: shareData.content || '',
+        privacy: shareData.privacy
+      }
     });
     return response.data;
   } catch (error: unknown) {

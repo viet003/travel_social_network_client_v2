@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Icon } from '@iconify/react';
 import PostDetailModal from './PostDetailModal';
+import SharePostModal from './SharePostModal';
+import SharedPostPreview from './SharedPostPreview';
 import { ExpandableContent } from '../../ui';
 import { useSelector } from 'react-redux';
 import avatardf from '../../../assets/images/avatar_default.png';
@@ -11,6 +13,7 @@ import { TravelImage } from '../../ui/customize';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination } from 'swiper/modules';
 import { PostOptionsDropdown } from '../../common/dropdowns';
+import type { PostResponse } from '../../../types/post.types';
 import '../../../styles/post-modal.css';
 
 // Types
@@ -25,17 +28,10 @@ interface Group {
   coverImageUrl?: string;
 }
 
-interface Comment {
-  id: string;
-  content: string;
-  userId: string;
-  userName: string;
-  avatar?: string;
-  createdAt: string;
-}
-
 interface AuthState {
   avatar?: string;
+  firstName?: string;
+  lastName?: string;
 }
 
 interface PostModalProps {
@@ -54,13 +50,14 @@ interface PostModalProps {
   shareCount?: number;
   tags?: string[];
   isShare?: boolean;
+  sharedPost?: PostResponse | null;
   privacy?: string;
   group?: Group | null;
-  comments?: Comment[];
+  postType?: 'NORMAL' | 'AVATAR_UPDATE' | 'COVER_UPDATE';
   onShare?: () => void;
   onImageClick?: (img: string, index: number) => void;
-  onComment?: (comment: Comment) => void;
   liked?: boolean;
+  onHidePost?: () => void;
 }
 
 const PostModal: React.FC<PostModalProps> = ({
@@ -79,25 +76,30 @@ const PostModal: React.FC<PostModalProps> = ({
   shareCount = 0,
   tags = [],
   isShare = false,
+  sharedPost = null,
   privacy,
   group = null,
-  comments: _comments = [],
+  postType = 'NORMAL',
   onShare,
   onImageClick,
-  onComment: _onComment,
-  liked = false
+  liked = false,
+  onHidePost
 }) => {
   const [selectedImageIndex, setSelectedImageIndex] = useState<number>(0);
   const [showCommentModal, setShowCommentModal] = useState<boolean>(false);
+  const [showShareModal, setShowShareModal] = useState<boolean>(false);
   const [isLiked, setIsLiked] = useState<boolean>(liked);
-  const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
   const [showOptionsDropdown, setShowOptionsDropdown] = useState<boolean>(false);
-  const { avatar: currentUserAvatar } = useSelector((state: { auth: AuthState }) => state.auth);
+  const { avatar: currentUserAvatar, firstName, lastName } = useSelector((state: { auth: AuthState }) => state.auth);
+  const currentUserName = `${firstName || ''} ${lastName || ''}`.trim() || 'Bạn';
   const [postLikeCount, setPostLikeCount] = useState<number>(likeCount);
   const [postCommentCount, setPostCommentCount] = useState<number>(commentCount);
-  const [postShareCount, _setPostShareCount] = useState<number>(shareCount);
+  const [postShareCount, setPostShareCount] = useState<number>(shareCount);
 
   const navigate = useNavigate();
+
+  // Debug logging
+  console.log('PostModal render:', { isShare, hasSharedPost: !!sharedPost, sharedPost });
 
   // Process mediaList to separate images and videos
   const imageMedia = mediaList.filter(media => media.type === 'IMAGE');
@@ -126,10 +128,50 @@ const PostModal: React.FC<PostModalProps> = ({
     setShowCommentModal(false);
   };
 
+  const handleShareClick = () => {
+    setShowShareModal(true);
+  };
+
+  const closeShareModal = () => {
+    setShowShareModal(false);
+  };
+
+  const handleShareSuccess = () => {
+    setPostShareCount(prev => prev + 1);
+    onShare?.();
+  };
+
   const handleGroupClick = () => {
     if (group?.groupId) {
       navigate(`/home/groups/${group.groupId}`);
     }
+  };
+
+  // Render header text based on postType
+  const renderHeaderText = () => {
+    if (postType === 'AVATAR_UPDATE') {
+      return (
+        <span className="text-xs sm:text-sm text-gray-600">{content}</span>
+      );
+    }
+    
+    if (postType === 'COVER_UPDATE') {
+      return (
+        <span className="text-xs sm:text-sm text-gray-600">{content}</span>
+      );
+    }
+    
+    // NORMAL post with location
+    if (location) {
+      return (
+        <>
+          <span className="text-xs sm:text-sm text-gray-600"> đã chia sẻ khoảnh khắc tại </span>
+          <span className="text-xs sm:text-sm text-gray-500 truncate">{location}</span>
+        </>
+      );
+    }
+    
+    return null;
   };
 
   const renderSingleImage = (img: string, index: number) => (
@@ -176,7 +218,6 @@ const PostModal: React.FC<PostModalProps> = ({
           }}
           spaceBetween={0}
           slidesPerView={1}
-          onSlideChange={(swiper) => setCurrentImageIndex(swiper.activeIndex)}
           className="post-swiper rounded-xl"
           style={{ 
             borderRadius: '12px',
@@ -216,6 +257,8 @@ const PostModal: React.FC<PostModalProps> = ({
       </div>
     );
   };
+
+
 
   const renderGroupHeader = () => {
     if (!group) return null;
@@ -260,27 +303,36 @@ const PostModal: React.FC<PostModalProps> = ({
               >
                 {userName}
               </span>
-              {location && (
-                <>
-                  <span className="text-gray-400">•</span>
-                  <span className="text-xs text-gray-500 truncate">{location}</span>
-                </>
-              )}
+              {renderHeaderText()}
             </div>
           </div>
 
           {/* Menu button */}
           <div className="ml-auto flex-shrink-0 relative">
-            <button 
-              className="text-gray-400 hover:text-gray-600 p-1 sm:p-2 rounded-full hover:bg-gray-100 transition-colors"
-              onClick={() => setShowOptionsDropdown(!showOptionsDropdown)}
-            >
-              <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                <circle cx="12" cy="6" r="1.5" />
-                <circle cx="12" cy="12" r="1.5" />
-                <circle cx="12" cy="18" r="1.5" />
-              </svg>
-            </button>
+            <div className="flex items-center gap-1">
+              {/* Options button */}
+              <button 
+                className="text-gray-400 hover:text-gray-600 p-1 sm:p-2 rounded-full hover:bg-gray-100 transition-colors"
+                onClick={() => setShowOptionsDropdown(!showOptionsDropdown)}
+              >
+                <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  <circle cx="12" cy="6" r="1.5" />
+                  <circle cx="12" cy="12" r="1.5" />
+                  <circle cx="12" cy="18" r="1.5" />
+                </svg>
+              </button>
+              
+              {/* Hide post button */}
+              {onHidePost && (
+                <button 
+                  className="text-gray-400 cursor-pointer hover:text-gray-600 p-1 sm:p-2 rounded-full hover:bg-gray-100 transition-colors"
+                  onClick={onHidePost}
+                  title="Ẩn bài viết"
+                >
+                  <Icon icon="fluent:dismiss-24-filled" className="w-4 h-4 sm:w-5 sm:h-5" />
+                </button>
+              )}
+            </div>
             {showOptionsDropdown && (
               <PostOptionsDropdown 
                 onClose={() => setShowOptionsDropdown(false)}
@@ -322,7 +374,7 @@ const PostModal: React.FC<PostModalProps> = ({
                 <span className="font-semibold text-sm sm:text-base text-gray-800 cursor-pointer hover:underline hover:text-blue-600 truncate"
                   onClick={() => { navigate(`/home/user/${userId}`) }}
                 >{userName}</span>
-                {location && <span className="text-xs text-gray-500 truncate">• {location}</span>}
+                {renderHeaderText()}
               </div>
               <div className="flex items-center gap-1 text-xs text-gray-400 flex-wrap">
                 <span>{formatTimeAgo(timeAgo)}</span>
@@ -331,16 +383,30 @@ const PostModal: React.FC<PostModalProps> = ({
               </div>
             </div>
             <div className="ml-auto flex-shrink-0 relative">
-              <button 
-                className="text-gray-400 hover:text-gray-600 p-1 sm:p-2 rounded-full hover:bg-gray-100 transition-colors cursor-pointer"
-                onClick={() => setShowOptionsDropdown(!showOptionsDropdown)}
-              >
-                <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                  <circle cx="12" cy="6" r="1.5" />
-                  <circle cx="12" cy="12" r="1.5" />
-                  <circle cx="12" cy="18" r="1.5" />
-                </svg>
-              </button>
+              <div className="flex items-center gap-1">
+                {/* Options button */}
+                <button 
+                  className="text-gray-400 hover:text-gray-600 p-1 sm:p-2 rounded-full hover:bg-gray-100 transition-colors cursor-pointer"
+                  onClick={() => setShowOptionsDropdown(!showOptionsDropdown)}
+                >
+                  <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                    <circle cx="12" cy="6" r="1.5" />
+                    <circle cx="12" cy="12" r="1.5" />
+                    <circle cx="12" cy="18" r="1.5" />
+                  </svg>
+                </button>
+                
+                {/* Hide post button */}
+                {onHidePost && (
+                  <button 
+                    className="text-gray-400 cursor-pointer hover:text-gray-600 p-1 sm:p-2 rounded-full hover:bg-gray-100 transition-colors"
+                    onClick={onHidePost}
+                    title="Ẩn bài viết"
+                  >
+                    <Icon icon="fluent:dismiss-24-filled" className="w-4 h-4 sm:w-5 sm:h-5" />
+                  </button>
+                )}
+              </div>
               {showOptionsDropdown && (
                 <PostOptionsDropdown 
                   onClose={() => setShowOptionsDropdown(false)}
@@ -353,14 +419,19 @@ const PostModal: React.FC<PostModalProps> = ({
         )}
 
         {/* Content with expandable functionality */}
-        <ExpandableContent content={content} maxLines={3} className="text-sm sm:text-base leading-relaxed break-words" />
+        {postType === 'NORMAL' && (
+          <ExpandableContent content={content} maxLines={3} className="text-sm sm:text-base leading-relaxed break-words" />
+        )}
 
         {/* Tags */}
         {renderTags()}
 
-        {/* Media rendering logic */}
-        {displayVideo && renderVideo(displayVideo)}
-        {displayImages.length > 0 && renderImageSlider()}
+        {/* Shared Post Preview - Only show if this is a share post */}
+        {isShare && sharedPost && <SharedPostPreview sharedPost={sharedPost} onImageClick={handleImageClick} />}
+
+        {/* Media rendering logic - Only show if NOT a share post */}
+        {!isShare && displayVideo && renderVideo(displayVideo)}
+        {!isShare && displayImages.length > 0 && renderImageSlider()}
 
         {/* Action buttons */}
         <div className="flex items-center gap-3 sm:gap-6 pt-3 text-xs sm:text-sm text-gray-500">
@@ -381,7 +452,7 @@ const PostModal: React.FC<PostModalProps> = ({
             <span className="hidden xs:inline">{postCommentCount}</span>
             <span className="xs:hidden">{postCommentCount > 99 ? '99+' : postCommentCount}</span>
           </div>
-          <div className="flex items-center gap-1 transition-colors cursor-pointer hover:text-green-500" onClick={onShare}>
+          <div className="flex items-center gap-1 transition-colors cursor-pointer hover:text-green-500" onClick={handleShareClick}>
             <Icon icon="fluent:arrow-reply-24-filled" className="w-4 h-4 sm:w-5 sm:h-5" />
             <span className="hidden xs:inline">{postShareCount}</span>
             <span className="xs:hidden">{postShareCount > 99 ? '99+' : postShareCount}</span>
@@ -430,13 +501,30 @@ const PostModal: React.FC<PostModalProps> = ({
         setIsLiked={setIsLiked}
         postCommentCount={postCommentCount}
         handleComment={handleComment}
+        onCommentCountChange={handleComment}
         currentUserAvatar={currentUserAvatar}
         tags={tags}
         isShare={isShare}
         privacy={privacy}
         group={group}
         postShareCount={postShareCount}
-        onShare={onShare}
+        onShare={handleShareClick}
+        sharedPost={sharedPost}
+        postType={postType}
+      />
+
+      {/* Share Post Modal */}
+      <SharePostModal
+        isOpen={showShareModal}
+        onClose={closeShareModal}
+        postId={postId}
+        originalPostContent={content}
+        originalPostAuthor={userName}
+        originalPostAuthorId={userId}
+        originalPostImages={displayImages}
+        currentUserAvatar={currentUserAvatar}
+        currentUserName={currentUserName}
+        onShareSuccess={handleShareSuccess}
       />
     </>
   );
