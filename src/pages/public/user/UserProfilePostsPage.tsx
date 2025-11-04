@@ -21,6 +21,7 @@ interface Post {
   location?: string;
   createdAt: string;
   content: string;
+  postType?: 'NORMAL' | 'AVATAR_UPDATE' | 'COVER_UPDATE';
   mediaList?: Array<{
     type: "IMAGE" | "VIDEO";
     url: string;
@@ -121,6 +122,7 @@ const UserProfilePostsPage: React.FC<UserProfilePostsPageProps> = ({
             location: post.location || undefined,
             createdAt: post.createdAt,
             content: post.content,
+            postType: post.postType,
             mediaList: post.mediaList.map((media) => ({
               type: media.type,
               url: media.url,
@@ -132,7 +134,7 @@ const UserProfilePostsPage: React.FC<UserProfilePostsPageProps> = ({
             isShare: post.isShare || false,
             sharedPost: post.sharedPost || null,
             privacy: post.privacy,
-            liked: post.isLiked,
+            liked: post.liked,
           })
         );
 
@@ -195,22 +197,21 @@ const UserProfilePostsPage: React.FC<UserProfilePostsPageProps> = ({
               location: post.location || undefined,
               createdAt: post.createdAt,
               content: post.content,
+              postType: post.postType,
               mediaList: post.mediaList.map((media) => ({
                 type: media.type,
-                url: media.url,
-              })),
-              likeCount: post.likeCount,
-              commentCount: post.commentCount,
-              shareCount: post.shareCount,
-              tags: post.tags || [],
-              isShare: post.isShare || false,
-              sharedPost: post.sharedPost || null,
-              privacy: post.privacy,
-              liked: post.isLiked,
-            })
-          );
-
-          if (pageNum === 0) {
+              url: media.url,
+            })),
+            likeCount: post.likeCount,
+            commentCount: post.commentCount,
+            shareCount: post.shareCount,
+            tags: post.tags || [],
+            isShare: post.isShare || false,
+            sharedPost: post.sharedPost || null,
+            privacy: post.privacy,
+            liked: post.liked,
+          })
+        );          if (pageNum === 0) {
             setPosts(mappedPosts);
             onPostsLoaded?.(postsData.totalElements);
           } else {
@@ -459,7 +460,7 @@ const UserProfilePostsPage: React.FC<UserProfilePostsPageProps> = ({
                     isShare={post.isShare}
                     sharedPost={post.sharedPost}
                     privacy={post.privacy}
-                    comments={[]}
+                    postType={post.postType}
                     liked={post.liked}
                   />
                 </div>
@@ -474,23 +475,21 @@ const UserProfilePostsPage: React.FC<UserProfilePostsPageProps> = ({
                 userName={post.fullName}
                 location={post.location}
                 timeAgo={post.createdAt}
-                content={post.content}
-                mediaList={post.mediaList || []}
-                likeCount={post.likeCount || 0}
-                commentCount={post.commentCount || 0}
-                shareCount={post.shareCount || 0}
-                tags={post.tags || []}
-                isShare={post.isShare}
-                sharedPost={post.sharedPost}
-                privacy={post.privacy}
-                comments={[]}
-                liked={post.liked}
-              />
-            );
-          })
-        )}
-
-        {/* Show spinner when loading more posts (not first page) */}
+              content={post.content}
+              mediaList={post.mediaList || []}
+              likeCount={post.likeCount || 0}
+              commentCount={post.commentCount || 0}
+              shareCount={post.shareCount || 0}
+              tags={post.tags || []}
+              isShare={post.isShare}
+              sharedPost={post.sharedPost}
+              privacy={post.privacy}
+              postType={post.postType}
+              liked={post.liked}
+            />
+          );
+        })
+      )}        {/* Show spinner when loading more posts (not first page) */}
         {loading && page > 0 && (
           <div className="flex items-center justify-center w-full py-8">
             <Icon

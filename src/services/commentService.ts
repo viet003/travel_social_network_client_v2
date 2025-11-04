@@ -66,3 +66,34 @@ export const apiToggleLikeComment = async (commentId: string): Promise<ApiRespon
     throw error;
   }
 };
+
+export const apiUpdateComment = async (commentId: string, content: string): Promise<ApiResponse> => {
+  try {
+    const response = await axiosConfig({
+      method: 'PATCH',
+      url: `comment/${commentId}`,
+      data: { content }, // Gửi trong body, không phải params
+    });
+    return response?.data;
+  } catch (error: unknown) {
+    if (error && typeof error === 'object' && 'response' in error) {
+      throw (error as { response: { data: unknown } }).response.data;
+    }
+    throw error;
+  }
+};
+
+export const apiDeleteComment = async (commentId: string): Promise<ApiResponse> => {
+  try {
+    const response = await axiosConfig({
+      method: 'DELETE',
+      url: `comment/${commentId}`,
+    });
+    return response?.data;
+  } catch (error: unknown) {
+    if (error && typeof error === 'object' && 'response' in error) {
+      throw (error as { response: { data: unknown } }).response.data;
+    }
+    throw error;
+  }
+};

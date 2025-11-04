@@ -127,6 +127,7 @@ const GroupFeedsPage: React.FC = () => {
               shareCount={post.shareCount}
               tags={post.tags}
               privacy={post.privacy}
+              postType="NORMAL"
               group={post.group}
               onShare={handleShare}
               onImageClick={handleImageClick}

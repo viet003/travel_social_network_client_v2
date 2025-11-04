@@ -8,6 +8,7 @@ import { TravelImage, ExpandableContent } from '../../ui';
 import avatardf from '../../../assets/images/avatar_default.png';
 import { apiGetAllCommentsByPost } from '../../../services/commentService';
 import type { PostResponse as PostResponseType } from '../../../types/post.types';
+import SharedPostPreview from './SharedPostPreview';
 
 // Types
 interface Comment {
@@ -48,6 +49,7 @@ interface PostDetailModalProps {
   isShare?: boolean;
   privacy?: string;
   group?: Group | null;
+  postType?: 'NORMAL' | 'AVATAR_UPDATE' | 'COVER_UPDATE';
   postLikeCount?: number;
   setPostLikeCount?: (count: number) => void;
   isLiked?: boolean;
@@ -78,6 +80,7 @@ const PostDetailModal: React.FC<PostDetailModalProps> = ({
   isShare = false,
   privacy,
   group = null,
+  postType = 'NORMAL',
   postLikeCount = 0,
   setPostLikeCount,
   isLiked,
@@ -169,6 +172,33 @@ const PostDetailModal: React.FC<PostDetailModalProps> = ({
     setCurrentImageIndex((prev) =>
       prev === displayImages.length - 1 ? 0 : prev + 1
     );
+  };
+
+  // Render header text based on postType
+  const renderHeaderText = () => {
+    if (postType === 'AVATAR_UPDATE') {
+      return (
+        <span className="text-xs sm:text-sm text-gray-600">{content}</span>
+      );
+    }
+    
+    if (postType === 'COVER_UPDATE') {
+      return (
+        <span className="text-xs sm:text-sm text-gray-600">{content}</span>
+      );
+    }
+    
+    // NORMAL post with location
+    if (location) {
+      return (
+        <>
+          <span className="text-xs sm:text-sm text-gray-600"> đã chia sẻ khoảnh khắc tại </span>
+          <span className="text-xs sm:text-sm text-gray-500 truncate">{location}</span>
+        </>
+      );
+    }
+    
+    return null;
   };
 
   const renderVideo = (videoUrl: string) => (
@@ -342,7 +372,7 @@ const PostDetailModal: React.FC<PostDetailModalProps> = ({
             >
               {userName}
             </span>
-            {location && <span className="text-xs text-gray-500">• {location}</span>}
+            {renderHeaderText()}
           </div>
           <span className="flex items-center gap-1 text-xs text-gray-400">
             {formatTimeAgo(timeAgo)}
@@ -354,206 +384,7 @@ const PostDetailModal: React.FC<PostDetailModalProps> = ({
     );
   };
 
-  const renderSharedPost = () => {
-    if (!sharedPost) return null;
 
-    const sharedImages = sharedPost.mediaList?.filter(m => m.type === 'IMAGE').map(m => m.url) || [];
-    const sharedVideo = sharedPost.mediaList?.find(m => m.type === 'VIDEO')?.url;
-
-    return (
-      <div className="p-4 mt-3 border-2 border-gray-200 rounded-lg bg-gray-50">
-        {/* Shared Post Header */}
-        {sharedPost.group ? (
-          <div className="mb-3">
-            <div className="flex items-center gap-3">
-              {/* Group Cover with Avatar Overlay */}
-              <div className="relative">
-                <img
-                  src={sharedPost.group.coverImageUrl || avatardf}
-                  alt={sharedPost.group.groupName}
-                  className="object-cover w-10 h-10 rounded-lg"
-                />
-                <img 
-                  src={sharedPost.user?.avatarImg || avatardf} 
-                  alt="avatar" 
-                  className="absolute object-cover border-2 border-white rounded-full cursor-pointer -bottom-1 -right-1 w-6 h-6"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigate(`/user/${sharedPost.user?.userId}`);
-                  }}
-                />
-              </div>
-              
-              {/* Group and User Info */}
-              <div className="flex-1">
-                <div className="flex items-center gap-2">
-                  <span 
-                    className="text-sm font-semibold text-gray-800 cursor-pointer hover:underline"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (sharedPost.group?.groupId) {
-                        navigate(`/home/groups/${sharedPost.group.groupId}`);
-                      }
-                    }}
-                  >
-                    {sharedPost.group.groupName}
-                  </span>
-                  <span className="text-gray-500">•</span>
-                  <span className="text-xs text-gray-500">{formatTimeAgo(sharedPost.createdAt)}</span>
-                </div>
-                <div className="flex items-center gap-1 mt-1 text-xs text-gray-600">
-                  <span 
-                    className="cursor-pointer hover:underline"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      navigate(`/user/${sharedPost.user?.userId}`);
-                    }}
-                  >
-                    {sharedPost.user?.fullName}
-                  </span>
-                  {sharedPost.location && (
-                    <>
-                      <span className="text-gray-400">•</span>
-                      <span className="text-xs text-gray-500">{sharedPost.location}</span>
-                    </>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-        ) : (
-          <div className="flex items-center gap-3 mb-3">
-            <img 
-              src={sharedPost.user?.avatarImg || avatardf} 
-              alt="avatar" 
-              className="object-cover rounded-full cursor-pointer w-9 h-9" 
-              onClick={(e) => {
-                e.stopPropagation();
-                navigate(`/user/${sharedPost.user?.userId}`);
-              }}
-            />
-            <div className='flex flex-col'>
-              <div className="flex items-center gap-2">
-                <span 
-                  className="text-sm font-semibold text-gray-800 cursor-pointer hover:underline"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigate(`/user/${sharedPost.user?.userId}`);
-                  }}
-                >
-                  {sharedPost.user?.fullName}
-                </span>
-                {sharedPost.location && <span className="text-xs text-gray-500">• {sharedPost.location}</span>}
-              </div>
-              <span className="flex items-center gap-1 text-xs text-gray-400">
-                {formatTimeAgo(sharedPost.createdAt)}
-                <Icon icon="fluent:globe-24-filled" className="w-3 h-3" />
-                {sharedPost.privacy && <span className="ml-1 text-xs">• {formatPrivacy(sharedPost.privacy)}</span>}
-              </span>
-            </div>
-          </div>
-        )}
-
-        {/* Shared Post Content */}
-        {sharedPost.content && (
-          <div className="mb-3">
-            <ExpandableContent content={sharedPost.content} maxLines={3} />
-          </div>
-        )}
-
-        {/* Shared Post Tags */}
-        {sharedPost.tags && sharedPost.tags.length > 0 && (
-          <div className="flex flex-wrap gap-2 mb-3">
-            {sharedPost.tags.map((tag, index) => (
-              <span
-                key={index}
-                className="px-2 py-1 text-xs text-blue-600 transition-colors bg-blue-100 rounded-full cursor-pointer hover:bg-blue-200"
-              >
-                #{tag}
-              </span>
-            ))}
-          </div>
-        )}
-
-        {/* Shared Post Media */}
-        {sharedVideo && (
-          <div className="relative">
-            <video
-              src={sharedVideo}
-              controls
-              className="object-cover w-full rounded-lg max-h-80"
-              poster=""
-            >
-              Your browser does not support the video tag.
-            </video>
-          </div>
-        )}
-
-        {!sharedVideo && sharedImages.length > 0 && (
-          <div className="grid gap-2">
-            {sharedImages.length === 1 && (
-              <TravelImage
-                src={sharedImages[0]}
-                alt="shared-post"
-                preview={{ mask: 'Xem ảnh' }}
-              />
-            )}
-            {sharedImages.length === 2 && (
-              <div className="grid grid-cols-2 gap-2">
-                {sharedImages.map((img: string, idx: number) => (
-                  <TravelImage
-                    key={idx}
-                    src={img}
-                    alt={`shared-post-${idx}`}
-                    preview={{ mask: 'Xem ảnh' }}
-                  />
-                ))}
-              </div>
-            )}
-            {sharedImages.length === 3 && (
-              <div className="grid gap-2">
-                <TravelImage
-                  src={sharedImages[0]}
-                  alt="shared-post-0"
-                  preview={{ mask: 'Xem ảnh' }}
-                />
-                <div className="grid grid-cols-2 gap-2">
-                  <TravelImage
-                    src={sharedImages[1]}
-                    alt="shared-post-1"
-                    preview={{ mask: 'Xem ảnh' }}
-                  />
-                  <TravelImage
-                    src={sharedImages[2]}
-                    alt="shared-post-2"
-                    preview={{ mask: 'Xem ảnh' }}
-                  />
-                </div>
-              </div>
-            )}
-            {sharedImages.length >= 4 && (
-              <div className="grid grid-cols-2 gap-2">
-                {sharedImages.slice(0, 4).map((img: string, idx: number) => (
-                  <div key={idx} className="relative">
-                    <TravelImage
-                      src={img}
-                      alt={`shared-post-${idx}`}
-                      preview={{ mask: 'Xem ảnh' }}
-                    />
-                    {idx === 3 && sharedImages.length > 4 && (
-                      <div className="absolute inset-0 flex items-center justify-center text-2xl font-bold text-white bg-black bg-opacity-50 rounded-lg">
-                        +{sharedImages.length - 4}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-    );
-  };
 
   if (!isOpen) return null;
 
@@ -647,7 +478,7 @@ const PostDetailModal: React.FC<PostDetailModalProps> = ({
             {renderTags()}
 
             {/* Shared Post Preview */}
-            {isShare && sharedPost && renderSharedPost()}
+            {isShare && sharedPost && <SharedPostPreview sharedPost={sharedPost} />}
 
             {/* Main Media Display - Only show if not a share post */}
             {!isShare && displayVideo && renderVideo(displayVideo)}
@@ -709,6 +540,12 @@ const PostDetailModal: React.FC<PostDetailModalProps> = ({
                         // Handle reply logic here
                       }}
                       onCommentCreated={onCommentCountChange}
+                      onCommentDeleted={(deletedId) => {
+                        // Remove deleted comment from list
+                        setComments(prev => prev.filter(c => (c.id || c.commentId) !== deletedId));
+                        // Decrement comment count
+                        onCommentCountChange?.();
+                      }}
                     />
                   </div>
                 ))}
@@ -730,7 +567,6 @@ const PostDetailModal: React.FC<PostDetailModalProps> = ({
                handleComment={handleComment || (() => {})} 
                setNewComment={(comment: Comment) => setNewComment(comment)} 
                currentUserAvatar={currentUserAvatar} 
-               loading={loading} 
                setLoading={setLoading} 
              />
           </div>

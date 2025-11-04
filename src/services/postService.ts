@@ -110,6 +110,10 @@ export const apiCreatePost = async (
     formData.append('content', postData.content);
     formData.append('privacy', postData.privacy);
     
+    if (postData.postType) {
+      formData.append('postType', postData.postType);
+    }
+    
     if (postData.location) {
       formData.append('location', postData.location);
     }
@@ -163,6 +167,10 @@ export const apiCreatePostInGroup = async (
     const formData = new FormData();
     formData.append('content', postData.content);
     formData.append('privacy', postData.privacy);
+    
+    if (postData.postType) {
+      formData.append('postType', postData.postType);
+    }
     
     if (postData.location) {
       formData.append('location', postData.location);

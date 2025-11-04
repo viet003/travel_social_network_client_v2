@@ -23,7 +23,6 @@ interface CommentCreateModalProps {
   handleComment?: (comment: Comment) => void;
   setNewComment: (comment: Comment) => void;
   currentUserAvatar?: string;
-  loading?: boolean;
   setLoading?: (loading: boolean) => void;
 }
 
@@ -32,7 +31,6 @@ const CommentCreateModal: React.FC<CommentCreateModalProps> = ({
   handleComment,
   setNewComment,
   currentUserAvatar,
-  loading: _externalLoading = false,
   setLoading: setExternalLoading
 }) => {
   const [commentText, setCommentText] = useState<string>('');

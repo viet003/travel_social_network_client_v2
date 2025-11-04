@@ -6,6 +6,7 @@ import type {
     PageableResponse,
     ApiResponse 
 } from "../types/user.types";
+import type { PostResponse } from "../types/post.types";
 
 // User Service - API calls for user operations
 
@@ -61,18 +62,21 @@ export const apiGetUserProfile = async (userId: string): Promise<ApiResponse<Use
 };
 
 /**
- * Update authenticated user's avatar
+ * Update authenticated user's avatar by creating a post with postType AVATAR_UPDATE
  * @param avatarFile - Avatar image file
- * @returns Updated user profile with new avatar
+ * @returns Created post response with avatar
  */
-export const apiUpdateUserAvatar = async (avatarFile: File): Promise<ApiResponse<UserResponse>> => {
+export const apiUpdateUserAvatar = async (avatarFile: File): Promise<ApiResponse<PostResponse>> => {
     try {
         const formData = new FormData();
-        formData.append('avatarImg', avatarFile);
+        formData.append('content', 'đã cập nhật ảnh đại diện');
+        formData.append('privacy', 'PUBLIC');
+        formData.append('postType', 'AVATAR_UPDATE');
+        formData.append('mediaFiles', avatarFile);
 
         const response = await axiosConfig({
             method: 'POST',
-            url: '/users/me/avatar',
+            url: '/post/me',
             data: formData,
             headers: {
                 'Content-Type': 'multipart/form-data'
@@ -88,18 +92,21 @@ export const apiUpdateUserAvatar = async (avatarFile: File): Promise<ApiResponse
 };
 
 /**
- * Update authenticated user's cover image
+ * Update authenticated user's cover image by creating a post with postType COVER_UPDATE
  * @param coverFile - Cover image file
- * @returns Updated user profile with new cover image
+ * @returns Created post response with cover image
  */
-export const apiUpdateUserCoverImage = async (coverFile: File): Promise<ApiResponse<UserResponse>> => {
+export const apiUpdateUserCoverImage = async (coverFile: File): Promise<ApiResponse<PostResponse>> => {
     try {
         const formData = new FormData();
-        formData.append('coverImg', coverFile);
+        formData.append('content', 'đã cập nhật ảnh bìa');
+        formData.append('privacy', 'PUBLIC');
+        formData.append('postType', 'COVER_UPDATE');
+        formData.append('mediaFiles', coverFile);
 
         const response = await axiosConfig({
             method: 'POST',
-            url: '/users/me/avatar',
+            url: '/post/me',
             data: formData,
             headers: {
                 'Content-Type': 'multipart/form-data'

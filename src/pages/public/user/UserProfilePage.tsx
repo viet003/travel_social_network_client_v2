@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate, Outlet, useLocation } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { Icon } from "@iconify/react";
-import { message } from "antd";
+import { message, Tooltip } from "antd";
 import { EditProfileModal, ImageUploadModal } from "../../../components/modal";
 import UserSettingsDropdown from "../../../components/common/dropdowns/user/UserSettingsDropdown";
 import { path } from "../../../utilities/path";
@@ -17,6 +17,7 @@ import {
   apiSendFriendRequest,
   apiUnfriend,
 } from "../../../services/friendshipService";
+import { updateAvatarImg, updateCoverImg } from "../../../stores/actions/authAction";
 import type { UpdateUserDto } from "../../../types/user.types";
 
 // Auth State Interface
@@ -45,6 +46,7 @@ const UserProfilePage: React.FC = () => {
   const { userId } = useParams<{ userId: string }>();
   const navigate = useNavigate();
   const location = useLocation();
+  const dispatch = useDispatch();
   const [user, setUser] = useState<UserProfile | null>(null);
   const createSuccess = false;
 
@@ -322,15 +324,23 @@ const UserProfilePage: React.FC = () => {
 
       const response = await apiUpdateUserAvatar(file);
 
-      if (response.data) {
+      if (response.data && response.data.mediaList && response.data.mediaList.length > 0) {
+        const newAvatarUrl = response.data.mediaList[0].url;
         message.success("Cập nhật ảnh đại diện thành công");
-        // Update local user state
+        
+        // Update local user state with new avatar from post media
         if (user) {
           setUser({
             ...user,
-            avatarImg: response.data.avatarImg || undefined,
+            avatarImg: newAvatarUrl,
           });
         }
+
+        // Update Redux store if this is current user's profile
+        if (userId === currentUserId) {
+          dispatch(updateAvatarImg(newAvatarUrl));
+        }
+
         setIsAvatarUploadOpen(false);
       }
     } catch (error) {
@@ -348,15 +358,23 @@ const UserProfilePage: React.FC = () => {
 
       const response = await apiUpdateUserCoverImage(file);
 
-      if (response.data) {
+      if (response.data && response.data.mediaList && response.data.mediaList.length > 0) {
+        const newCoverUrl = response.data.mediaList[0].url;
         message.success("Cập nhật ảnh bìa thành công");
-        // Update local user state
+        
+        // Update local user state with new cover from post media
         if (user) {
           setUser({
             ...user,
-            coverImg: response.data.coverImg || undefined,
+            coverImg: newCoverUrl,
           });
         }
+
+        // Update Redux store if this is current user's profile
+        if (userId === currentUserId) {
+          dispatch(updateCoverImg(newCoverUrl));
+        }
+
         setIsCoverUploadOpen(false);
       }
     } catch (error) {
@@ -387,41 +405,48 @@ const UserProfilePage: React.FC = () => {
           {currentUserId !== userId && (
             <>
               {renderFriendButton()}
-              <button className="w-8 h-8 sm:w-11 sm:h-11 flex items-center justify-center text-white transition rounded-full bg-black/40 hover:bg-black/60 cursor-pointer">
-                <Icon
-                  icon="lucide:message-circle"
-                  width={16}
-                  className="sm:w-5 sm:h-5"
-                />
-              </button>
+              <Tooltip title="Nhắn tin" placement="bottom">
+                <button className="w-8 h-8 sm:w-11 sm:h-11 flex items-center justify-center text-white transition rounded-full bg-black/40 hover:bg-black/60 cursor-pointer">
+                  <Icon
+                    icon="lucide:message-circle"
+                    width={16}
+                    className="sm:w-5 sm:h-5"
+                  />
+                </button>
+              </Tooltip>
             </>
           )}
           {userId === currentUserId && (
-            <button
-              className="w-8 h-8 sm:w-11 sm:h-11 flex items-center justify-center text-white transition rounded-full bg-black/40 hover:bg-black/60 cursor-pointer"
-              onClick={() => setIsEditProfileOpen(true)}
-            >
-              <Icon icon="lucide:edit-3" width={16} className="sm:w-5 sm:h-5" />
-            </button>
+            <Tooltip title="Chỉnh sửa trang cá nhân" placement="bottom">
+              <button
+                className="w-8 h-8 sm:w-11 sm:h-11 flex items-center justify-center text-white transition rounded-full bg-black/40 hover:bg-black/60 cursor-pointer"
+                onClick={() => setIsEditProfileOpen(true)}
+              >
+                <Icon icon="lucide:edit-3" width={16} className="sm:w-5 sm:h-5" />
+              </button>
+            </Tooltip>
           )}
 
-          <button className="w-8 h-8 sm:w-11 sm:h-11 flex items-center justify-center text-white transition rounded-full bg-black/40 hover:bg-black/60 cursor-pointer">
-            <Icon icon="lucide:share-2" width={16} className="sm:w-5 sm:h-5" />
-          </button>
+          <Tooltip title="Chia sẻ trang cá nhân" placement="bottom">
+            <button className="w-8 h-8 sm:w-11 sm:h-11 flex items-center justify-center text-white transition rounded-full bg-black/40 hover:bg-black/60 cursor-pointer">
+              <Icon icon="lucide:share-2" width={16} className="sm:w-5 sm:h-5" />
+            </button>
+          </Tooltip>
 
           {userId !== currentUserId && (
             <div className="relative">
-              <button
-                className="w-8 h-8 sm:w-11 sm:h-11 flex items-center justify-center text-white transition rounded-full bg-black/40 hover:bg-black/60 cursor-pointer"
-                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                title="Cài đặt"
-              >
-                <Icon
-                  icon="lucide:more-vertical"
-                  width={16}
-                  className="sm:w-5 sm:h-5"
-                />
-              </button>
+              <Tooltip title="Tùy chọn khác" placement="bottom">
+                <button
+                  className="w-8 h-8 sm:w-11 sm:h-11 flex items-center justify-center text-white transition rounded-full bg-black/40 hover:bg-black/60 cursor-pointer"
+                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                >
+                  <Icon
+                    icon="lucide:more-vertical"
+                    width={16}
+                    className="sm:w-5 sm:h-5"
+                  />
+                </button>
+              </Tooltip>
 
               <UserSettingsDropdown
                 isOpen={isDropdownOpen}
@@ -436,14 +461,16 @@ const UserProfilePage: React.FC = () => {
         {/* Cover photo upload button */}
         {userId === currentUserId && (
           <div className="absolute z-30 flex items-center gap-2 top-3 left-3 sm:top-6 sm:left-6">
-            <button
-              className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-white transition rounded-lg bg-black/40 hover:bg-black/60 cursor-pointer"
-              onClick={() => setIsCoverUploadOpen(true)}
-            >
-              <Icon icon="lucide:camera" width={14} className="sm:w-4 sm:h-4" />
-              <span className="hidden sm:inline">Thay đổi ảnh bìa</span>
-              <span className="sm:hidden">Ảnh bìa</span>
-            </button>
+            <Tooltip title="Cập nhật ảnh bìa" placement="bottom">
+              <button
+                className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-white transition rounded-lg bg-black/40 hover:bg-black/60 cursor-pointer"
+                onClick={() => setIsCoverUploadOpen(true)}
+              >
+                <Icon icon="lucide:camera" width={14} className="sm:w-4 sm:h-4" />
+                <span className="hidden sm:inline">Thay đổi ảnh bìa</span>
+                <span className="sm:hidden">Ảnh bìa</span>
+              </button>
+            </Tooltip>
           </div>
         )}
 
@@ -451,12 +478,14 @@ const UserProfilePage: React.FC = () => {
         <div className="absolute max-w-full sm:max-w-2xl p-3 sm:p-6 lg:p-8 text-white bottom-3 left-3 right-3 sm:bottom-6 sm:left-6 sm:right-auto bg-black/40 backdrop-blur-md rounded-xl sm:rounded-2xl min-h-[140px] sm:min-h-[180px] lg:min-h-[200px]">
           <div className="flex items-start gap-3 sm:gap-4 lg:gap-6 h-full">
             <div className="relative cursor-pointer group flex-shrink-0">
-              <img
-                src={user?.avatarImg || avatardf}
-                alt="Profile"
-                className="w-16 h-16 sm:w-24 sm:h-24 lg:w-32 lg:h-32 transition-all duration-300 border-2 sm:border-4 rounded-full shadow-lg border-white/30 hover:shadow-xl group-hover:scale-105"
-                onClick={handleProfileClick}
-              />
+              <Tooltip title={userId === currentUserId ? "Cập nhật ảnh đại diện" : "Xem ảnh đại diện"} placement="bottom">
+                <img
+                  src={user?.avatarImg || avatardf}
+                  alt="Profile"
+                  className="w-16 h-16 sm:w-24 sm:h-24 lg:w-32 lg:h-32 transition-all duration-300 border-2 sm:border-4 rounded-full shadow-lg border-white/30 hover:shadow-xl group-hover:scale-105"
+                  onClick={handleProfileClick}
+                />
+              </Tooltip>
 
               {userId === currentUserId && (
                 <div
@@ -531,27 +560,29 @@ const UserProfilePage: React.FC = () => {
         <div className="max-w-[1200px] mx-auto p-3 sm:px-6 lg:px-[50px]">
           <div className="flex space-x-1">
             {[
-              { id: "posts", label: "Bài viết", icon: "lucide:camera" },
-              { id: "photos", label: "Ảnh", icon: "lucide:image" },
+              { id: "posts", label: "Bài viết", icon: "lucide:camera", tooltip: "Xem bài viết" },
+              { id: "photos", label: "Ảnh", icon: "lucide:image", tooltip: "Xem ảnh" },
               {
                 id: "reviews",
                 label: "Đánh giá",
                 icon: "lucide:message-square",
+                tooltip: "Xem đánh giá"
               },
-              { id: "friends", label: "Bạn bè", icon: "lucide:users" },
-            ].map(({ id, label, icon }) => (
-              <button
-                key={id}
-                onClick={() => handleTabClick(id)}
-                className={`flex cursor-pointer items-center space-x-2 px-3 sm:px-4 py-3 font-medium transition-colors flex-shrink-0 whitespace-nowrap ${
-                  activeTab === id
-                    ? "text-blue-600 border-b-2 border-blue-600"
-                    : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-                }`}
-              >
-                <Icon icon={icon} className="h-5 w-5" />
-                <span className="text-xs sm:text-sm">{label}</span>
-              </button>
+              { id: "friends", label: "Bạn bè", icon: "lucide:users", tooltip: "Xem danh sách bạn bè" },
+            ].map(({ id, label, icon, tooltip }) => (
+              <Tooltip key={id} title={tooltip} placement="top">
+                <button
+                  onClick={() => handleTabClick(id)}
+                  className={`flex cursor-pointer items-center space-x-2 px-3 sm:px-4 py-3 font-medium transition-colors flex-shrink-0 whitespace-nowrap ${
+                    activeTab === id
+                      ? "text-blue-600 border-b-2 border-blue-600"
+                      : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                  }`}
+                >
+                  <Icon icon={icon} className="h-5 w-5" />
+                  <span className="text-xs sm:text-sm">{label}</span>
+                </button>
+              </Tooltip>
             ))}
           </div>
         </div>

@@ -134,14 +134,14 @@ const GroupCreateModal: React.FC<GroupCreateModalProps> = ({ setCreateSuccess })
 
       if (response?.status === "SUCCESS") {
         handleClose();
-        setCreateSuccess && setCreateSuccess(true);
-        toast.success('Tạo nhóm thành công!');
+        if (setCreateSuccess) {
+          setCreateSuccess(true);
+        }
       } else {
         throw new Error('Không thể tạo nhóm');
       }
     } catch (error) {
       console.error('Lỗi khi tạo nhóm:', error);
-      toast.error('Đã xảy ra lỗi khi tạo nhóm. Vui lòng thử lại!');
     } finally {
       setIsCreating(false);
     }

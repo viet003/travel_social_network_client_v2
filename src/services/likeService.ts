@@ -7,7 +7,7 @@ import type { ApiResponse } from "../types/post.types";
 export interface LikePostResponse {
   postId: string;
   likeCount: number;
-  isLiked: boolean; // Use isLiked to match backend field name
+  liked: boolean;
 }
 
 /**

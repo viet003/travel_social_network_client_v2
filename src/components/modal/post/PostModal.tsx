@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Icon } from '@iconify/react';
 import PostDetailModal from './PostDetailModal';
 import SharePostModal from './SharePostModal';
+import SharedPostPreview from './SharedPostPreview';
 import { ExpandableContent } from '../../ui';
 import { useSelector } from 'react-redux';
 import avatardf from '../../../assets/images/avatar_default.png';
@@ -25,15 +26,6 @@ interface Group {
   groupId: string;
   groupName: string;
   coverImageUrl?: string;
-}
-
-interface Comment {
-  id: string;
-  content: string;
-  userId: string;
-  userName: string;
-  avatar?: string;
-  createdAt: string;
 }
 
 interface AuthState {
@@ -61,11 +53,11 @@ interface PostModalProps {
   sharedPost?: PostResponse | null;
   privacy?: string;
   group?: Group | null;
-  comments?: Comment[];
+  postType?: 'NORMAL' | 'AVATAR_UPDATE' | 'COVER_UPDATE';
   onShare?: () => void;
   onImageClick?: (img: string, index: number) => void;
-  onComment?: (comment: Comment) => void;
   liked?: boolean;
+  onHidePost?: () => void;
 }
 
 const PostModal: React.FC<PostModalProps> = ({
@@ -87,11 +79,11 @@ const PostModal: React.FC<PostModalProps> = ({
   sharedPost = null,
   privacy,
   group = null,
-  comments: _comments = [],
+  postType = 'NORMAL',
   onShare,
   onImageClick,
-  onComment: _onComment,
-  liked = false
+  liked = false,
+  onHidePost
 }) => {
   const [selectedImageIndex, setSelectedImageIndex] = useState<number>(0);
   const [showCommentModal, setShowCommentModal] = useState<boolean>(false);
@@ -153,6 +145,33 @@ const PostModal: React.FC<PostModalProps> = ({
     if (group?.groupId) {
       navigate(`/home/groups/${group.groupId}`);
     }
+  };
+
+  // Render header text based on postType
+  const renderHeaderText = () => {
+    if (postType === 'AVATAR_UPDATE') {
+      return (
+        <span className="text-xs sm:text-sm text-gray-600">{content}</span>
+      );
+    }
+    
+    if (postType === 'COVER_UPDATE') {
+      return (
+        <span className="text-xs sm:text-sm text-gray-600">{content}</span>
+      );
+    }
+    
+    // NORMAL post with location
+    if (location) {
+      return (
+        <>
+          <span className="text-xs sm:text-sm text-gray-600"> đã chia sẻ khoảnh khắc tại </span>
+          <span className="text-xs sm:text-sm text-gray-500 truncate">{location}</span>
+        </>
+      );
+    }
+    
+    return null;
   };
 
   const renderSingleImage = (img: string, index: number) => (
@@ -239,116 +258,7 @@ const PostModal: React.FC<PostModalProps> = ({
     );
   };
 
-  const renderSharedPost = () => {
-    if (!sharedPost || !sharedPost.user) return null;
 
-    const sharedImages = sharedPost.mediaList?.filter(m => m.type === 'IMAGE').map(m => m.url) || [];
-    const sharedVideo = sharedPost.mediaList?.find(m => m.type === 'VIDEO')?.url;
-
-    return (
-      <div className="mb-3 border border-gray-200 rounded-xl overflow-hidden hover:bg-gray-50 transition-colors">
-        {/* Shared post header */}
-        <div className="flex items-center gap-2 p-3 bg-gray-50">
-          <img
-            src={sharedPost.user.avatarImg || avatardf}
-            alt={sharedPost.user.fullName}
-            className="w-8 h-8 rounded-full object-cover cursor-pointer"
-            onClick={() => navigate(`/home/user/${sharedPost.user!.userId}`)}
-          />
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2">
-              <span 
-                className="font-semibold text-sm text-gray-800 hover:underline cursor-pointer truncate"
-                onClick={() => navigate(`/home/user/${sharedPost.user!.userId}`)}
-              >
-                {sharedPost.user.fullName}
-              </span>
-              <span className="text-xs text-gray-500">•</span>
-              <span className="text-xs text-gray-500">{formatTimeAgo(sharedPost.createdAt)}</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Shared post content */}
-        <div className="p-3">
-          <ExpandableContent 
-            content={sharedPost.content} 
-            maxLines={3} 
-            className="text-sm leading-relaxed break-words mb-2" 
-          />
-
-          {/* Shared post tags */}
-          {sharedPost.tags && sharedPost.tags.length > 0 && (
-            <div className="flex flex-wrap gap-2 mb-2">
-              {sharedPost.tags.map((tag, index) => (
-                <span
-                  key={index}
-                  className="px-2 py-1 text-xs text-blue-600 bg-blue-100 rounded-full"
-                >
-                  #{tag}
-                </span>
-              ))}
-            </div>
-          )}
-
-          {/* Shared post media */}
-          {sharedVideo && (
-            <div className="relative mb-2">
-              <video
-                src={sharedVideo}
-                controls
-                className="w-full max-h-[500px] object-cover rounded-lg"
-              >
-                Your browser does not support the video tag.
-              </video>
-            </div>
-          )}
-
-          {sharedImages.length > 0 && (
-            <div className={`grid gap-2 ${
-              sharedImages.length === 1 ? 'grid-cols-1' : 
-              sharedImages.length === 2 ? 'grid-cols-2' : 
-              'grid-cols-2'
-            }`}>
-              {sharedImages.slice(0, 4).map((img, idx) => (
-                <div key={idx} className="relative w-full h-[400px] overflow-hidden rounded-lg">
-                  <img
-                    src={img}
-                    alt={`shared-${idx}`}
-                    className="w-full h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
-                    onClick={() => handleImageClick(img, idx)}
-                  />
-                  {idx === 3 && sharedImages.length > 4 && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-lg">
-                      <span className="text-2xl font-bold text-white">
-                        +{sharedImages.length - 4}
-                      </span>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* Shared post stats */}
-          <div className="flex items-center gap-4 mt-3 text-xs text-gray-500 border-t border-gray-200 pt-2">
-            <div className="flex items-center gap-1">
-              <Icon icon="fluent:heart-24-regular" className="w-4 h-4" />
-              <span>{sharedPost.likeCount}</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <Icon icon="fluent:chat-24-filled" className="w-4 h-4" />
-              <span>{sharedPost.commentCount}</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <Icon icon="fluent:arrow-reply-24-filled" className="w-4 h-4" />
-              <span>{sharedPost.shareCount}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  };
 
   const renderGroupHeader = () => {
     if (!group) return null;
@@ -393,27 +303,36 @@ const PostModal: React.FC<PostModalProps> = ({
               >
                 {userName}
               </span>
-              {location && (
-                <>
-                  <span className="text-gray-400">•</span>
-                  <span className="text-xs text-gray-500 truncate">{location}</span>
-                </>
-              )}
+              {renderHeaderText()}
             </div>
           </div>
 
           {/* Menu button */}
           <div className="ml-auto flex-shrink-0 relative">
-            <button 
-              className="text-gray-400 hover:text-gray-600 p-1 sm:p-2 rounded-full hover:bg-gray-100 transition-colors"
-              onClick={() => setShowOptionsDropdown(!showOptionsDropdown)}
-            >
-              <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                <circle cx="12" cy="6" r="1.5" />
-                <circle cx="12" cy="12" r="1.5" />
-                <circle cx="12" cy="18" r="1.5" />
-              </svg>
-            </button>
+            <div className="flex items-center gap-1">
+              {/* Options button */}
+              <button 
+                className="text-gray-400 hover:text-gray-600 p-1 sm:p-2 rounded-full hover:bg-gray-100 transition-colors"
+                onClick={() => setShowOptionsDropdown(!showOptionsDropdown)}
+              >
+                <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  <circle cx="12" cy="6" r="1.5" />
+                  <circle cx="12" cy="12" r="1.5" />
+                  <circle cx="12" cy="18" r="1.5" />
+                </svg>
+              </button>
+              
+              {/* Hide post button */}
+              {onHidePost && (
+                <button 
+                  className="text-gray-400 cursor-pointer hover:text-gray-600 p-1 sm:p-2 rounded-full hover:bg-gray-100 transition-colors"
+                  onClick={onHidePost}
+                  title="Ẩn bài viết"
+                >
+                  <Icon icon="fluent:dismiss-24-filled" className="w-4 h-4 sm:w-5 sm:h-5" />
+                </button>
+              )}
+            </div>
             {showOptionsDropdown && (
               <PostOptionsDropdown 
                 onClose={() => setShowOptionsDropdown(false)}
@@ -455,7 +374,7 @@ const PostModal: React.FC<PostModalProps> = ({
                 <span className="font-semibold text-sm sm:text-base text-gray-800 cursor-pointer hover:underline hover:text-blue-600 truncate"
                   onClick={() => { navigate(`/home/user/${userId}`) }}
                 >{userName}</span>
-                {location && <span className="text-xs text-gray-500 truncate">• {location}</span>}
+                {renderHeaderText()}
               </div>
               <div className="flex items-center gap-1 text-xs text-gray-400 flex-wrap">
                 <span>{formatTimeAgo(timeAgo)}</span>
@@ -464,16 +383,30 @@ const PostModal: React.FC<PostModalProps> = ({
               </div>
             </div>
             <div className="ml-auto flex-shrink-0 relative">
-              <button 
-                className="text-gray-400 hover:text-gray-600 p-1 sm:p-2 rounded-full hover:bg-gray-100 transition-colors cursor-pointer"
-                onClick={() => setShowOptionsDropdown(!showOptionsDropdown)}
-              >
-                <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                  <circle cx="12" cy="6" r="1.5" />
-                  <circle cx="12" cy="12" r="1.5" />
-                  <circle cx="12" cy="18" r="1.5" />
-                </svg>
-              </button>
+              <div className="flex items-center gap-1">
+                {/* Options button */}
+                <button 
+                  className="text-gray-400 hover:text-gray-600 p-1 sm:p-2 rounded-full hover:bg-gray-100 transition-colors cursor-pointer"
+                  onClick={() => setShowOptionsDropdown(!showOptionsDropdown)}
+                >
+                  <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                    <circle cx="12" cy="6" r="1.5" />
+                    <circle cx="12" cy="12" r="1.5" />
+                    <circle cx="12" cy="18" r="1.5" />
+                  </svg>
+                </button>
+                
+                {/* Hide post button */}
+                {onHidePost && (
+                  <button 
+                    className="text-gray-400 cursor-pointer hover:text-gray-600 p-1 sm:p-2 rounded-full hover:bg-gray-100 transition-colors"
+                    onClick={onHidePost}
+                    title="Ẩn bài viết"
+                  >
+                    <Icon icon="fluent:dismiss-24-filled" className="w-4 h-4 sm:w-5 sm:h-5" />
+                  </button>
+                )}
+              </div>
               {showOptionsDropdown && (
                 <PostOptionsDropdown 
                   onClose={() => setShowOptionsDropdown(false)}
@@ -486,13 +419,15 @@ const PostModal: React.FC<PostModalProps> = ({
         )}
 
         {/* Content with expandable functionality */}
-        <ExpandableContent content={content} maxLines={3} className="text-sm sm:text-base leading-relaxed break-words" />
+        {postType === 'NORMAL' && (
+          <ExpandableContent content={content} maxLines={3} className="text-sm sm:text-base leading-relaxed break-words" />
+        )}
 
         {/* Tags */}
         {renderTags()}
 
         {/* Shared Post Preview - Only show if this is a share post */}
-        {isShare && sharedPost && renderSharedPost()}
+        {isShare && sharedPost && <SharedPostPreview sharedPost={sharedPost} onImageClick={handleImageClick} />}
 
         {/* Media rendering logic - Only show if NOT a share post */}
         {!isShare && displayVideo && renderVideo(displayVideo)}
@@ -575,6 +510,7 @@ const PostModal: React.FC<PostModalProps> = ({
         postShareCount={postShareCount}
         onShare={handleShareClick}
         sharedPost={sharedPost}
+        postType={postType}
       />
 
       {/* Share Post Modal */}

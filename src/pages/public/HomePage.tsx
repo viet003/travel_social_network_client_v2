@@ -17,9 +17,15 @@ const HomePage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState<number>(0);
   const [hasMore, setHasMore] = useState<boolean>(true);
+  const [hiddenPostIds, setHiddenPostIds] = useState<Set<string>>(new Set());
   
   // Intersection Observer ref
   const observer = useRef<IntersectionObserver | null>(null);
+
+  // Function to hide a post
+  const handleHidePost = (postId: string) => {
+    setHiddenPostIds(prev => new Set([...prev, postId]));
+  };
 
   const handleLogout = () => {
     dispatch(authAction.logout());
@@ -148,7 +154,7 @@ const HomePage: React.FC = () => {
           <div className="space-y-4 sm:space-y-6">
             {posts.length > 0 ? (
               <>
-                {posts.map((post, index) => {
+                {posts.filter(post => !hiddenPostIds.has(post.postId)).map((post, index) => {
                   // Attach ref to the last post for infinite scroll
                   if (posts.length === index + 1) {
                     return (
@@ -172,24 +178,24 @@ const HomePage: React.FC = () => {
                           tags={post.tags}
                           isShare={post.isShare}
                           sharedPost={post.sharedPost}
-                          privacy={post.privacy}
-                          group={post.group ? {
-                            groupId: post.group.groupId,
-                            groupName: post.group.groupName,
-                            coverImageUrl: post.group.coverImageUrl || undefined
-                          } : null}
-                          comments={[]}
-                          onImageClick={() => {}}
-                          onShare={() => {}}
-                          onComment={() => {}}
-                          liked={post.isLiked}
-                        />
-                      </div>
-                    );
-                  }
-                  
-                  return (
-                    <PostModal
+                        privacy={post.privacy}
+                        postType={post.postType}
+                        group={post.group ? {
+                          groupId: post.group.groupId,
+                          groupName: post.group.groupName,
+                          coverImageUrl: post.group.coverImageUrl || undefined
+                        } : null}
+                        onImageClick={() => {}}
+                        onShare={() => {}}
+                        liked={post.liked}
+                        onHidePost={() => handleHidePost(post.postId)}
+                      />
+                    </div>
+                  );
+                }
+                
+                return (
+                  <PostModal
                       key={post.postId}
                       postId={post.postId}
                       userId={post.user?.userId || ''}
@@ -210,21 +216,19 @@ const HomePage: React.FC = () => {
                       isShare={post.isShare}
                       sharedPost={post.sharedPost}
                       privacy={post.privacy}
+                      postType={post.postType}
                       group={post.group ? {
                         groupId: post.group.groupId,
                         groupName: post.group.groupName,
                         coverImageUrl: post.group.coverImageUrl || undefined
-                      } : null}
-                      comments={[]}
+                        } : null}
                       onImageClick={() => {}}
                       onShare={() => {}}
-                      onComment={() => {}}
-                      liked={post.isLiked}
+                      liked={post.liked}
+                      onHidePost={() => handleHidePost(post.postId)}
                     />
                   );
-                })}
-                
-                {/* Loading indicator when fetching more */}
+                })}                {/* Loading indicator when fetching more */}
                 {loading && (
                   <div className="flex justify-center py-8">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>

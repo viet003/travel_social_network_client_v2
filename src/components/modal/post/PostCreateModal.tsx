@@ -253,8 +253,6 @@ const PostCreateModal: React.FC<PostCreateModalProps> = ({
       console.log('✅ Post created successfully:', response);
 
        if (response?.success) {
-         toast.success('Tạo bài viết thành công!');
-         
          // Reset form and close modal
          handleClose();
          

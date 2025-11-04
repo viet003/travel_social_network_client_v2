@@ -17,6 +17,7 @@ export interface PostResponse {
     content: string;
     location: string | null;
     privacy: 'PUBLIC' | 'FRIENDS_ONLY' | 'PRIVATE';
+    postType?: 'NORMAL' | 'AVATAR_UPDATE' | 'COVER_UPDATE';
     createdAt: string;
     user: PostUserResponse | null;
     likeCount: number;
@@ -31,12 +32,13 @@ export interface PostResponse {
         groupName: string;
         coverImageUrl: string | null;
     } | null;
-    isLiked: boolean;
+    liked: boolean;
 }
 
 export interface UpdatePostDto {
     content: string;
     privacy: 'PUBLIC' | 'FRIENDS_ONLY' | 'PRIVATE';
+    postType?: 'NORMAL' | 'AVATAR_UPDATE' | 'COVER_UPDATE';
     location?: string;
     tags?: string[];
     mediaFiles?: File[];
