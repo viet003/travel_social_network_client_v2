@@ -36,6 +36,31 @@ export const apiGetFriendSuggestions = async (
 };
 
 /**
+ * Get friends of friends suggestions
+ * @param page - Page number (default: 0)
+ * @param size - Page size (default: 20)
+ * @returns Pageable response containing friends of friends suggestions
+ */
+export const apiGetFriendsOfFriendsSuggestions = async (
+  page: number = 0,
+  size: number = 20
+): Promise<ApiResponse<PageableResponse<FriendshipResponse>>> => {
+  try {
+    const response = await axiosConfig({
+      method: 'GET',
+      url: '/friendship/suggestions/friends-of-friends',
+      params: { page, size }
+    });
+    return response.data;
+  } catch (error: unknown) {
+    if (error && typeof error === 'object' && 'response' in error) {
+      throw (error as { response: { data: unknown } }).response.data;
+    }
+    throw error;
+  }
+};
+
+/**
  * Send friend request
  * @param receiverId - User ID to send friend request to
  * @returns Success response
@@ -179,6 +204,25 @@ export const apiGetUserFriendshipLists = async (
     const response = await axiosConfig({
       method: 'GET',
       url: `/friendship/users/${userId}/lists`
+    });
+    return response.data;
+  } catch (error: unknown) {
+    if (error && typeof error === 'object' && 'response' in error) {
+      throw (error as { response: { data: unknown } }).response.data;
+    }
+    throw error;
+  }
+};
+
+/**
+ * Get friends birthdays
+ * @returns List of friends with birthdays sorted by date
+ */
+export const apiGetFriendsBirthdays = async (): Promise<ApiResponse<UserResponse[]>> => {
+  try {
+    const response = await axiosConfig({
+      method: 'GET',
+      url: '/friendship/birthdays'
     });
     return response.data;
   } catch (error: unknown) {
