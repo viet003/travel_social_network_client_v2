@@ -1,97 +1,78 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Icon } from '@iconify/react';
 import FriendCard from '../../../components/common/cards/FriendCard';
 import { SearchFriendDropdown } from '../../../components/common/dropdowns';
 import type { UserResultItemProps } from '../../../components/common/items';
+import { apiGetMyFriends, apiUnfriend } from '../../../services/friendshipService';
+import type { UserResponse } from '../../../types/friendship.types';
+import { toast } from 'react-toastify';
+import { useLoading } from '../../../hooks/useLoading';
 
 const AllFriendsPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearchResults, setShowSearchResults] = useState(false);
+  const [allFriends, setAllFriends] = useState<UserResponse[]>([]);
+  const { isLoading, showLoading, hideLoading } = useLoading(true);
 
-  // Mock data for all friends
-  const allFriends = [
-    {
-      id: 1,
-      name: "Nguyễn Văn A",
-      avatar: "https://images.unsplash.com/photo-1599566150163-29194dcaad36?w=150&h=150&fit=crop&crop=face",
-      mutualFriends: 45
-    },
-    {
-      id: 2,
-      name: "Trần Thị B",
-      avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&h=150&fit=crop&crop=face",
-      mutualFriends: 32
-    },
-    {
-      id: 3,
-      name: "Lê Văn C",
-      avatar: "https://images.unsplash.com/photo-1527980965255-d3b416303d12?w=150&h=150&fit=crop&crop=face",
-      mutualFriends: 28
-    },
-    {
-      id: 4,
-      name: "Phạm Thị D",
-      avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&h=150&fit=crop&crop=face",
-      mutualFriends: 19
-    },
-    {
-      id: 5,
-      name: "Mai Phương",
-      avatar: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=150&h=150&fit=crop&crop=face",
-      mutualFriends: 56
-    },
-    {
-      id: 6,
-      name: "Hoàng Tuấn",
-      avatar: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&h=150&fit=crop&crop=face",
-      mutualFriends: 41
-    },
-    {
-      id: 7,
-      name: "Linh Chi",
-      avatar: "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=150&h=150&fit=crop&crop=face",
-      mutualFriends: 37
-    },
-    {
-      id: 8,
-      name: "Minh Đức",
-      avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=face",
-      mutualFriends: 22
+  // Fetch all friends from API
+  const fetchAllFriends = async () => {
+    try {
+      showLoading();
+      const response = await apiGetMyFriends();
+      if (response.success && response.data) {
+        setAllFriends(response.data);
+      }
+    } catch (error) {
+      console.error('Error fetching friends:', error);
+      toast.error('Không thể tải danh sách bạn bè');
+    } finally {
+      hideLoading();
     }
-  ];
+  };
 
+  useEffect(() => {
+    fetchAllFriends();
+  }, []);
+
+  // Filter friends based on search query
   const filteredFriends = allFriends.filter(friend =>
-    friend.name.toLowerCase().includes(searchQuery.toLowerCase())
+    (friend.userProfile.fullName || friend.userName).toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  // Mock search results data
-  const [searchResults, setSearchResults] = useState<UserResultItemProps[]>([
-    {
-      id: '1',
-      name: 'Nguyễn Văn A',
-      avatar: 'https://images.unsplash.com/photo-1599566150163-29194dcaad36?w=150&h=150&fit=crop&crop=face',
-      description: 'Bạn bè'
-    },
-    {
-      id: '2',
-      name: 'Trần Thị B',
-      avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&h=150&fit=crop&crop=face',
-      description: 'Bạn bè'
-    },
-    {
-      id: '3',
-      name: 'Lê Văn C',
-      avatar: 'https://images.unsplash.com/photo-1527980965255-d3b416303d12?w=150&h=150&fit=crop&crop=face',
-      description: 'Bạn chung'
-    }
-  ]);
+  // Convert filtered friends to search results format
+  const searchResults: UserResultItemProps[] = filteredFriends.slice(0, 5).map(friend => ({
+    id: friend.userId || '',
+    name: friend.userProfile.fullName || friend.userName,
+    avatar: friend.avatarImg || 'https://via.placeholder.com/150',
+    description: 'Bạn bè'
+  }));
 
   const removeSearchResult = (id: string) => {
-    setSearchResults(results => results.filter(item => item.id !== id));
+    // This would typically remove from filtered view or unfriend
+    console.log('Remove search result:', id);
+  };
+
+  // Handle unfriend action
+  const handleUnfriend = async (userId: string, friendName: string) => {
+    if (!window.confirm(`Bạn có chắc chắn muốn hủy kết bạn với ${friendName}?`)) {
+      return;
+    }
+
+    try {
+      const response = await apiUnfriend(userId);
+      if (response.success) {
+        toast.success(`Đã hủy kết bạn với ${friendName}`);
+        // Remove friend from list
+        setAllFriends(prev => prev.filter(friend => friend.userId !== userId));
+      }
+    } catch (error) {
+      console.error('Error unfriending:', error);
+      toast.error('Không thể hủy kết bạn');
+    }
   };
 
   // Handle click outside to close search results
-  React.useEffect(() => {
+  useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as HTMLElement;
       const searchContainer = document.querySelector('[data-search-container-friends]');
@@ -117,6 +98,17 @@ const AllFriendsPage: React.FC = () => {
     };
   }, [showSearchResults]);
 
+  if (isLoading) {
+    return (
+      <div className="p-6 flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <Icon icon="eos-icons:loading" className="h-12 w-12 mx-auto mb-4" style={{ color: 'var(--travel-primary-500)' }} />
+          <p className="text-gray-600">Đang tải danh sách bạn bè...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="p-6">
       {/* Header */}
@@ -141,12 +133,13 @@ const AllFriendsPage: React.FC = () => {
             />
             
             {/* Search Results Dropdown */}
-            {showSearchResults && (
+            {showSearchResults && searchQuery.trim() && (
               <SearchFriendDropdown
                 searchResults={searchResults}
                 onRemove={removeSearchResult}
                 onItemClick={(item) => {
                   console.log('Clicked:', item.name);
+                  setShowSearchResults(false);
                 }}
                 onClose={() => setShowSearchResults(false)}
               />
@@ -156,33 +149,38 @@ const AllFriendsPage: React.FC = () => {
       </div>
 
       {/* Friends Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4">
-        {filteredFriends.map((friend) => (
-          <FriendCard
-            key={friend.id}
-            id={friend.id}
-            name={friend.name}
-            avatar={friend.avatar}
-            mutualFriends={friend.mutualFriends}
-            primaryAction={{
-              label: 'Nhắn tin',
-              icon: 'fluent:chat-24-filled',
-              onClick: () => console.log('Message', friend.id),
-              variant: 'secondary'
-            }}
-            secondaryAction={{
-              label: 'Hủy kết bạn',
-              onClick: () => console.log('Unfriend', friend.id)
-            }}
-            onCardClick={() => console.log('View profile', friend.id)}
-          />
-        ))}
-      </div>
-
-      {filteredFriends.length === 0 && (
+      {filteredFriends.length > 0 ? (
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4">
+          {filteredFriends.map((friend, index) => (
+            <FriendCard
+              key={friend.userId}
+              id={index + 1}
+              name={friend.userProfile.fullName || friend.userName}
+              avatar={friend.avatarImg || 'https://via.placeholder.com/150'}
+              mutualFriends={null} // API doesn't provide mutual friends count yet
+              primaryAction={{
+                label: 'Nhắn tin',
+                icon: 'fluent:chat-24-filled',
+                onClick: () => console.log('Message', friend.userId),
+                variant: 'secondary'
+              }}
+              secondaryAction={{
+                label: 'Hủy kết bạn',
+                onClick: () => handleUnfriend(friend.userId || '', friend.userProfile.fullName || friend.userName)
+              }}
+              onCardClick={() => console.log('View profile', friend.userId)}
+            />
+          ))}
+        </div>
+      ) : (
         <div className="text-center py-12">
           <Icon icon="fluent:people-24-regular" className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-          <p className="text-gray-600">Không tìm thấy bạn bè nào</p>
+          <p className="text-gray-600">
+            {searchQuery ? 'Không tìm thấy bạn bè nào' : 'Bạn chưa có bạn bè nào'}
+          </p>
+          {!searchQuery && (
+            <p className="text-gray-500 text-sm mt-2">Hãy thêm bạn bè để kết nối với mọi người</p>
+          )}
         </div>
       )}
     </div>
