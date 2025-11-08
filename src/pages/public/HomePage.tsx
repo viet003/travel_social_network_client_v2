@@ -111,13 +111,11 @@ const HomePage: React.FC = () => {
   }, [page]);
 
   // Reload feed after creating a post
-  const handlePostCreated = (success: boolean) => {
-    if (success) {
-      console.log('Post created successfully! Reloading feed...');
-      setPosts([]);
-      setPage(0);
-      setHasMore(true);
-      fetchNewsFeed(0);
+  const handlePostCreated = (success: boolean, newPost?: PostResponse) => {
+    if (success && newPost) {
+      console.log('Post created successfully! Adding to top of feed...', newPost);
+      // Add new post to the beginning of the array
+      setPosts(prev => [newPost, ...prev]);
     }
   };
 

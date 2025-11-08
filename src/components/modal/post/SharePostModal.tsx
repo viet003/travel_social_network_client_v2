@@ -7,6 +7,7 @@ import { apiSharePost } from "../../../services/postService";
 import { TiptapEditor, ExpandableContent } from "../../ui";
 import { PrivacyDropdown } from "../../common/dropdowns";
 import TravelButton from "../../ui/customize/TravelButton";
+import { LoadingSpinner } from "../../ui/loading";
 
 interface PrivacyOption {
   value: string;
@@ -259,9 +260,16 @@ const SharePostModal: React.FC<SharePostModalProps> = ({
               onClick={handleShare}
               loading={isSubmitting}
               disabled={isSubmitting}
-              className="px-6"
+              className="px-6 !bg-gray-100 hover:!bg-gray-200 transition-colors"
             >
-              Chia sẻ ngay
+              {isSubmitting ? (
+                <div className="flex items-center justify-center space-x-2">
+                  <LoadingSpinner size={16} color="#374151" />
+                  <span>Đang chia sẻ...</span>
+                </div>
+              ) : (
+                "Chia sẻ ngay"
+              )}
             </TravelButton>
           </div>
         </div>

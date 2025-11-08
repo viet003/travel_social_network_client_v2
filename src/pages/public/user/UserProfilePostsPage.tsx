@@ -256,12 +256,42 @@ const UserProfilePostsPage: React.FC<UserProfilePostsPageProps> = ({
   // Reload posts when postCreated changes
   useEffect(() => {
     if (postCreated) {
-      setPage(0);
-      setHasMore(true);
-      fetchInitialData();
+      console.log('Post created flag changed, will be handled by callback');
       setPostCreated(false);
     }
-  }, [postCreated, fetchInitialData]);
+  }, [postCreated]);
+
+  // Handler for when a post is created
+  const handlePostCreated = (success: boolean, newPost?: PostResponse) => {
+    if (success && newPost) {
+      console.log('Post created successfully on profile! Adding to top of feed...', newPost);
+      
+      // Transform PostResponse to Post format
+      const transformedPost: Post = {
+        postId: newPost.postId,
+        userId: newPost.user?.userId || '',
+        fullName: newPost.user?.fullName || '',
+        avatarImg: newPost.user?.avatarImg || undefined,
+        location: newPost.location || undefined,
+        createdAt: newPost.createdAt,
+        content: newPost.content,
+        postType: newPost.postType,
+        mediaList: newPost.mediaList,
+        likeCount: newPost.likeCount,
+        commentCount: newPost.commentCount,
+        shareCount: newPost.shareCount,
+        tags: newPost.tags,
+        isShare: newPost.isShare,
+        sharedPost: newPost.sharedPost,
+        privacy: newPost.privacy,
+        liked: newPost.liked
+      };
+      
+      // Add new post to the beginning of the array
+      setPosts(prev => [transformedPost, ...prev]);
+      message.success('Đã đăng bài viết');
+    }
+  };
 
   return (
     <div className="flex flex-col lg:flex-row w-full gap-4 sm:gap-6">
@@ -421,7 +451,7 @@ const UserProfilePostsPage: React.FC<UserProfilePostsPageProps> = ({
       {/* Right Content Area - Posts */}
       <div className="flex-1 min-w-0 space-y-6">
         {/* Post Create Modal */}
-        <PostCreateModal setCreateSuccess={setPostCreated} />
+        <PostCreateModal setCreateSuccess={handlePostCreated} />
 
         {loading && page === 0 && (
           <div className="flex justify-center py-8">

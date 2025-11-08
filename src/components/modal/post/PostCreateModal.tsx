@@ -9,8 +9,9 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import '../../../styles/tiptap-editor.css';
 import { apiCreatePost, apiCreatePostInGroup } from '../../../services/postService';
-import type { UpdatePostDto } from '../../../types/post.types';
+import type { UpdatePostDto, PostResponse } from '../../../types/post.types';
 import TravelButton from '../../ui/customize/TravelButton';
+import { LoadingSpinner } from '../../ui/loading';
 
 // Types
 interface MediaItem {
@@ -28,7 +29,7 @@ interface PrivacyOption {
 }
 
 interface PostCreateModalProps {
-  setCreateSuccess?: (success: boolean) => void;
+  setCreateSuccess?: (success: boolean, post?: PostResponse) => void;
   location?: string;
   groupId?: string | null;
 }
@@ -61,29 +62,44 @@ const PostCreateModal: React.FC<PostCreateModalProps> = ({
   const [tagInput, setTagInput] = useState<string>("");
   const [showTagInput, setShowTagInput] = useState<boolean>(false);
 
-   // Privacy options
-   const privacyOptions: PrivacyOption[] = [
-     {
-       value: "public",
-       label: "Công khai",
-       icon: () => <Icon icon="fluent:globe-24-filled" className="w-4 h-4" />,
-       description: "Mọi người đều có thể xem bài viết này"
-     },
-     {
-       value: "friend",
-       label: "Bạn bè",
-       icon: () => <Icon icon="fluent:people-24-filled" className="w-4 h-4" />,
-       description: "Chỉ bạn bè của bạn mới có thể xem bài viết này"
-     },
-     {
-       value: "private",
-       label: "Chỉ mình tôi",
-       icon: () => <Icon icon="fluent:lock-closed-24-filled" className="w-4 h-4" />,
-       description: "Chỉ bạn mới có thể xem bài viết này"
-     }
-   ];
+   // Privacy options - if groupId exists, only show public option
+   const privacyOptions: PrivacyOption[] = groupId 
+     ? [
+         {
+           value: "public",
+           label: "Công khai",
+           icon: () => <Icon icon="fluent:globe-24-filled" className="w-4 h-4" />,
+           description: "Bài viết trong nhóm luôn công khai với thành viên"
+         }
+       ]
+     : [
+         {
+           value: "public",
+           label: "Công khai",
+           icon: () => <Icon icon="fluent:globe-24-filled" className="w-4 h-4" />,
+           description: "Mọi người đều có thể xem bài viết này"
+         },
+         {
+           value: "friend",
+           label: "Bạn bè",
+           icon: () => <Icon icon="fluent:people-24-filled" className="w-4 h-4" />,
+           description: "Chỉ bạn bè của bạn mới có thể xem bài viết này"
+         },
+         {
+           value: "private",
+           label: "Chỉ mình tôi",
+           icon: () => <Icon icon="fluent:lock-closed-24-filled" className="w-4 h-4" />,
+           description: "Chỉ bạn mới có thể xem bài viết này"
+         }
+       ];
 
-  const handleOpen = () => setIsOpen(true);
+  const handleOpen = () => {
+    setIsOpen(true);
+    // Force privacy to public when posting in a group
+    if (groupId) {
+      setPrivacy("public");
+    }
+  };
 
   const handleClose = () => {
     setIsOpen(false);
@@ -252,13 +268,13 @@ const PostCreateModal: React.FC<PostCreateModalProps> = ({
 
       console.log('✅ Post created successfully:', response);
 
-       if (response?.success) {
+       if (response?.success && response?.data) {
          // Reset form and close modal
          handleClose();
          
-         // Trigger success callback if provided
+         // Trigger success callback with the created post data
          if (setCreateSuccess) {
-           setCreateSuccess(true);
+           setCreateSuccess(true, response.data);
          }
          
          // Navigate if needed
@@ -303,36 +319,42 @@ const PostCreateModal: React.FC<PostCreateModalProps> = ({
            placeholder="Chia sẻ câu chuyện..."
            readOnly
          />
-         <button
-           className="hidden sm:flex items-center gap-1 px-3 py-1 text-sm font-medium text-blue-600 rounded bg-blue-50 hover:bg-blue-100 cursor-pointer flex-shrink-0"
-           onClick={(e) => {
-             e.stopPropagation();
-             handleOpen();
-           }}
-         >
-           <Icon icon="fluent:image-24-filled" className="w-4 h-4 sm:w-5 sm:h-5" />
-           <span className="hidden md:inline">Hình ảnh</span>
-         </button>
-         <button
-           className="hidden sm:flex items-center gap-1 px-3 py-1 text-sm font-medium text-blue-600 rounded bg-blue-50 hover:bg-blue-100 cursor-pointer flex-shrink-0"
-           onClick={(e) => {
-             e.stopPropagation();
-             handleOpen();
-           }}
-         >
-           <Icon icon="fluent:location-24-filled" className="w-4 h-4 sm:w-5 sm:h-5" />
-           <span className="hidden md:inline">Địa điểm</span>
-         </button>
+         <div className="hidden sm:flex items-center gap-2 flex-shrink-0">
+           <div onClick={(e) => e.stopPropagation()}>
+             <TravelButton
+               type="default"
+               onClick={handleOpen}
+               className="!px-3 !py-1 !bg-gray-100 hover:!bg-gray-200 transition-colors"
+             >
+               <div className="flex items-center gap-1">
+                 <Icon icon="fluent:image-24-filled" className="w-4 h-4 sm:w-5 sm:h-5" />
+                 <span className="hidden md:inline text-sm">Hình ảnh</span>
+               </div>
+             </TravelButton>
+           </div>
+           <div onClick={(e) => e.stopPropagation()}>
+             <TravelButton
+               type="default"
+               onClick={handleOpen}
+               className="!px-3 !py-1 !bg-gray-100 hover:!bg-gray-200 transition-colors"
+             >
+               <div className="flex items-center gap-1">
+                 <Icon icon="fluent:location-24-filled" className="w-4 h-4 sm:w-5 sm:h-5" />
+                 <span className="hidden md:inline text-sm">Địa điểm</span>
+               </div>
+             </TravelButton>
+           </div>
+         </div>
          {/* Mobile: Single action button */}
-         <button
-           className="flex sm:hidden items-center justify-center p-2 text-blue-600 rounded-full bg-blue-50 hover:bg-blue-100 cursor-pointer flex-shrink-0"
-           onClick={(e) => {
-             e.stopPropagation();
-             handleOpen();
-           }}
-         >
-           <Icon icon="fluent:add-24-filled" className="w-5 h-5" />
-         </button>
+         <div className="flex sm:hidden flex-shrink-0" onClick={(e) => e.stopPropagation()}>
+           <TravelButton
+             type="primary"
+             onClick={handleOpen}
+             className="!p-2"
+           >
+             <Icon icon="fluent:add-24-filled" className="w-5 h-5" />
+           </TravelButton>
+         </div>
       </div>
 
       {/* Modal */}
@@ -387,10 +409,10 @@ const PostCreateModal: React.FC<PostCreateModalProps> = ({
                        type={true}
                      />
 
-                    {/* Privacy Selector */}
+                    {/* Privacy Selector - disabled if posting in group */}
                     <PrivacyDropdown
                       value={privacy}
-                      onChange={setPrivacy}
+                      onChange={groupId ? () => {} : setPrivacy}
                       options={privacyOptions}
                     />
                   </div>
@@ -670,9 +692,16 @@ const PostCreateModal: React.FC<PostCreateModalProps> = ({
                     htmlType="submit"
                     loading={isUploading}
                     disabled={isUploading || (!postContent.trim() && selectedMedia.length === 0)}
-                    className="px-6"
+                    className="px-6 !bg-gray-100 hover:!bg-gray-200 transition-colors"
                   >
-                    Tạo Bài Viết
+                    {isUploading ? (
+                      <div className="flex items-center justify-center space-x-2">
+                        <LoadingSpinner size={16} color="#374151" />
+                        <span>Đang tạo bài viết...</span>
+                      </div>
+                    ) : (
+                      "Tạo Bài Viết"
+                    )}
                   </TravelButton>
                 </div>
               </div>

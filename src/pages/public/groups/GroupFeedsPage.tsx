@@ -1,93 +1,90 @@
-import React from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Icon } from '@iconify/react';
-import { PostModal } from '../../../components/modal/post'; // Đường dẫn tương đối đến PostModal
+import { PostModal } from '../../../components/modal/post';
+import { apiGetMyGroups } from '../../../services/groupService';
+import { apiGetPostsByGroup } from '../../../services/postService';
+import type { PostResponse } from '../../../types/post.types';
+import { toast } from 'react-toastify';
 
 const GroupFeedsPage: React.FC = () => {
-  // Mock data for posts - giả lập các bài viết trong group
-  const mockPosts = [
-    {
-      postId: "1",
-      userId: "user1",
-      avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&h=150&fit=crop&crop=face",
-      userName: "Nguyễn Văn A",
-      location: "Hà Nội",
-      timeAgo: "2024-10-23T10:30:00Z",
-      content: "Vừa có chuyến du lịch Hạ Long tuyệt vời! Phong cảnh đẹp không thể tả. Mọi người nên thử trải nghiệm một lần 🌊⛵",
-      mediaList: [
-        {
-          type: "IMAGE" as const,
-          url: "https://images.unsplash.com/photo-1559592413-7cec4d0cae2b?w=800&h=600&fit=crop"
+  const [posts, setPosts] = useState<PostResponse[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const [currentPage, setCurrentPage] = useState(0);
+  const observer = useRef<IntersectionObserver | null>(null);
+
+  useEffect(() => {
+    fetchGroupPosts();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const fetchGroupPosts = async () => {
+    if (isLoading || !hasMore) return;
+    
+    setIsLoading(true);
+    try {
+      // Lấy danh sách các nhóm đã tham gia
+      const groupsResponse = await apiGetMyGroups(0, 20);
+      const myGroups = groupsResponse.data.content;
+
+      if (myGroups.length === 0) {
+        setHasMore(false);
+        return;
+      }
+
+      // Lấy posts từ tất cả các groups (lấy 5 posts mỗi lần)
+      const postPromises = myGroups.map(group => 
+        apiGetPostsByGroup(group.groupId, currentPage, 5)
+          .catch(err => {
+            console.error(`Error fetching posts for group ${group.groupId}:`, err);
+            return null;
+          })
+      );
+
+      const postsResponses = await Promise.all(postPromises);
+      
+      // Gộp tất cả posts lại và lọc null values
+      const allPosts = postsResponses
+        .filter(response => response !== null)
+        .flatMap(response => response!.data.content);
+
+      if (allPosts.length === 0) {
+        setHasMore(false);
+      } else {
+        setPosts(prev => [...prev, ...allPosts]);
+        setCurrentPage(prev => prev + 1);
+      }
+    } catch (error) {
+      console.error('Error fetching group posts:', error);
+      toast.error('Không thể tải bài viết từ nhóm');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Callback ref for infinite scroll
+  const lastPostElementRef = useCallback(
+    (node: HTMLDivElement | null) => {
+      if (isLoading) return;
+      if (observer.current) observer.current.disconnect();
+
+      observer.current = new IntersectionObserver(
+        (entries) => {
+          if (entries[0].isIntersecting && hasMore) {
+            console.log('Reached end of posts, loading more...');
+            fetchGroupPosts();
+          }
         },
         {
-          type: "IMAGE" as const,
-          url: "https://images.unsplash.com/photo-1583417319070-4a69db38a482?w=800&h=600&fit=crop"
+          rootMargin: '200px', // Load before reaching the bottom
         }
-      ],
-      likeCount: 45,
-      commentCount: 12,
-      shareCount: 5,
-      tags: ["HaLong", "DuLich", "VietNam"],
-      privacy: "Công khai",
-      group: {
-        groupId: "1",
-        groupName: "Nhóm Du Lịch Việt Nam",
-        coverImageUrl: "https://images.unsplash.com/photo-1574158622682-e40e69881006?w=150&h=150&fit=crop&crop=face"
-      },
-      liked: false
+      );
+
+      if (node) observer.current.observe(node);
     },
-    {
-      postId: "2",
-      userId: "user2",
-      avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&h=150&fit=crop&crop=face",
-      userName: "Trần Thị B",
-      location: "Đà Nẵng",
-      timeAgo: "2024-10-23T08:15:00Z",
-      content: "Chia sẻ kinh nghiệm đi Sapa mùa lúa chín. Cảnh đẹp mê hồn, không khí trong lành. Recommend mọi người đi vào tháng 9-10 nhé! 🌾🏔️",
-      mediaList: [
-        {
-          type: "IMAGE" as const,
-          url: "https://images.unsplash.com/photo-1583417319070-4a69db38a482?w=800&h=600&fit=crop"
-        }
-      ],
-      likeCount: 89,
-      commentCount: 23,
-      shareCount: 8,
-      tags: ["Sapa", "MuaLuaChin", "TayBac"],
-      privacy: "Công khai",
-      group: {
-        groupId: "2",
-        groupName: "Chia sẻ kinh nghiệm du lịch",
-        coverImageUrl: "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=150&h=150&fit=crop&crop=face"
-      },
-      liked: true
-    },
-    {
-      postId: "3",
-      userId: "user3",
-      avatar: "https://images.unsplash.com/photo-1599566150163-29194dcaad36?w=150&h=150&fit=crop&crop=face",
-      userName: "Lê Văn C",
-      location: "TP. Hồ Chí Minh",
-      timeAgo: "2024-10-22T15:45:00Z",
-      content: "Video hành trình phượt xuyên Việt của team mình. 30 ngày, 3000km, biết bao kỷ niệm đẹp! 🏍️🇻🇳",
-      mediaList: [
-        {
-          type: "VIDEO" as const,
-          url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
-        }
-      ],
-      likeCount: 156,
-      commentCount: 45,
-      shareCount: 34,
-      tags: ["Phuot", "XuyenViet", "MotorbikeTrip"],
-      privacy: "Công khai",
-      group: {
-        groupId: "3",
-        groupName: "Phượt thủ xuyên Việt",
-        coverImageUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face"
-      },
-      liked: false
-    }
-  ];
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [isLoading, hasMore]
+  );
 
   const handleShare = () => {
     console.log('Share clicked');
@@ -96,6 +93,14 @@ const GroupFeedsPage: React.FC = () => {
   const handleImageClick = (img: string, index: number) => {
     console.log('Image clicked:', img, index);
   };
+
+  if (isLoading && posts.length === 0) {
+    return (
+      <div className="flex justify-center items-center min-h-[400px]">
+        <Icon icon="fluent:spinner-ios-20-filled" className="w-8 h-8 text-blue-600 animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -111,40 +116,52 @@ const GroupFeedsPage: React.FC = () => {
 
         {/* Posts Feed Section */}
         <div className="space-y-4">
-          {mockPosts.map((post) => (
-            <PostModal
+          {posts.map((post, index) => (
+            <div
               key={post.postId}
-              postId={post.postId}
-              userId={post.userId}
-              avatar={post.avatar}
-              userName={post.userName}
-              location={post.location}
-              timeAgo={post.timeAgo}
-              content={post.content}
-              mediaList={post.mediaList}
-              likeCount={post.likeCount}
-              commentCount={post.commentCount}
-              shareCount={post.shareCount}
-              tags={post.tags}
-              privacy={post.privacy}
-              postType="NORMAL"
-              group={post.group}
-              onShare={handleShare}
-              onImageClick={handleImageClick}
-              liked={post.liked}
-            />
+              ref={index === posts.length - 1 ? lastPostElementRef : null}
+            >
+              <PostModal
+                postId={post.postId}
+                userId={post.user?.userId || ''}
+                avatar={post.user?.avatarImg || 'https://via.placeholder.com/150'}
+                userName={post.user?.fullName || 'Unknown User'}
+                location={post.location || ''}
+                timeAgo={post.createdAt}
+                content={post.content}
+                mediaList={post.mediaList || []}
+                likeCount={post.likeCount}
+                commentCount={post.commentCount}
+                shareCount={post.shareCount}
+                tags={post.tags || []}
+                privacy={post.privacy}
+                postType={post.postType || 'NORMAL'}
+                group={post.group ? {
+                  groupId: post.group.groupId,
+                  groupName: post.group.groupName,
+                  coverImageUrl: post.group.coverImageUrl || ''
+                } : undefined}
+                onShare={handleShare}
+                onImageClick={handleImageClick}
+                liked={post.liked}
+              />
+            </div>
           ))}
+
+          {/* Loading indicator */}
+          {isLoading && posts.length > 0 && (
+            <div className="flex justify-center py-8">
+              <Icon icon="fluent:spinner-ios-20-filled" className="w-8 h-8 text-blue-600 animate-spin" />
+            </div>
+          )}
         </div>
 
         {/* Empty State - hiển thị khi không có bài viết */}
-        {mockPosts.length === 0 && (
-          <div className="bg-white rounded-lg shadow p-12 text-center">
-            <Icon icon="fluent:document-empty-24-regular" className="w-16 h-16 mx-auto text-gray-400 mb-4" />
+        {posts.length === 0 && !isLoading && (
+          <div className="bg-white rounded-lg mt-[200px] text-center">
+            <Icon icon="mdi:inbox" className="w-16 h-16 mx-auto text-gray-400 mb-4" />
             <h3 className="text-lg font-semibold text-gray-900 mb-2">Chưa có bài viết nào</h3>
-            <p className="text-gray-600 mb-4">Hãy là người đầu tiên chia sẻ trải nghiệm của bạn!</p>
-            <button className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">
-              Tạo bài viết đầu tiên
-            </button>
+            <p className="text-gray-600">Các nhóm bạn tham gia chưa có bài viết nào.</p>
           </div>
         )}
       </div>

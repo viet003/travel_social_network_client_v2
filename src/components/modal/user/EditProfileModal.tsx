@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Icon } from '@iconify/react';
 import { TravelSelect, TravelInput, TravelDatePicker, TravelButton } from '../../ui/customize';
+import { LoadingSpinner } from '../../ui/loading';
 
 interface FormData {
   userName: string;
@@ -239,7 +240,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
                 htmlType="button"
                 onClick={handleClose}
                 disabled={isSubmitting}
-                className="px-6"
+                className="px-6 !bg-gray-100 hover:!bg-gray-200 transition-colors"
               >
                 Hủy
               </TravelButton>
@@ -248,9 +249,16 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
                 htmlType="submit"
                 disabled={isSubmitting || !form.firstName.trim() || !form.lastName.trim() || !form.userName.trim()}
                 loading={isSubmitting}
-                className="px-6"
+                className="px-6 !bg-gray-100 hover:!bg-gray-200 transition-colors"
               >
-                Lưu thay đổi
+                {isSubmitting ? (
+                  <div className="flex items-center justify-center space-x-2">
+                    <LoadingSpinner size={16} color="#374151" />
+                    <span>Đang lưu...</span>
+                  </div>
+                ) : (
+                  "Lưu thay đổi"
+                )}
               </TravelButton>
             </div>
           </div>

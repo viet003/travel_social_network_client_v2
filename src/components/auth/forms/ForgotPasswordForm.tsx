@@ -37,7 +37,7 @@ const ForgotPasswordForm = () => {
       } else {
         setError(response?.message || 'Có lỗi xảy ra khi gửi email');
       }
-    } catch (error: any) {
+    } catch (error) {
       setError(error?.message || 'Có lỗi xảy ra khi gửi email');
     } finally {
       setIsLoading(false);

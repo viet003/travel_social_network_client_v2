@@ -1,14 +1,19 @@
-import React from 'react';
-import { Outlet, NavLink } from 'react-router-dom';
+import React, { useEffect, useCallback, useRef } from 'react';
+import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { Icon } from '@iconify/react';
 import { path } from '../utilities/path';
+import { formatTimeAgo } from '../utilities/helper';
 import { SearchGroupDropdown } from '../components/common/dropdowns';
 import type { GroupResultItemProps } from '../components/common/items/GroupResultItem';
 import { GroupCreateModal } from '../components/modal';
+import { apiGetMyGroups, type GroupResponse } from '../services/groupService';
+import { toast } from 'react-toastify';
+import { LoadingSpinner } from '../components/ui/loading';
 // import { subLogo } from '../assets/images';
 
 const GroupLayout: React.FC = () => {
   // const location = useLocation();
+  const navigate = useNavigate();
   const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
   const [searchQuery, setSearchQuery] = React.useState('');
   const [showSearchDropdown, setShowSearchDropdown] = React.useState(false);
@@ -35,6 +40,65 @@ const GroupLayout: React.FC = () => {
       memberCount: 8900
     }
   ]);
+
+  // API state for user's groups
+  const [joinedGroups, setJoinedGroups] = React.useState<GroupResponse[]>([]);
+  const [currentPage, setCurrentPage] = React.useState(0);
+  const [totalPages, setTotalPages] = React.useState(0);
+  const [isLoading, setIsLoading] = React.useState(false);
+  const [hasMore, setHasMore] = React.useState(true);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  // Fetch user's groups
+  const fetchMyGroups = useCallback(async (page: number) => {
+    if (isLoading) return;
+    
+    setIsLoading(true);
+    try {
+      const response = await apiGetMyGroups(page, 5);
+      const { content, totalPages: total } = response.data;
+      
+      if (page === 0) {
+        setJoinedGroups(content);
+      } else {
+        setJoinedGroups(prev => [...prev, ...content]);
+      }
+      
+      setTotalPages(total);
+      setCurrentPage(page);
+      setHasMore(page < total - 1);
+    } catch (error) {
+      console.error('Error fetching groups:', error);
+      toast.error('Không thể tải danh sách nhóm');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [isLoading]);
+
+  // Initial load
+  useEffect(() => {
+    fetchMyGroups(0);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Infinite scroll handler (scroll to top to load more)
+  const handleScroll = useCallback(() => {
+    const container = scrollContainerRef.current;
+    if (!container || isLoading || !hasMore) return;
+
+    // Check if scrolled to top
+    if (container.scrollTop === 0 && currentPage < totalPages - 1) {
+      fetchMyGroups(currentPage + 1);
+    }
+  }, [currentPage, totalPages, hasMore, isLoading, fetchMyGroups]);
+
+  useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    container.addEventListener('scroll', handleScroll);
+    return () => container.removeEventListener('scroll', handleScroll);
+  }, [handleScroll]);
   
   const handleRemoveSearch = (id: string) => {
     setRecentSearches(recentSearches.filter(item => item.id !== id));
@@ -44,41 +108,6 @@ const GroupLayout: React.FC = () => {
     console.log('Navigate to group:', item.name);
     // TODO: Navigate to group detail page
   };
-  
-  
-  // Sample groups data
-  const joinedGroups = [
-    { 
-      id: 1,
-      name: 'Cafe Đường Phố', 
-      activity: 'Lần hoạt động gần nhất: 5 phút trước', 
-      image: 'https://images.unsplash.com/photo-1511920170033-f8396924c348?w=100&h=100&fit=crop' 
-    },
-    { 
-      id: 2,
-      name: 'Học Từ Vựng Tiếng Anh Mỗi Ngày', 
-      activity: 'Lần hoạt động gần nhất: 10 giờ trước', 
-      image: 'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=100&h=100&fit=crop' 
-    },
-    { 
-      id: 3,
-      name: 'Trường Người Ta', 
-      activity: 'Lần hoạt động gần nhất: vài giây trước', 
-      image: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=100&h=100&fit=crop' 
-    },
-    { 
-      id: 4,
-      name: 'Phenikaa University Confession', 
-      activity: 'Lần hoạt động gần nhất: 3 năm trước', 
-      image: 'https://images.unsplash.com/photo-1460661419201-fd4cecdf8a8b?w=100&h=100&fit=crop' 
-    },
-    { 
-      id: 5,
-      name: 'Đẩy xã hội - Ban không thể flex, tôi cũng vậy!', 
-      activity: 'Lần hoạt động gần nhất: 10 giờ trước', 
-      image: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=100&h=100&fit=crop' 
-    }
-  ];
 
   return (
     <div className="bg-gray-50 flex min-h-[calc(100vh-55px)] relative">
@@ -150,7 +179,7 @@ const GroupLayout: React.FC = () => {
         </div>
 
         {/* Scrollable Content */}
-        <div className="overflow-y-auto flex-1">
+        <div className="overflow-y-auto flex-1" ref={scrollContainerRef}>
           {/* Navigation Menu */}
           <div className="px-2">
             <nav className="space-y-1">
@@ -238,28 +267,51 @@ const GroupLayout: React.FC = () => {
           <div className="flex-1">
             <div className="px-4 py-3 flex items-center justify-between">
               <h2 className="font-semibold text-[17px] text-gray-900">Nhóm bạn đã tham gia</h2>
-              <button className="text-blue-600 hover:text-blue-700 text-[15px] font-medium cursor-pointer">
+              <button 
+                onClick={() => navigate(path.YOUR_GROUPS)}
+                className="text-blue-600 hover:text-blue-700 text-[15px] font-medium cursor-pointer"
+              >
                 Xem tất cả
               </button>
             </div>
 
             <div className="px-2 pb-4 space-y-1">
-              {joinedGroups.map((group) => (
-                <div 
-                  key={group.id}
-                  className="flex items-start space-x-3 p-2 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
-                >
-                  <img 
-                    src={group.image} 
-                    alt={group.name}
-                    className="w-12 h-12 rounded-lg object-cover flex-shrink-0"
-                  />
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-medium text-[15px] text-gray-900 truncate">{group.name}</h3>
-                    <p className="text-[13px] text-gray-500 truncate">{group.activity}</p>
-                  </div>
+              {isLoading && joinedGroups.length === 0 ? (
+                <div className="flex justify-center py-8">
+                  <LoadingSpinner size={24} color="#2563eb" />
                 </div>
-              ))}
+              ) : joinedGroups.length === 0 ? (
+                <div className="text-center py-8 text-gray-500">
+                  <p>Bạn chưa tham gia nhóm nào</p>
+                </div>
+              ) : (
+                <>
+                  {joinedGroups.map((group) => (
+                    <div 
+                      key={group.groupId}
+                      className="flex items-start space-x-3 p-2 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
+                      onClick={() => navigate(`/home/groups/${group.groupId}`)}
+                    >
+                      <img 
+                        src={group.coverImageUrl || 'https://images.unsplash.com/photo-1511920170033-f8396924c348?w=100&h=100&fit=crop'} 
+                        alt={group.groupName}
+                        className="w-12 h-12 rounded-lg object-cover flex-shrink-0"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-medium text-[15px] text-gray-900 truncate">{group.groupName}</h3>
+                        <p className="text-[13px] text-gray-500 truncate">
+                          Hoạt động: {formatTimeAgo(group.lastActivityAt)}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                  {isLoading && currentPage > 0 && (
+                    <div className="flex justify-center py-2">
+                      <LoadingSpinner size={20} color="#2563eb" />
+                    </div>
+                  )}
+                </>
+              )}
             </div>
           </div>
         </div>
