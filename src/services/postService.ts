@@ -71,18 +71,20 @@ export const apiGetPublicPosts = async (
  * @param groupId - Group UUID
  * @param page - Page number (default: 0)
  * @param size - Page size (default: 5)
+ * @param sort - Sort order: "new_post" | "new_activity" | "relevant" (default: "new_post")
  * @returns Pageable response containing group posts
  */
 export const apiGetPostsByGroup = async (
   groupId: string, 
   page: number = 0,
-  size: number = 5
+  size: number = 5,
+  sort: string = "new_post"
 ): Promise<ApiResponse<PageableResponse<PostResponse>>> => {
   try {
     const response = await axiosConfig({
       method: 'GET',
       url: `/post/group/${groupId}`,
-      params: { page, size }
+      params: { page, size, sort }
     });
     return response.data;
   } catch (error: unknown) {

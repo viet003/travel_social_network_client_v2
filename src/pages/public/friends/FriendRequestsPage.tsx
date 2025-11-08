@@ -9,6 +9,7 @@ import {
 import type { FriendshipResponse } from '../../../types/friendship.types';
 import { toast } from 'react-toastify';
 import { useLoading } from '../../../hooks/useLoading';
+import avatardf from '../../../assets/images/avatar_default.png';
 
 const FriendRequestsPage: React.FC = () => {
   const [friendRequests, setFriendRequests] = useState<FriendshipResponse[]>([]);
@@ -21,7 +22,7 @@ const FriendRequestsPage: React.FC = () => {
   const fetchFriendRequests = async (pageNum: number = 0) => {
     try {
       showLoading();
-      const response = await apiGetPendingFriendRequests(pageNum, 20);
+      const response = await apiGetPendingFriendRequests(pageNum, 5);
       if (response.success && response.data) {
         setFriendRequests(response.data.content);
         setTotalPages(response.data.totalPages);
@@ -45,7 +46,6 @@ const FriendRequestsPage: React.FC = () => {
     try {
       const response = await apiAcceptFriendRequest(friendshipId);
       if (response.success) {
-        toast.success('Đã chấp nhận lời mời kết bạn');
         // Remove the request from list after accepting
         setFriendRequests(prev => prev.filter(req => req.friendshipId !== friendshipId));
         setTotalElements(prev => prev - 1);
@@ -61,7 +61,6 @@ const FriendRequestsPage: React.FC = () => {
     try {
       const response = await apiRejectFriendRequest(friendshipId);
       if (response.success) {
-        toast.success('Đã xóa lời mời kết bạn');
         // Remove the request from list after rejecting
         setFriendRequests(prev => prev.filter(req => req.friendshipId !== friendshipId));
         setTotalElements(prev => prev - 1);
@@ -144,7 +143,7 @@ const FriendRequestsPage: React.FC = () => {
               key={request.friendshipId}
               id={index + 1}
               name={request.friendProfile.userProfile.fullName || request.friendProfile.userName}
-              avatar={request.friendProfile.avatarImg || 'https://via.placeholder.com/150'}
+              avatar={request.friendProfile.avatarImg || avatardf}
               mutualFriends={null} // API doesn't provide mutual friends count yet
               timeAgo={formatTimeAgo(request.createdAt)}
               primaryAction={{

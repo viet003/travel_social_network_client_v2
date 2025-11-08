@@ -7,12 +7,16 @@ import { apiGetMyFriends, apiUnfriend } from '../../../services/friendshipServic
 import type { UserResponse } from '../../../types/friendship.types';
 import { toast } from 'react-toastify';
 import { useLoading } from '../../../hooks/useLoading';
+import ConfirmDeleteModal from '../../../components/modal/confirm/ConfirmDeleteModal';
+import avatardf from '../../../assets/images/avatar_default.png';
 
 const AllFriendsPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearchResults, setShowSearchResults] = useState(false);
   const [allFriends, setAllFriends] = useState<UserResponse[]>([]);
   const { isLoading, showLoading, hideLoading } = useLoading(true);
+  const [showConfirmDelete, setShowConfirmDelete] = useState(false);
+  const [friendToUnfriend, setFriendToUnfriend] = useState<{ userId: string; name: string } | null>(null);
 
   // Fetch all friends from API
   const fetchAllFriends = async () => {
@@ -43,7 +47,7 @@ const AllFriendsPage: React.FC = () => {
   const searchResults: UserResultItemProps[] = filteredFriends.slice(0, 5).map(friend => ({
     id: friend.userId || '',
     name: friend.userProfile.fullName || friend.userName,
-    avatar: friend.avatarImg || 'https://via.placeholder.com/150',
+    avatar: friend.avatarImg || avatardf,
     description: 'Bạn bè'
   }));
 
@@ -54,20 +58,26 @@ const AllFriendsPage: React.FC = () => {
 
   // Handle unfriend action
   const handleUnfriend = async (userId: string, friendName: string) => {
-    if (!window.confirm(`Bạn có chắc chắn muốn hủy kết bạn với ${friendName}?`)) {
-      return;
-    }
+    setFriendToUnfriend({ userId, name: friendName });
+    setShowConfirmDelete(true);
+  };
+
+  const confirmUnfriend = async () => {
+    if (!friendToUnfriend) return;
 
     try {
-      const response = await apiUnfriend(userId);
+      const response = await apiUnfriend(friendToUnfriend.userId);
       if (response.success) {
-        toast.success(`Đã hủy kết bạn với ${friendName}`);
         // Remove friend from list
-        setAllFriends(prev => prev.filter(friend => friend.userId !== userId));
+        setAllFriends(prev => prev.filter(friend => friend.userId !== friendToUnfriend.userId));
+        toast.success(`Đã hủy kết bạn với ${friendToUnfriend.name}`);
       }
     } catch (error) {
       console.error('Error unfriending:', error);
       toast.error('Không thể hủy kết bạn');
+    } finally {
+      setShowConfirmDelete(false);
+      setFriendToUnfriend(null);
     }
   };
 
@@ -150,13 +160,13 @@ const AllFriendsPage: React.FC = () => {
 
       {/* Friends Grid */}
       {filteredFriends.length > 0 ? (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
           {filteredFriends.map((friend, index) => (
             <FriendCard
               key={friend.userId}
               id={index + 1}
               name={friend.userProfile.fullName || friend.userName}
-              avatar={friend.avatarImg || 'https://via.placeholder.com/150'}
+              avatar={friend.avatarImg || avatardf}
               mutualFriends={null} // API doesn't provide mutual friends count yet
               primaryAction={{
                 label: 'Nhắn tin',
@@ -182,6 +192,20 @@ const AllFriendsPage: React.FC = () => {
             <p className="text-gray-500 text-sm mt-2">Hãy thêm bạn bè để kết nối với mọi người</p>
           )}
         </div>
+      )}
+
+      {/* Confirm Delete Modal */}
+      {friendToUnfriend && (
+        <ConfirmDeleteModal
+          isOpen={showConfirmDelete}
+          onClose={() => {
+            setShowConfirmDelete(false);
+            setFriendToUnfriend(null);
+          }}
+          onConfirm={confirmUnfriend}
+          type="unfriend"
+          itemName={friendToUnfriend.name}
+        />
       )}
     </div>
   );

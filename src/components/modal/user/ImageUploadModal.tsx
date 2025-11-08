@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Icon } from '@iconify/react';
 import { toast } from 'react-toastify';
 import { TravelButton } from '../../ui/customize';
+import { LoadingSpinner } from '../../ui/loading';
 
 interface ImageUploadModalProps {
   isOpen: boolean;
@@ -113,29 +114,66 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
-          {/* Current Image Display */}
-          {currentImage && !preview && (
+          {/* Current Image and Preview - Side by Side for Avatar */}
+          {type === "avatar" && (currentImage || preview) && (
+            <div>
+              <label className="block mb-3 text-sm font-medium text-gray-700">
+                {currentImage && preview ? "So sánh ảnh" : currentImage ? "Ảnh hiện tại" : "Ảnh mới"}
+              </label>
+              <div className="flex items-center justify-center gap-6">
+                {currentImage && (
+                  <div className="flex flex-col items-center">
+                    <div className="relative overflow-hidden border-2 border-gray-200 rounded-full w-40 h-40">
+                      <img
+                        src={currentImage}
+                        alt="Current"
+                        className="object-cover w-full h-full"
+                      />
+                    </div>
+                    <span className="mt-2 text-xs text-gray-500">Ảnh hiện tại</span>
+                  </div>
+                )}
+                {preview && (
+                  <div className="flex flex-col items-center">
+                    <div className="relative  border-2 border-blue-500 rounded-full w-40 h-40">
+                      <button
+                        type="button"
+                        onClick={removeSelectedImage}
+                        className="absolute z-10 p-1 text-white transition-colors bg-red-500 rounded-full top-2 right-2 hover:bg-red-600 cursor-pointer"
+                      >
+                        <Icon icon="lucide:x" className="w-4 h-4" />
+                      </button>
+                      <img
+                        src={preview}
+                        alt="Preview"
+                        className="object-cover w-full h-full rounded-full"
+                      />
+                    </div>
+                    <span className="mt-2 text-xs font-medium text-blue-600">Ảnh mới</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Current Image Display for Cover */}
+          {type === "cover" && currentImage && !preview && (
             <div>
               <label className="block mb-2 text-sm font-medium text-gray-700">Ảnh hiện tại</label>
               <div className="relative overflow-hidden border border-gray-200 rounded-lg">
                 <img
                   src={currentImage}
                   alt="Current"
-                  className={`object-cover w-full ${
-                    type === "avatar" ? "h-40" : "h-48"
-                  } ${type === "avatar" ? "rounded-full mx-auto w-40" : ""}`}
+                  className="object-cover w-full h-48"
                 />
               </div>
             </div>
           )}
 
-          {/* Image Upload Area */}
-          <div>
-            <label className="block mb-2 text-sm font-medium text-gray-700">
-              Chọn ảnh mới <span className="text-red-500">*</span>
-            </label>
-            
-            {preview ? (
+          {/* Preview for Cover */}
+          {type === "cover" && preview && (
+            <div>
+              <label className="block mb-2 text-sm font-medium text-gray-700">Ảnh mới</label>
               <div className="relative overflow-hidden border border-gray-200 rounded-lg">
                 <button
                   type="button"
@@ -147,12 +185,18 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
                 <img
                   src={preview}
                   alt="Preview"
-                  className={`object-cover w-full ${
-                    type === "avatar" ? "h-40 rounded-full mx-auto w-40" : "h-48"
-                  }`}
+                  className="object-cover w-full h-48"
                 />
               </div>
-            ) : (
+            </div>
+          )}
+
+          {/* Image Upload Area - Only show if no preview */}
+          {!preview && (
+            <div>
+              <label className="block mb-2 text-sm font-medium text-gray-700">
+                Chọn ảnh mới <span className="text-red-500">*</span>
+              </label>
               <div className="flex flex-col items-center">
                 <label className="flex flex-col items-center justify-center w-full h-48 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer hover:border-blue-400 hover:bg-blue-50">
                   <div className="flex flex-col items-center py-8">
@@ -177,8 +221,8 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
                   />
                 </label>
               </div>
-            )}
-          </div>
+            </div>
+          )}
 
           {/* Image Requirements */}
           <div className="p-4 border border-blue-200 rounded-lg bg-blue-50">
@@ -199,7 +243,7 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
                 htmlType="button"
                 onClick={handleClose}
                 disabled={isUploading}
-                className="px-6"
+                className="px-6 !bg-gray-100 hover:!bg-gray-200 transition-colors"
               >
                 Hủy
               </TravelButton>
@@ -208,12 +252,19 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
                 htmlType="submit"
                 disabled={isUploading || !selectedFile}
                 loading={isUploading}
-                className="px-6"
+                className="px-6 !bg-gray-100 hover:!bg-gray-200 transition-colors"
               >
-                <div className="flex items-center gap-2">
-                  <Icon icon="lucide:check" className="w-4 h-4" />
-                  Tải ảnh lên
-                </div>
+                {isUploading ? (
+                  <div className="flex items-center justify-center space-x-2">
+                    <LoadingSpinner size={16} color="#374151" />
+                    <span>Đang tải lên...</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <Icon icon="lucide:check" className="w-4 h-4" />
+                    Tải ảnh lên
+                  </div>
+                )}
               </TravelButton>
             </div>
           </div>

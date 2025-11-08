@@ -1,5 +1,6 @@
 import React from 'react';
 import { Icon } from '@iconify/react';
+import TravelButton from '../../ui/customize/TravelButton';
 
 export interface OtherGroupCardProps {
   id: string;
@@ -7,12 +8,16 @@ export interface OtherGroupCardProps {
   coverImage: string;
   memberCount: number;
   postsPerDay: number;
+  privacy?: boolean; // true = private, false = public
   friendMembers?: {
     name: string;
     avatar: string;
   }[];
   onJoinClick?: (id: string) => void;
+  onRemoveClick?: (id: string) => void;
   onClick?: () => void;
+  isJoining?: boolean;
+  requestStatus?: 'PENDING' | 'APPROVED';
 }
 
 const OtherGroupCard: React.FC<OtherGroupCardProps> = ({
@@ -21,9 +26,13 @@ const OtherGroupCard: React.FC<OtherGroupCardProps> = ({
   coverImage,
   memberCount,
   postsPerDay,
+  privacy,
   friendMembers = [],
   onJoinClick,
-  onClick
+  onRemoveClick,
+  onClick,
+  isJoining = false,
+  requestStatus
 }) => {
   const formatNumber = (num: number): string => {
     if (num >= 1000000) {
@@ -51,7 +60,9 @@ const OtherGroupCard: React.FC<OtherGroupCardProps> = ({
           className="absolute top-2 right-2 w-8 h-8 bg-white/90 hover:bg-white rounded-full flex items-center justify-center transition-colors cursor-pointer"
           onClick={(e) => {
             e.stopPropagation();
-            // Handle close/hide
+            if (onRemoveClick) {
+              onRemoveClick(id);
+            }
           }}
         >
           <Icon icon="fluent:dismiss-24-filled" className="w-5 h-5 text-gray-700" />
@@ -67,6 +78,21 @@ const OtherGroupCard: React.FC<OtherGroupCardProps> = ({
         >
           {name}
         </h3>
+
+        {/* Privacy Badge */}
+        <div className="flex items-center mb-2">
+          <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${
+            privacy 
+              ? 'bg-gray-100 text-gray-700' 
+              : 'bg-blue-50 text-blue-700'
+          }`}>
+            <Icon 
+              icon={privacy ? "fluent:lock-closed-20-filled" : "fluent:globe-20-filled"} 
+              className="w-3 h-3 mr-1" 
+            />
+            {privacy ? 'Riêng tư' : 'Công khai'}
+          </span>
+        </div>
 
         {/* Group Stats */}
         <div className="flex items-center text-sm mb-3 text-gray-500">
@@ -102,17 +128,37 @@ const OtherGroupCard: React.FC<OtherGroupCardProps> = ({
         <div className="flex-1"></div>
 
         {/* Join Button */}
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            if (onJoinClick) {
-              onJoinClick(id);
-            }
-          }}
-          className="w-full py-2 px-4 rounded-md font-medium text-sm transition-colors cursor-pointer bg-gray-200 text-gray-900 hover:bg-gray-300 mt-auto"
+        <div 
+          onClick={(e) => e.stopPropagation()}
+          className="flex justify-end"
         >
-          Tham gia nhóm
-        </button>
+          {requestStatus === 'PENDING' ? (
+            <TravelButton
+              type="default"
+              disabled
+              className="!h-10 !bg-gray-100 !w-auto"
+            >
+              <div className="flex items-center justify-center">
+                <Icon icon="fluent:clock-24-regular" className="w-4 h-4 mr-2" />
+                Đang chờ duyệt
+              </div>
+            </TravelButton>
+          ) : (
+            <TravelButton
+              type="default"
+              loading={isJoining}
+              disabled={isJoining}
+              className="!h-10 !bg-gray-100 hover:!bg-gray-200 !w-auto transition-colors"
+              onClick={() => {
+                if (onJoinClick && !isJoining) {
+                  onJoinClick(id);
+                }
+              }}
+            >
+              {isJoining ? 'Đang tham gia...' : 'Tham gia nhóm'}
+            </TravelButton>
+          )}
+        </div>
       </div>
     </div>
   );

@@ -232,3 +232,43 @@ export const apiGetFriendsBirthdays = async (): Promise<ApiResponse<UserResponse
     throw error;
   }
 };
+
+/**
+ * Block a user
+ * @param userId - User ID to block
+ * @returns Response with updated friendship status
+ */
+export const apiBlockUser = async (userId: string): Promise<ApiResponse<{ friendshipStatus: 'BLOCKED' | null }>> => {
+  try {
+    const response = await axiosConfig({
+      method: 'POST',
+      url: `/friendship/block/${userId}`
+    });
+    return response.data;
+  } catch (error: unknown) {
+    if (error && typeof error === 'object' && 'response' in error) {
+      throw (error as { response: { data: unknown } }).response.data;
+    }
+    throw error;
+  }
+};
+
+/**
+ * Unblock a user
+ * @param userId - User ID to unblock
+ * @returns Success response with null friendship status
+ */
+export const apiUnblockUser = async (userId: string): Promise<ApiResponse<{ friendshipStatus: null }>> => {
+  try {
+    const response = await axiosConfig({
+      method: 'DELETE',
+      url: `/friendship/unblock/${userId}`
+    });
+    return response.data;
+  } catch (error: unknown) {
+    if (error && typeof error === 'object' && 'response' in error) {
+      throw (error as { response: { data: unknown } }).response.data;
+    }
+    throw error;
+  }
+};

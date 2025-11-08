@@ -1,74 +1,291 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Icon } from '@iconify/react';
+import { useParams, useNavigate, useOutletContext } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import { 
+  apiGetGroupMembers, 
+  apiGetGroupById, 
+  apiChangeMemberRole,
+  apiApproveJoinRequest,
+  apiRejectJoinRequest,
+  type GroupMemberResponse,
+  type GroupResponse
+} from '../../../../services/groupService';
+import { toast } from 'react-toastify';
+import avatardf from '../../../../assets/images/avatar_default.png';
+import { TravelButton } from '../../../../components/ui/customize';
+
+interface AuthState {
+  userId: string | null;
+  userName: string | null;
+  fullName: string | null;
+  firstName: string | null;
+  lastName: string | null;
+  avatar: string | null;
+  isLoggedIn: boolean;
+}
+
+interface OutletContext {
+  groupData: GroupResponse | null;
+  isMember: boolean;
+}
 
 const GroupMembersPage: React.FC = () => {
+  const { isMember } = useOutletContext<OutletContext>();
+  const { groupId } = useParams<{ groupId: string }>();
+  const navigate = useNavigate();
+  const currentUserId = useSelector((state: { auth: AuthState }) => state.auth.userId);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterTab, setFilterTab] = useState('all');
+  const [members, setMembers] = useState<GroupMemberResponse[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [totalElements, setTotalElements] = useState(0);
+  const [page, setPage] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const [currentUserRole, setCurrentUserRole] = useState<string | null>(null);
+  const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
+  const observer = useRef<IntersectionObserver | null>(null);
 
-  // Mock members data
-  const members = [
-    {
-      id: 1,
-      name: 'Nguyễn Văn A',
-      avatar: 'https://i.pravatar.cc/60?img=10',
-      role: 'Quản trị viên',
-      joinedDate: '15/03/2023',
-      postsCount: 234,
-      isFriend: true,
+  // Fetch group info to get current user's role
+  useEffect(() => {
+    const fetchGroupInfo = async () => {
+      if (!groupId) return;
+      try {
+        const response = await apiGetGroupById(groupId);
+        if (response.data) {
+          setCurrentUserRole(response.data.currentUserRole);
+        }
+      } catch (error) {
+        console.error('Error fetching group info:', error);
+      }
+    };
+    fetchGroupInfo();
+  }, [groupId]);
+
+  // Fetch members from API
+  const fetchMembers = async (pageNum: number = 0, append: boolean = false) => {
+    if (!groupId || loading || !isMember) return;
+
+    setLoading(true);
+    try {
+      const response = await apiGetGroupMembers(groupId, searchQuery, filterTab, pageNum, 5);
+      
+      if (response.data) {
+        const newMembers = response.data.content;
+        
+        if (append) {
+          setMembers(prev => [...prev, ...newMembers]);
+        } else {
+          setMembers(newMembers);
+        }
+        
+        setTotalElements(response.data.totalElements);
+        setHasMore(newMembers.length === 5); // Has more if we got a full page
+      }
+    } catch (error) {
+      console.error('Error fetching group members:', error);
+      toast.error('Không thể tải danh sách thành viên');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fetch on mount, filter changes, and search (with debounce for search)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setPage(0);
+      fetchMembers(0, false);
+    }, searchQuery ? 500 : 0); // Debounce only for search, immediate for other changes
+
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [groupId, filterTab, searchQuery]);
+
+  // Callback ref for infinite scroll
+  const lastMemberElementRef = useCallback(
+    (node: HTMLDivElement | null) => {
+      if (loading) return;
+      if (observer.current) observer.current.disconnect();
+
+      observer.current = new IntersectionObserver(
+        (entries) => {
+          if (entries[0].isIntersecting && hasMore) {
+            const nextPage = page + 1;
+            setPage(nextPage);
+            fetchMembers(nextPage, true);
+          }
+        },
+        {
+          rootMargin: '200px',
+        }
+      );
+
+      if (node) observer.current.observe(node);
     },
-    {
-      id: 2,
-      name: 'Trần Thị B',
-      avatar: 'https://i.pravatar.cc/60?img=20',
-      role: 'Người kiểm duyệt',
-      joinedDate: '20/03/2023',
-      postsCount: 189,
-      isFriend: false,
-    },
-    {
-      id: 3,
-      name: 'Lê Văn C',
-      avatar: 'https://i.pravatar.cc/60?img=30',
-      role: 'Thành viên',
-      joinedDate: '01/04/2023',
-      postsCount: 56,
-      isFriend: true,
-    },
-    {
-      id: 4,
-      name: 'Phạm Thị D',
-      avatar: 'https://i.pravatar.cc/60?img=40',
-      role: 'Thành viên',
-      joinedDate: '15/04/2023',
-      postsCount: 42,
-      isFriend: false,
-    },
-    {
-      id: 5,
-      name: 'Hoàng Văn E',
-      avatar: 'https://i.pravatar.cc/60?img=50',
-      role: 'Thành viên',
-      joinedDate: '20/04/2023',
-      postsCount: 38,
-      isFriend: false,
-    },
-  ];
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [loading, hasMore, page]
+  );
+
+  // Check if current user is admin/moderator/owner
+  const canManageMembers = currentUserRole && ['OWNER', 'ADMIN', 'MODERATOR'].includes(currentUserRole);
 
   const tabs = [
-    { id: 'all', label: 'Tất cả', count: members.length },
-    { id: 'friends', label: 'Bạn bè', count: members.filter(m => m.isFriend).length },
-    { id: 'admins', label: 'Quản trị viên', count: members.filter(m => m.role !== 'Thành viên').length },
+    { id: 'all', label: 'Tất cả', count: totalElements },
+    { id: 'admins', label: 'Quản trị viên', count: members.filter(m => m.role !== 'MEMBER').length },
+    ...(canManageMembers ? [{ id: 'pending', label: 'Yêu cầu tham gia', count: members.filter(m => m.status === 'PENDING').length }] : []),
   ];
 
-  const filteredMembers = members.filter(member => {
-    if (filterTab === 'friends' && !member.isFriend) return false;
-    if (filterTab === 'admins' && member.role === 'Thành viên') return false;
-    if (searchQuery && !member.name.toLowerCase().includes(searchQuery.toLowerCase())) return false;
-    return true;
-  });
+  const getRoleBadgeColor = (role: string) => {
+    switch (role) {
+      case 'OWNER':
+      case 'ADMIN':
+        return 'bg-red-100 text-red-700';
+      case 'MODERATOR':
+        return 'bg-blue-100 text-blue-700';
+      default:
+        return 'bg-gray-100 text-gray-700';
+    }
+  };
+
+  const getRoleLabel = (role: string) => {
+    switch (role) {
+      case 'OWNER':
+        return 'Chủ nhóm';
+      case 'ADMIN':
+        return 'Quản trị viên';
+      case 'MODERATOR':
+        return 'Người kiểm duyệt';
+      default:
+        return 'Thành viên';
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('vi-VN');
+  };
+
+  // Check if user can change role (OWNER can change anyone except themselves, ADMIN can change MEMBER and MODERATOR except themselves)
+  const canChangeRole = (targetUserId: string, targetRole: string) => {
+    // Cannot change own role
+    if (targetUserId === currentUserId) return false;
+    
+    if (currentUserRole === 'OWNER') return true;
+    if (currentUserRole === 'ADMIN' && targetRole !== 'OWNER' && targetRole !== 'ADMIN') return true;
+    return false;
+  };
+
+  // Get available role options for a member
+  const getAvailableRoles = (currentRole: string) => {
+    const roles = [];
+    
+    if (currentUserRole === 'OWNER') {
+      // Owner can set any role
+      if (currentRole !== 'ADMIN') roles.push({ value: 'ADMIN', label: 'Thăng quản trị viên' });
+      if (currentRole !== 'MODERATOR') roles.push({ value: 'MODERATOR', label: 'Thăng người kiểm duyệt' });
+      if (currentRole !== 'MEMBER') roles.push({ value: 'MEMBER', label: 'Giáng thành viên' });
+    } else if (currentUserRole === 'ADMIN') {
+      // Admin can only manage MEMBER and MODERATOR
+      if (currentRole === 'MEMBER') {
+        roles.push({ value: 'MODERATOR', label: 'Thăng người kiểm duyệt' });
+      } else if (currentRole === 'MODERATOR') {
+        roles.push({ value: 'MEMBER', label: 'Giáng thành viên' });
+      }
+    }
+    
+    return roles;
+  };
+
+  // Handle role change
+  const handleRoleChange = async (memberId: string, newRole: string) => {
+    if (!groupId) return;
+    
+    try {
+      await apiChangeMemberRole(groupId, memberId, newRole);
+      
+      // Refresh members list
+      setPage(0);
+      fetchMembers(0, false);
+      setOpenDropdownId(null);
+    } catch (error) {
+      console.error('Error changing member role:', error);
+      toast.error('Không thể cập nhật vai trò');
+    }
+  };
+
+  // Handle approve join request
+  const handleApproveRequest = async (memberId: string) => {
+    if (!groupId) return;
+    
+    try {
+      const response = await apiApproveJoinRequest(groupId, memberId);
+      
+      // Update member with the response data from server
+      if (response.data) {
+        setMembers(prevMembers => 
+          prevMembers.map(m => 
+            m.userId === memberId 
+              ? response.data
+              : m
+          )
+        );
+      }
+    } catch (error) {
+      console.error('Error approving join request:', error);
+      toast.error('Không thể chấp nhận yêu cầu');
+    }
+  };
+
+  // Handle reject join request
+  const handleRejectRequest = async (memberId: string) => {
+    if (!groupId) return;
+    
+    try {
+      await apiRejectJoinRequest(groupId, memberId);
+      
+      // Remove member from list locally
+      setMembers(prevMembers => prevMembers.filter(m => m.userId !== memberId));
+      setTotalElements(prev => prev - 1);
+    } catch (error) {
+      console.error('Error rejecting join request:', error);
+      toast.error('Không thể từ chối yêu cầu');
+    }
+  };
+
+  // Toggle dropdown
+  const toggleDropdown = (memberId: string) => {
+    setOpenDropdownId(openDropdownId === memberId ? null : memberId);
+  };
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = () => {
+      if (openDropdownId) {
+        setOpenDropdownId(null);
+      }
+    };
+    
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, [openDropdownId]);
 
   return (
     <div className="space-y-4">
+      {!isMember ? (
+        <div className="bg-white rounded-lg shadow-sm p-12 text-center">
+          <Icon
+            icon="fluent:lock-closed-24-regular"
+            className="w-16 h-16 text-gray-300 mx-auto mb-4"
+          />
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">
+            Vui lòng tham gia nhóm
+          </h3>
+          <p className="text-gray-500">
+            Bạn cần tham gia nhóm để xem danh sách thành viên
+          </p>
+        </div>
+      ) : (
+        <>
       {/* Search & Filter */}
       <div className="bg-white rounded-lg shadow-sm p-4">
         <div className="flex flex-col sm:flex-row gap-4">
@@ -87,40 +304,15 @@ const GroupMembersPage: React.FC = () => {
           {/* Filter Tabs */}
           <div className="flex space-x-2">
             {tabs.map((tab) => (
-              <button
+              <TravelButton
                 key={tab.id}
+                type={filterTab === tab.id ? 'primary' : 'default'}
                 onClick={() => setFilterTab(tab.id)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  filterTab === tab.id
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
+                className="text-sm"
               >
                 {tab.label} ({tab.count})
-              </button>
+              </TravelButton>
             ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Members Stats */}
-      <div className="bg-white rounded-lg shadow-sm p-4">
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          <div className="text-center">
-            <div className="text-2xl font-bold text-gray-900">{members.length}</div>
-            <div className="text-sm text-gray-500">Tổng thành viên</div>
-          </div>
-          <div className="text-center">
-            <div className="text-2xl font-bold text-green-600">+12</div>
-            <div className="text-sm text-gray-500">Hôm nay</div>
-          </div>
-          <div className="text-center">
-            <div className="text-2xl font-bold text-blue-600">+89</div>
-            <div className="text-sm text-gray-500">Tuần này</div>
-          </div>
-          <div className="text-center">
-            <div className="text-2xl font-bold text-purple-600">+234</div>
-            <div className="text-sm text-gray-500">Tháng này</div>
           </div>
         </div>
       </div>
@@ -128,75 +320,164 @@ const GroupMembersPage: React.FC = () => {
       {/* Members List */}
       <div className="bg-white rounded-lg shadow-sm p-4">
         <h2 className="text-lg font-bold text-gray-900 mb-4">
-          Danh sách thành viên ({filteredMembers.length})
+          Danh sách thành viên ({totalElements})
         </h2>
         
-        <div className="space-y-3">
-          {filteredMembers.map((member) => (
-            <div
-              key={member.id}
-              className="flex items-center justify-between p-4 hover:bg-gray-50 rounded-lg transition-colors"
-            >
-              <div className="flex items-center space-x-4">
-                <img
-                  src={member.avatar}
-                  alt={member.name}
-                  className="w-14 h-14 rounded-full"
-                />
-                <div>
-                  <h3 className="font-semibold text-gray-900">{member.name}</h3>
-                  <div className="flex items-center space-x-2 text-sm text-gray-500">
-                    <span className={`px-2 py-0.5 rounded-full text-xs ${
-                      member.role === 'Quản trị viên' 
-                        ? 'bg-red-100 text-red-700'
-                        : member.role === 'Người kiểm duyệt'
-                        ? 'bg-blue-100 text-blue-700'
-                        : 'bg-gray-100 text-gray-700'
-                    }`}>
-                      {member.role}
-                    </span>
-                    {member.isFriend && (
-                      <span className="flex items-center space-x-1 text-blue-600">
-                        <Icon icon="fluent:people-24-filled" className="h-4 w-4" />
-                        <span>Bạn bè</span>
-                      </span>
+        {loading && page === 0 ? (
+          <div className="flex items-center justify-center py-8">
+            <Icon icon="fluent:spinner-ios-20-filled" className="w-8 h-8 text-blue-600 animate-spin" />
+            <span className="ml-2 text-gray-600">Đang tải...</span>
+          </div>
+        ) : (
+          <>
+            <div className="space-y-3">
+              {members.map((member, index) => (
+                <div
+                  key={member.userId}
+                  ref={index === members.length - 1 ? lastMemberElementRef : null}
+                  className="flex items-center justify-between p-4 hover:bg-gray-50 rounded-lg transition-colors cursor-pointer"
+                  onClick={() => navigate(`/profile/${member.userId}`)}
+                >
+                  <div className="flex items-center space-x-4">
+                    <img
+                      src={member.avatar || avatardf}
+                      alt={member.fullName}
+                      className="w-14 h-14 rounded-full object-cover"
+                    />
+                    <div>
+                      <h3 className="font-semibold text-gray-900">{member.fullName}</h3>
+                      <div className="flex items-center space-x-2 text-sm text-gray-500">
+                        <span className={`px-2 py-0.5 rounded-full text-xs ${getRoleBadgeColor(member.role)}`}>
+                          {getRoleLabel(member.role)}
+                        </span>
+                      </div>
+                      <div className="flex items-center space-x-3 text-xs text-gray-500 mt-1">
+                        <span className="flex items-center space-x-1">
+                          <Icon icon="fluent:calendar-24-regular" className="h-3.5 w-3.5" />
+                          <span>Tham gia {formatDate(member.joinedAt)}</span>
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center space-x-2">
+                    {/* Approve/Reject buttons for pending members */}
+                    {member.status === 'PENDING' && canManageMembers ? (
+                      <>
+                        <div onClick={(e) => e.stopPropagation()}>
+                          <TravelButton
+                            type="primary"
+                            onClick={() => handleApproveRequest(member.userId)}
+                            className="!px-3 !py-1.5"
+                          >
+                            <div className="flex items-center gap-1">
+                              <Icon icon="fluent:checkmark-24-filled" className="h-4 w-4" />
+                              <span className="text-sm">Chấp nhận</span>
+                            </div>
+                          </TravelButton>
+                        </div>
+                        <div onClick={(e) => e.stopPropagation()}>
+                          <TravelButton
+                            type="default"
+                            danger={true}
+                            onClick={() => handleRejectRequest(member.userId)}
+                            className="!px-3 !py-1.5 !bg-gray-100 hover:!bg-gray-200 transition-colors"
+                          >
+                            <div className="flex items-center gap-1">
+                              <Icon icon="fluent:dismiss-24-filled" className="h-4 w-4" />
+                              <span className="text-sm">Từ chối</span>
+                            </div>
+                          </TravelButton>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        {/* Only show chat button if not viewing own profile */}
+                        {member.userId !== currentUserId && (
+                          <button 
+                            className="p-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors cursor-pointer"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              navigate(`/messages/${member.userId}`);
+                            }}
+                          >
+                            <Icon icon="fluent:chat-24-regular" className="h-5 w-5" />
+                          </button>
+                        )}
+                        
+                        {canChangeRole(member.userId, member.role) && (
+                          <div className="relative">
+                            <button 
+                              className="p-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors cursor-pointer"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                toggleDropdown(member.userId);
+                              }}
+                            >
+                              <Icon icon="fluent:more-horizontal-24-filled" className="h-5 w-5" />
+                            </button>
+
+                            {/* Dropdown Menu */}
+                            {openDropdownId === member.userId && (
+                              <div 
+                                className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 z-10"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <div className="py-1">
+                                  <div className="px-4 py-2 text-xs text-gray-500 font-semibold uppercase">
+                                    Quản lý vai trò
+                                  </div>
+                                  {getAvailableRoles(member.role).map((role) => (
+                                    <button
+                                      key={role.value}
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleRoleChange(member.userId, role.value);
+                                      }}
+                                      className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors flex items-center space-x-2"
+                                    >
+                                      <Icon 
+                                        icon={role.value === 'MEMBER' ? 'fluent:arrow-down-24-regular' : 'fluent:arrow-up-24-regular'} 
+                                        className="h-4 w-4"
+                                      />
+                                      <span>{role.label}</span>
+                                    </button>
+                                  ))}
+                                  {getAvailableRoles(member.role).length === 0 && (
+                                    <div className="px-4 py-2 text-sm text-gray-500 italic">
+                                      Không có tùy chọn nào
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </>
                     )}
                   </div>
-                  <div className="flex items-center space-x-3 text-xs text-gray-500 mt-1">
-                    <span className="flex items-center space-x-1">
-                      <Icon icon="fluent:calendar-24-regular" className="h-3.5 w-3.5" />
-                      <span>Tham gia {member.joinedDate}</span>
-                    </span>
-                    <span>•</span>
-                    <span>{member.postsCount} bài viết</span>
-                  </div>
                 </div>
-              </div>
-
-              <div className="flex items-center space-x-2">
-                {!member.isFriend && member.role === 'Thành viên' && (
-                  <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm">
-                    Kết bạn
-                  </button>
-                )}
-                <button className="p-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
-                  <Icon icon="fluent:mail-24-regular" className="h-5 w-5" />
-                </button>
-                <button className="p-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
-                  <Icon icon="fluent:more-horizontal-24-filled" className="h-5 w-5" />
-                </button>
-              </div>
+              ))}
             </div>
-          ))}
-        </div>
 
-        {filteredMembers.length === 0 && (
-          <div className="text-center py-8">
-            <Icon icon="fluent:people-search-24-regular" className="h-16 w-16 text-gray-300 mx-auto mb-3" />
-            <p className="text-gray-500">Không tìm thấy thành viên nào</p>
-          </div>
+            {/* Loading indicator */}
+            {loading && members.length > 0 && (
+              <div className="flex justify-center py-8">
+                <Icon icon="fluent:spinner-ios-20-filled" className="w-8 h-8 text-blue-600 animate-spin" />
+              </div>
+            )}
+
+            {members.length === 0 && (
+              <div className="text-center py-8">
+                <Icon icon="fluent:people-search-24-regular" className="h-16 w-16 text-gray-300 mx-auto mb-3" />
+                <p className="text-gray-500">Không tìm thấy thành viên nào</p>
+              </div>
+            )}
+          </>
         )}
       </div>
+      </>
+      )}
     </div>
   );
 };

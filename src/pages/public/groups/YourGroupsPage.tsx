@@ -1,82 +1,79 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Icon } from '@iconify/react';
 import { MyGroupCard } from '../../../components/common/cards';
+import { apiGetMyGroups, apiGetPendingGroups, apiLeaveGroup, type GroupResponse } from '../../../services/groupService';
+import { toast } from 'react-toastify';
+import { formatTimeAgo } from '../../../utilities/helper';
 
 const YourGroupsPage: React.FC = () => {
-  // Mock data for pending group requests
-  const [pendingGroups] = useState([
-    {
-      id: '1',
-      name: 'Du lịch Hà Nội',
-      avatar: 'https://images.unsplash.com/photo-1559628376-f3fe5f782a2e?w=100&h=100&fit=crop',
-      lastActivity: 'Đã yêu cầu tham gia vào 2 ngày trước'
-    },
-    {
-      id: '2',
-      name: 'Ẩm thực Việt Nam',
-      avatar: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=100&h=100&fit=crop',
-      lastActivity: 'Đã yêu cầu tham gia vào 5 ngày trước'
-    }
-  ]);
+  const navigate = useNavigate();
+  const [pendingGroups, setPendingGroups] = useState<GroupResponse[]>([]);
+  const [joinedGroups, setJoinedGroups] = useState<GroupResponse[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
-  // Mock data for joined groups
-  const [joinedGroups] = useState([
-    {
-      id: '3',
-      name: 'Bộ Tộc MixiGaming.',
-      avatar: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?w=100&h=100&fit=crop',
-      lastActivity: 'Lần hoạt động gần nhất: 5 phút trước'
-    },
-    {
-      id: '4',
-      name: 'Cafe Đường Phố',
-      avatar: 'https://images.unsplash.com/photo-1511920170033-f8396924c348?w=100&h=100&fit=crop',
-      lastActivity: 'Lần hoạt động gần nhất: 10 phút trước'
-    },
-    {
-      id: '5',
-      name: 'Học Từ Vựng Tiếng Anh Mỗi Ngày',
-      avatar: 'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=100&h=100&fit=crop',
-      lastActivity: 'Lần hoạt động gần nhất: 2 giờ trước'
-    },
-    {
-      id: '6',
-      name: 'Trường Người Ta',
-      avatar: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=100&h=100&fit=crop',
-      lastActivity: 'Lần hoạt động gần nhất: 5 giờ trước'
-    },
-    {
-      id: '7',
-      name: 'Phenikaa University Confession',
-      avatar: 'https://images.unsplash.com/photo-1460661419201-fd4cecdf8a8b?w=100&h=100&fit=crop',
-      lastActivity: 'Lần hoạt động gần nhất: 1 ngày trước'
-    },
-    {
-      id: '8',
-      name: 'Đẩy xã hội - Ban không thể flex, tôi cũng vậy!',
-      avatar: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=100&h=100&fit=crop',
-      lastActivity: 'Lần hoạt động gần nhất: 2 ngày trước'
-    },
-    {
-      id: '9',
-      name: 'Cộng đồng Developer Việt Nam',
-      avatar: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=100&h=100&fit=crop',
-      lastActivity: 'Lần hoạt động gần nhất: 3 ngày trước'
-    },
-    {
-      id: '10',
-      name: 'Yêu thích phim ảnh',
-      avatar: 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=100&h=100&fit=crop',
-      lastActivity: 'Lần hoạt động gần nhất: 4 ngày trước'
+  useEffect(() => {
+    fetchGroups();
+  }, []);
+
+  const fetchGroups = async () => {
+    setIsLoading(true);
+    try {
+      // Fetch pending groups and joined groups in parallel
+      const [pendingResponse, joinedResponse] = await Promise.all([
+        apiGetPendingGroups(0, 20),
+        apiGetMyGroups(0, 100)
+      ]);
+
+      setPendingGroups(pendingResponse.data.content);
+      setJoinedGroups(joinedResponse.data.content);
+    } catch (error) {
+      console.error('Error fetching groups:', error);
+      toast.error('Không thể tải danh sách nhóm');
+    } finally {
+      setIsLoading(false);
     }
-  ]);
+  };
 
   const handleViewGroup = (id: string) => {
-    console.log('View group:', id);
+    navigate(`/home/groups/${id}`);
   };
 
-  const handleMoreOptions = (id: string) => {
-    console.log('More options for group:', id);
+  const handleClickCard = (id: string) => {
+    navigate(`/home/groups/${id}`);
   };
+
+  const handleCancelRequest = async (groupId: string) => {
+    try {
+      await apiLeaveGroup(groupId);
+      // Remove the group from pending list
+      setPendingGroups(prev => prev.filter(g => g.groupId !== groupId));
+      toast.success('Đã hủy yêu cầu tham gia nhóm');
+    } catch (error) {
+      console.error('Error canceling request:', error);
+      toast.error('Không thể hủy yêu cầu');
+    }
+  };
+
+  const handleLeaveGroup = async (groupId: string) => {
+    try {
+      await apiLeaveGroup(groupId);
+      // Remove the group from joined list
+      setJoinedGroups(prev => prev.filter(g => g.groupId !== groupId));
+      toast.success('Đã rời khỏi nhóm');
+    } catch (error) {
+      console.error('Error leaving group:', error);
+      toast.error('Không thể rời nhóm');
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-[400px]">
+        <Icon icon="fluent:spinner-ios-20-filled" className="w-8 h-8 text-blue-600 animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 max-w-7xl mx-auto">
@@ -92,14 +89,16 @@ const YourGroupsPage: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {pendingGroups.map((group) => (
               <MyGroupCard
-                key={group.id}
-                id={group.id}
-                name={group.name}
-                avatar={group.avatar}
-                lastActivity={group.lastActivity}
+                key={group.groupId}
+                id={group.groupId}
+                name={group.groupName}
+                avatar={group.coverImageUrl || 'https://images.unsplash.com/photo-1511920170033-f8396924c348?w=100&h=100&fit=crop'}
+                lastActivity={`Đã yêu cầu tham gia ${group.lastActivityAt ? formatTimeAgo(group.lastActivityAt) : ''}`}
+                isPending={true}
+                currentUserRole={group.currentUserRole}
                 onViewClick={handleViewGroup}
-                onMoreClick={handleMoreOptions}
-                onClick={() => console.log('Click card:', group.id)}
+                onCancelRequest={handleCancelRequest}
+                onClick={() => handleClickCard(group.groupId)}
               />
             ))}
           </div>
@@ -114,17 +113,19 @@ const YourGroupsPage: React.FC = () => {
         <p className="text-gray-600 text-sm mb-4">
           Danh sách các nhóm bạn đang là thành viên hoặc quản trị viên
         </p>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {joinedGroups.map((group) => (
             <MyGroupCard
-              key={group.id}
-              id={group.id}
-              name={group.name}
-              avatar={group.avatar}
-              lastActivity={group.lastActivity}
+              key={group.groupId}
+              id={group.groupId}
+              name={group.groupName}
+              avatar={group.coverImageUrl || 'https://images.unsplash.com/photo-1511920170033-f8396924c348?w=100&h=100&fit=crop'}
+              lastActivity={`Lần hoạt động gần nhất: ${group.lastActivityAt ? formatTimeAgo(group.lastActivityAt) : 'Chưa có hoạt động'}`}
+              isPending={false}
+              currentUserRole={group.currentUserRole}
               onViewClick={handleViewGroup}
-              onMoreClick={handleMoreOptions}
-              onClick={() => console.log('Click card:', group.id)}
+              onLeaveGroup={handleLeaveGroup}
+              onClick={() => handleClickCard(group.groupId)}
             />
           ))}
         </div>

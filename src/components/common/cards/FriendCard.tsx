@@ -1,5 +1,7 @@
-import React from 'react';
-import { Icon } from '@iconify/react';
+import React from "react";
+import { Icon } from "@iconify/react";
+import avatardf from "../../../assets/images/avatar_default.png";
+import TravelButton from "../../ui/customize/TravelButton";
 
 export interface FriendCardProps {
   id: number;
@@ -16,7 +18,7 @@ export interface FriendCardProps {
     label: string;
     icon?: string;
     onClick: () => void;
-    variant?: 'primary' | 'secondary';
+    variant?: "primary" | "secondary";
   };
   secondaryAction?: {
     label: string;
@@ -38,120 +40,142 @@ const FriendCard: React.FC<FriendCardProps> = ({
   age,
   primaryAction,
   secondaryAction,
-  onCardClick
+  onCardClick,
 }) => {
   return (
-    <div 
-      className="bg-white border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors cursor-pointer flex flex-col h-full"
+    <div
+      className="bg-white border border-gray-200 rounded-xl shadow-sm transition-all duration-300 overflow-hidden cursor-pointer group"
       onClick={onCardClick}
     >
       {/* Profile Picture */}
-      <div className="mb-3 flex-shrink-0">
+      <div className="relative overflow-hidden">
         <img
-          src={avatar}
+          src={avatar || avatardf}
           alt={name}
-          className="w-full aspect-square object-cover rounded-lg"
+          className="w-full aspect-square object-cover transition-transform duration-300 group-hover:scale-105"
         />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
       </div>
 
-      {/* Name */}
-      <h3 
-        className="text-gray-900 font-medium text-sm mb-2 line-clamp-2 hover:transition-colors cursor-pointer min-h-[2.5rem]"
-        style={{ 
-          transition: 'color 0.2s',
-        }}
-        onMouseEnter={(e) => e.currentTarget.style.color = 'var(--travel-primary-500)'}
-        onMouseLeave={(e) => e.currentTarget.style.color = ''}
-      >
-        {name}
-      </h3>
+      {/* Content Section */}
+      <div className="p-3">
+        {/* Name */}
+        <h3 className="text-gray-900 font-semibold text-base mb-1.5 line-clamp-1 hover:text-travel-primary-500 transition-colors">
+          {name}
+        </h3>
 
-      {/* Connection Info */}
-      <div className="mb-4 min-h-[3rem] flex-1">
-        {mutualFriends !== null && mutualFriends !== undefined && (
-          <div className="flex items-center space-x-1 text-gray-600 text-xs mb-1">
-            <Icon icon="fluent:people-24-filled" className="h-3 w-3" />
-            <span>{mutualFriends} bạn chung</span>
-          </div>
-        )}
-        
-        {followers !== null && followers !== undefined && (
-          <div className="text-gray-600 text-xs mb-1">
-            Có {followers} người theo dõi
-          </div>
-        )}
-        
-        {timeAgo && (
-          <div className="text-gray-500 text-xs line-clamp-1">{timeAgo}</div>
-        )}
-        
-        {reason && (
-          <div className="text-gray-500 text-xs mt-1 line-clamp-2">{reason}</div>
-        )}
-        
-        {date && (
-          <div className="text-gray-600 text-sm">{date}</div>
-        )}
-        
-        {age !== undefined && (
-          <p className="text-gray-600 text-sm">
-            <Icon icon="fluent:balloon-24-regular" className="inline h-4 w-4 mr-1" />
-            {age} tuổi hôm nay
-          </p>
-        )}
-      </div>
-
-      {/* Action Buttons */}
-      {(primaryAction || secondaryAction) && (
-        <div className="space-y-2 mt-auto">
-          {primaryAction && (
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                primaryAction.onClick();
-              }}
-              className={`w-full text-xs py-2 px-3 rounded-lg transition-colors cursor-pointer flex items-center justify-center ${
-                primaryAction.variant === 'secondary'
-                  ? 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                  : 'text-white'
-              }`}
-              style={primaryAction.variant !== 'secondary' ? {
-                backgroundColor: 'var(--travel-primary-500)',
-              } : {}}
-              onMouseEnter={(e) => {
-                if (primaryAction.variant !== 'secondary') {
-                  e.currentTarget.style.backgroundColor = 'var(--travel-primary-500)';
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (primaryAction.variant !== 'secondary') {
-                  e.currentTarget.style.backgroundColor = 'var(--travel-primary-500)';
-                }
-              }}
-            >
-              {primaryAction.icon && (
-                <Icon icon={primaryAction.icon} className="inline h-4 w-4 mr-1" />
-              )}
-              {primaryAction.label}
-            </button>
+        {/* Connection Info */}
+        <div className="mb-3 space-y-1 min-h-[3rem]">
+          {mutualFriends !== null && mutualFriends !== undefined && (
+            <div className="flex items-center text-gray-600 text-sm">
+              <Icon
+                icon="fluent:people-24-filled"
+                className="h-4 w-4 mr-1.5 text-travel-primary-500"
+              />
+              <span className="font-medium">{mutualFriends}</span>
+              <span className="ml-1">bạn chung</span>
+            </div>
           )}
-          
-          {secondaryAction && (
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                secondaryAction.onClick();
-              }}
-              className="w-full bg-gray-200 text-gray-700 text-xs py-2 px-3 rounded-lg hover:bg-gray-300 transition-colors cursor-pointer flex items-center justify-center"
-            >
-              {secondaryAction.icon && (
-                <Icon icon={secondaryAction.icon} className="inline h-4 w-4 mr-1" />
-              )}
-              {secondaryAction.label}
-            </button>
+
+          {followers !== null && followers !== undefined && (
+            <div className="flex items-center text-gray-600 text-sm">
+              <Icon
+                icon="fluent:eye-24-filled"
+                className="h-4 w-4 mr-1.5 text-travel-primary-500"
+              />
+              <span>
+                <span className="font-medium">{followers}</span> người theo dõi
+              </span>
+            </div>
+          )}
+
+          {timeAgo && (
+            <div className="flex items-center text-gray-500 text-sm">
+              <Icon icon="fluent:clock-24-regular" className="h-4 w-4 mr-1.5" />
+              <span className="line-clamp-1">{timeAgo}</span>
+            </div>
+          )}
+
+          {reason && (
+            <div className="flex items-start text-gray-500 text-sm">
+              <Icon
+                icon="fluent:info-24-regular"
+                className="h-4 w-4 mr-1.5 mt-0.5 flex-shrink-0"
+              />
+              <span className="line-clamp-2">{reason}</span>
+            </div>
+          )}
+
+          {date && (
+            <div className="flex items-center text-gray-600 text-sm">
+              <Icon
+                icon="fluent:calendar-24-regular"
+                className="h-4 w-4 mr-1.5"
+              />
+              <span>{date}</span>
+            </div>
+          )}
+
+          {age !== undefined && (
+            <div className="flex items-center text-gray-600 text-sm">
+              <Icon
+                icon="fluent:balloon-24-regular"
+                className="h-4 w-4 mr-1.5 text-travel-primary-500"
+              />
+              <span>
+                <span className="font-medium">{age}</span> tuổi hôm nay
+              </span>
+            </div>
           )}
         </div>
-      )}
+
+        {/* Action Buttons */}
+        {(primaryAction || secondaryAction) && (
+          <div className="flex gap-2">
+            {primaryAction && (
+              <div onClick={(e) => e.stopPropagation()} className="flex-1">
+                <TravelButton
+                  type={
+                    primaryAction.variant === "secondary"
+                      ? "default"
+                      : "primary"
+                  }
+                  onClick={primaryAction.onClick}
+                  className="w-full"
+                >
+                  <span className="flex items-center justify-center">
+                    {primaryAction.icon && (
+                      <Icon
+                        icon={primaryAction.icon}
+                        className="h-4 w-4 mr-1.5 text-blue-600"
+                      />
+                    )}{" "}
+                    {primaryAction.label}
+                  </span>
+                </TravelButton>
+              </div>
+            )}
+
+            {secondaryAction && (
+              <div onClick={(e) => e.stopPropagation()} className="flex-1">
+                <button
+                  onClick={secondaryAction.onClick}
+                  className="w-full bg-gray-200 hover:bg-gray-300 cursor-pointer text-gray-700 font-semibold text-sm py-2.5 px-3 rounded-xl transition-all duration-300 flex items-center justify-center whitespace-nowrap"
+                  style={{ height: "40px" }}
+                >
+                  {secondaryAction.icon && (
+                    <Icon
+                      icon={secondaryAction.icon}
+                      className="h-4 w-4 mr-1.5"
+                    />
+                  )}
+                  {secondaryAction.label}
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 };

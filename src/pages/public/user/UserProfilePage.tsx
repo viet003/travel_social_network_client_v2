@@ -16,6 +16,8 @@ import {
 import {
   apiSendFriendRequest,
   apiUnfriend,
+  apiBlockUser,
+  apiUnblockUser,
 } from "../../../services/friendshipService";
 import { updateAvatarImg, updateCoverImg } from "../../../stores/actions/authAction";
 import type { UpdateUserDto } from "../../../types/user.types";
@@ -156,10 +158,55 @@ const UserProfilePage: React.FC = () => {
   };
 
   // Handle block user
-  const handleBlockUser = () => {
+  const handleBlockUser = async () => {
+    if (!userId) return;
+    
     setIsDropdownOpen(false);
-    // TODO: Implement block functionality
-    message.info("Chức năng chặn người dùng đang được phát triển");
+    
+    try {
+      const response = await apiBlockUser(userId);
+      
+      if (response.data) {
+        message.success("Đã chặn người dùng");
+        
+        // Update user state with new friendship status
+        if (user) {
+          setUser({
+            ...user,
+            friendshipStatus: response.data.friendshipStatus,
+          });
+        }
+      }
+    } catch (error) {
+      console.error("Error blocking user:", error);
+      message.error("Không thể chặn người dùng");
+    }
+  };
+
+  // Handle unblock user
+  const handleUnblockUser = async () => {
+    if (!userId) return;
+    
+    setIsDropdownOpen(false);
+    
+    try {
+      const response = await apiUnblockUser(userId);
+      
+      if (response.data) {
+        message.success("Đã bỏ chặn người dùng");
+        
+        // Update user state with new friendship status
+        if (user) {
+          setUser({
+            ...user,
+            friendshipStatus: response.data.friendshipStatus,
+          });
+        }
+      }
+    } catch (error) {
+      console.error("Error unblocking user:", error);
+      message.error("Không thể bỏ chặn người dùng");
+    }
   };
 
   // Render friend action button based on friendship status
@@ -205,7 +252,7 @@ const UserProfilePage: React.FC = () => {
         </button>
       );
     } else {
-      // No relationship - show add friend button
+      // No relationship (null) or rejected - show add friend button
       return (
         <button
           className="h-8 sm:h-11 px-3 sm:px-4 text-white transition rounded-full bg-black/40 hover:bg-black/60 cursor-pointer flex flex-row gap-1.5 sm:gap-2 items-center"
@@ -453,6 +500,8 @@ const UserProfilePage: React.FC = () => {
                 onClose={() => setIsDropdownOpen(false)}
                 onReport={handleReportUser}
                 onBlock={handleBlockUser}
+                onUnblock={handleUnblockUser}
+                friendshipStatus={user?.friendshipStatus}
               />
             </div>
           )}
@@ -596,10 +645,10 @@ const UserProfilePage: React.FC = () => {
               <div className="mb-6">
                 <Icon
                   icon="lucide:user-x"
-                  className="w-16 h-16 sm:w-20 sm:h-20 mx-auto text-red-500"
+                  className="w-16 h-16 sm:w-20 sm:h-20 mx-auto"
                 />
               </div>
-              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3">
+              <h2 className="text-xl sm:text-2xl font-bold mb-3">
                 Không thể xem nội dung
               </h2>
               <p className="text-sm sm:text-base text-gray-600">

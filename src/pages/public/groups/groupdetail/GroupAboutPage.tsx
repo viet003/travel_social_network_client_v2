@@ -1,128 +1,273 @@
 import React from 'react';
 import { Icon } from '@iconify/react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { apiGetGroupById, type GroupResponse } from '../../../../services/groupService';
+import { toast } from 'react-toastify';
 
 const GroupAboutPage: React.FC = () => {
-  // Mock data - replace with API call
-  const groupInfo = {
-    description: 'Tại đây các bạn có thể phốt và cục súc một cách thoải mái :)))',
-    isPublic: true,
-    createdDate: '15 tháng 3, 2023',
-    memberCount: 58000,
-    postCount: 1250,
-    history: 'Nhóm được tạo ra để mọi người có thể chia sẻ những câu chuyện thú vị và hài hước trong cuộc sống.',
+  const { groupId } = useParams<{ groupId: string }>();
+  const navigate = useNavigate();
+  const [groupData, setGroupData] = React.useState<GroupResponse | null>(null);
+  const [isLoading, setIsLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    const fetchGroupData = async () => {
+      if (!groupId) return;
+      
+      setIsLoading(true);
+      try {
+        const response = await apiGetGroupById(groupId);
+        setGroupData(response.data);
+      } catch (error) {
+        console.error('Error fetching group:', error);
+        toast.error('Không thể tải thông tin nhóm');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchGroupData();
+  }, [groupId]);
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-[400px]">
+        <Icon icon="fluent:spinner-ios-20-filled" className="w-8 h-8 text-blue-600 animate-spin" />
+      </div>
+    );
+  }
+
+  if (!groupData) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-gray-500">Không tìm thấy thông tin nhóm</p>
+      </div>
+    );
+  }
+
+  // Format date
+  const formatDate = (dateString: string | null) => {
+    if (!dateString) return 'Không rõ';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('vi-VN', { day: 'numeric', month: 'long', year: 'numeric' });
   };
 
-  const rules = [
-    'Tôn trọng tất cả thành viên trong nhóm',
-    'Không spam hoặc quảng cáo',
-    'Nội dung phải phù hợp với chủ đề nhóm',
-    'Không đăng nội dung bạo lực, khiêu dâm',
-    'Tương tác lịch sự và văn minh',
-  ];
+  // Navigate to member profile
+  const handleMemberClick = (userId: string) => {
+    navigate(`/home/user/${userId}`);
+  };
 
-  const admins = [
-    {
-      id: 1,
-      name: 'Nguyễn Admin',
-      avatar: 'https://i.pravatar.cc/60?img=1',
-      role: 'Quản trị viên',
-    },
-    {
-      id: 2,
-      name: 'Trần Moderator',
-      avatar: 'https://i.pravatar.cc/60?img=2',
-      role: 'Người kiểm duyệt',
-    },
-  ];
+  // Navigate to members page
+  const handleViewAllMembers = () => {
+    if (groupId) {
+      navigate(`/home/groups/${groupId}/members`);
+    }
+  };
 
   return (
-    <div className="space-y-6">
-      {/* Group Description */}
-      <div className="bg-white rounded-lg shadow-sm p-6">
-        <h2 className="text-xl font-bold text-gray-900 mb-4">Giới thiệu về nhóm</h2>
-        <p className="text-gray-700 leading-relaxed mb-6">
-          {groupInfo.description}
-        </p>
-        
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
-            <Icon icon="fluent:people-24-filled" className="h-6 w-6 text-blue-600" />
-            <div>
-              <p className="text-sm text-gray-500">Thành viên</p>
-              <p className="font-semibold text-gray-900">{groupInfo.memberCount.toLocaleString()}</p>
-            </div>
-          </div>
-          
-          <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
-            <Icon icon="fluent:document-24-filled" className="h-6 w-6 text-green-600" />
-            <div>
-              <p className="text-sm text-gray-500">Bài viết</p>
-              <p className="font-semibold text-gray-900">{groupInfo.postCount.toLocaleString()}</p>
-            </div>
-          </div>
-          
-          <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
-            <Icon icon={groupInfo.isPublic ? "fluent:globe-24-filled" : "fluent:lock-closed-24-filled"} className="h-6 w-6 text-purple-600" />
-            <div>
-              <p className="text-sm text-gray-500">Quyền riêng tư</p>
-              <p className="font-semibold text-gray-900">{groupInfo.isPublic ? 'Công khai' : 'Riêng tư'}</p>
-            </div>
-          </div>
-          
-          <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
-            <Icon icon="fluent:calendar-24-filled" className="h-6 w-6 text-orange-600" />
-            <div>
-              <p className="text-sm text-gray-500">Ngày tạo</p>
-              <p className="font-semibold text-gray-900">{groupInfo.createdDate}</p>
-            </div>
-          </div>
+    <div className="space-y-4">
+      {/* Giới thiệu về nhóm */}
+      <div className="bg-white rounded-lg shadow-sm">
+        <div className="p-4 border-b border-gray-200">
+          <h2 className="text-lg font-bold text-gray-900">Giới thiệu về nhóm này</h2>
         </div>
-      </div>
-
-      {/* Group Rules */}
-      <div className="bg-white rounded-lg shadow-sm p-6">
-        <h2 className="text-xl font-bold text-gray-900 mb-4">Quy tắc nhóm</h2>
-        <div className="space-y-3">
-          {rules.map((rule, index) => (
-            <div key={index} className="flex items-start space-x-3">
-              <div className="flex-shrink-0 w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center">
-                <span className="text-blue-600 text-sm font-semibold">{index + 1}</span>
+        <div className="p-4">
+          <p className="text-gray-700 text-sm mb-4">
+            {groupData.groupDescription || 'Ae vào nhóm vui vẻ hòa đồng !'}
+          </p>
+          
+          <div className="space-y-3">
+            {/* Công khai/Riêng tư */}
+            <div className="flex items-start space-x-3">
+              <Icon icon={!groupData.privacy ? "fluent:globe-24-regular" : "fluent:lock-closed-24-regular"} className="h-6 w-6 text-gray-600 mt-0.5" />
+              <div>
+                <p className="font-semibold text-gray-900 text-sm">{!groupData.privacy ? 'Công khai' : 'Riêng tư'}</p>
+                <p className="text-xs text-gray-500">
+                  {!groupData.privacy 
+                    ? 'Bất kỳ ai cũng có thể nhìn thấy mọi người trong nhóm và những gì họ đăng.' 
+                    : 'Chỉ thành viên mới có thể xem nội dung trong nhóm.'}
+                </p>
               </div>
-              <p className="text-gray-700 flex-1">{rule}</p>
             </div>
-          ))}
-        </div>
-      </div>
 
-      {/* Admins & Moderators */}
-      <div className="bg-white rounded-lg shadow-sm p-6">
-        <h2 className="text-xl font-bold text-gray-900 mb-4">Quản trị viên</h2>
-        <div className="space-y-4">
-          {admins.map((admin) => (
-            <div key={admin.id} className="flex items-center space-x-4 p-3 hover:bg-gray-50 rounded-lg transition-colors">
-              <img
-                src={admin.avatar}
-                alt={admin.name}
-                className="w-12 h-12 rounded-full"
-              />
-              <div className="flex-1">
-                <h3 className="font-semibold text-gray-900">{admin.name}</h3>
-                <p className="text-sm text-gray-500">{admin.role}</p>
+            {/* Hiện thi */}
+            <div className="flex items-start space-x-3">
+              <Icon icon="fluent:eye-24-regular" className="h-6 w-6 text-gray-600 mt-0.5" />
+              <div>
+                <p className="font-semibold text-gray-900 text-sm">Hiện thi</p>
+                <p className="text-xs text-gray-500">
+                  Ai cũng có thể tìm thấy nhóm này.
+                </p>
               </div>
-              <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm">
-                Nhắn tin
-              </button>
             </div>
-          ))}
+
+            {/* Lịch sử */}
+            <div className="flex items-start space-x-3">
+              <Icon icon="fluent:history-24-regular" className="h-6 w-6 text-gray-600 mt-0.5" />
+              <div>
+                <p className="font-semibold text-gray-900 text-sm">Lịch sử</p>
+                <p className="text-xs text-gray-500">
+                  Đã tạo nhóm vào {formatDate(groupData.createdAt || null)}. Lần gần nhất đổi tên là vào {formatDate(groupData.lastActivityAt || null)}. <span className="text-blue-600 cursor-pointer hover:underline">Xem thêm</span>
+                </p>
+              </div>
+            </div>
+
+            {/* Thẻ */}
+            <div className="flex items-start space-x-3">
+              <Icon icon="fluent:tag-24-regular" className="h-6 w-6 text-gray-600 mt-0.5" />
+              <div>
+                <p className="font-semibold text-gray-900 text-sm">Thẻ</p>
+                <p className="text-xs text-gray-500">
+                  {groupData.tags || 'Tính yêu & sự lãng mạn'}
+                </p>
+              </div>
+            </div>
+
+            {/* Vị trí */}
+            <div className="flex items-start space-x-3">
+              <Icon icon="fluent:location-24-regular" className="h-6 w-6 text-gray-600 mt-0.5" />
+              <div>
+                <p className="font-semibold text-gray-900 text-sm">{groupData.location || 'Việt Nam'}</p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* History */}
-      <div className="bg-white rounded-lg shadow-sm p-6">
-        <h2 className="text-xl font-bold text-gray-900 mb-4">Lịch sử</h2>
-        <p className="text-gray-700 leading-relaxed">
-          {groupInfo.history}
-        </p>
+      {/* Thành viên */}
+      <div className="bg-white rounded-lg shadow-sm">
+        <div className="p-4 border-b border-gray-200 flex items-center justify-between">
+          <div>
+            <h2 className="text-lg font-bold text-gray-900">Thành viên</h2>
+            <p className="text-sm text-gray-500">· {groupData.memberCount.toLocaleString()} thành viên</p>
+          </div>
+        </div>
+        <div className="p-4">
+          {/* Friend Members Avatars */}
+          {groupData.friendMembers && groupData.friendMembers.length > 0 && (
+            <>
+              <div className="flex items-center mb-3">
+                <div className="flex -space-x-2">
+                  {groupData.friendMembers.slice(0, 5).map((friend, index) => (
+                    <img
+                      key={friend.userId}
+                      src={friend.avatar || `https://i.pravatar.cc/40?img=${index}`}
+                      alt={friend.name}
+                      className="w-8 h-8 rounded-full border-2 border-white cursor-pointer hover:scale-110 transition-transform"
+                      style={{ zIndex: 5 - index }}
+                      onClick={() => handleMemberClick(friend.userId)}
+                      title={friend.name}
+                    />
+                  ))}
+                </div>
+              </div>
+              <p className="text-sm text-gray-700 mb-4">
+                <span 
+                  className="font-semibold cursor-pointer hover:underline"
+                  onClick={() => handleMemberClick(groupData.friendMembers[0].userId)}
+                >
+                  {groupData.friendMembers.slice(0, 2).map(f => f.name).join(', ')}
+                </span>
+                {groupData.friendMembers.length > 2 && (
+                  <> và <span className="font-semibold">{groupData.friendMembers.length - 2} người bạn khác</span></>
+                )} đã tham gia
+              </p>
+            </>
+          )}
+          
+          {/* Admin & Moderator Members */}
+          {(groupData.adminMembers && groupData.adminMembers.length > 0) || 
+           (groupData.moderatorMembers && groupData.moderatorMembers.length > 0) ? (
+            <>
+              <div className="flex items-center mb-3">
+                <div className="flex -space-x-2">
+                  {groupData.adminMembers?.slice(0, 5).map((admin, index) => (
+                    <img
+                      key={admin.userId}
+                      src={admin.avatar || `https://i.pravatar.cc/40?img=${index + 10}`}
+                      alt={admin.name}
+                      className="w-8 h-8 rounded-full border-2 border-white cursor-pointer hover:scale-110 transition-transform"
+                      style={{ zIndex: 5 - index }}
+                      onClick={() => handleMemberClick(admin.userId)}
+                      title={admin.name}
+                    />
+                  ))}
+                </div>
+              </div>
+              <p className="text-sm text-gray-700 mb-4">
+                {groupData.adminMembers && groupData.adminMembers.length > 0 && (
+                  <>
+                    <span 
+                      className="font-semibold cursor-pointer hover:underline"
+                      onClick={() => handleMemberClick(groupData.adminMembers[0].userId)}
+                    >
+                      {groupData.adminMembers.slice(0, 2).map(admin => admin.name).join(', ')}
+                    </span>
+                    {groupData.adminMembers.length > 2 && (
+                      <> và <span className="font-semibold">{groupData.adminMembers.length - 2} thành viên khác</span></>
+                    )} là quản trị viên.{' '}
+                  </>
+                )}
+                {groupData.moderatorMembers && groupData.moderatorMembers.length > 0 && (
+                  <>
+                    <span 
+                      className="font-semibold cursor-pointer hover:underline"
+                      onClick={() => groupData.moderatorMembers[0] && handleMemberClick(groupData.moderatorMembers[0].userId)}
+                    >
+                      {groupData.moderatorMembers.slice(0, 2).map(mod => mod.name).join(' và ')}
+                    </span>
+                    {groupData.moderatorMembers.length > 2 && (
+                      <> và <span className="font-semibold">{groupData.moderatorMembers.length - 2} người khác</span></>
+                    )} là người kiểm duyệt.
+                  </>
+                )}
+              </p>
+            </>
+          ) : null}
+
+          <button 
+            onClick={handleViewAllMembers}
+            className="w-full py-2 px-4 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-lg transition-colors text-sm cursor-pointer"
+          >
+            Xem tất cả
+          </button>
+        </div>
+      </div>
+
+      {/* Hoạt động */}
+      <div className="bg-white rounded-lg shadow-sm">
+        <div className="p-4 border-b border-gray-200">
+          <h2 className="text-lg font-bold text-gray-900">Hoạt động</h2>
+        </div>
+        <div className="p-4">
+          <div className="flex items-center space-x-3 mb-4">
+            <Icon icon="fluent:document-text-24-regular" className="h-6 w-6 text-gray-600" />
+            <div>
+              <p className="font-semibold text-gray-900 text-sm">
+                Hôm nay có {groupData.postsToday || 0} bài viết mới
+              </p>
+              <p className="text-xs text-gray-500">{groupData.postsLastMonth || 0} trong tháng trước</p>
+            </div>
+          </div>
+
+          <div className="flex items-center space-x-3 mb-4">
+            <Icon icon="fluent:people-24-regular" className="h-6 w-6 text-gray-600" />
+            <div>
+              <p className="font-semibold text-gray-900 text-sm">Tổng cộng {groupData.memberCount.toLocaleString()} thành viên</p>
+              <p className="text-xs text-gray-500">+ {groupData.newMembersThisWeek || 0} trong tuần qua</p>
+            </div>
+          </div>
+
+          <div className="flex items-center space-x-3">
+            <Icon icon="fluent:calendar-24-regular" className="h-6 w-6 text-gray-600" />
+            <div>
+              <p className="font-semibold text-gray-900 text-sm">Ngày tạo:</p>
+              <p className="text-xs text-gray-500">
+                {groupData.createdAt ? formatDate(groupData.createdAt) : '5 năm trước'}
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

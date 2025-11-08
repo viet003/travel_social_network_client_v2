@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import { Icon } from '@iconify/react';
 import { PrivacyDropdown } from '../../common/dropdowns';
 import { TravelInput, TravelButton } from '../../ui/customize';
 import avatardf from '../../../assets/images/avatar_default.png';
 import { toast } from 'react-toastify';
+import { apiCreateGroup } from '../../../services/groupService';
+import { LoadingSpinner } from '../../ui/loading';
 
 // Types
 interface PrivacyOption {
@@ -21,12 +24,12 @@ interface GroupCreateModalProps {
 interface AuthState {
   userId: string;
   avatar: string | null;
-  firstName: string;
-  lastName: string;
+  fullName: string;
 }
 
 const GroupCreateModal: React.FC<GroupCreateModalProps> = ({ setCreateSuccess }) => {
-  const { avatar, firstName, lastName } = useSelector((state: { auth: AuthState }) => state.auth);
+  const { avatar, fullName } = useSelector((state: { auth: AuthState }) => state.auth);
+  const navigate = useNavigate();
 
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [groupName, setGroupName] = useState<string>("");
@@ -112,36 +115,31 @@ const GroupCreateModal: React.FC<GroupCreateModalProps> = ({ setCreateSuccess })
     setIsCreating(true);
 
     try {
-      const formData = new FormData();
-      formData.append('name', groupName.trim());
-      formData.append('description', description.trim());
-      formData.append('privacy', privacy);
+      // Server expects boolean privacy: true -> private, false -> public
+      const privacyBool = privacy === 'private';
 
-      if (selectedImage) {
-        formData.append('image', selectedImage.file);
-      }
-
-      // Call API to create group
-      console.log('Tạo nhóm mới:', {
-        name: groupName,
-        description: description,
-        privacy: privacy,
-        hasImage: !!selectedImage
+      const response = await apiCreateGroup({
+        name: groupName.trim(),
+        description: description.trim(),
+        privacy: privacyBool,
+        cover: selectedImage?.file
       });
 
-      // Mock response
-      const response = { status: "SUCCESS" };
-
-      if (response?.status === "SUCCESS") {
+      if (response && response.success) {
+        toast.success('Tạo nhóm thành công!');
+        const groupId = response.data?.groupId;
         handleClose();
-        if (setCreateSuccess) {
-          setCreateSuccess(true);
+        
+        if (setCreateSuccess) setCreateSuccess(true);
+        
+        // Redirect to group detail page if we have groupId
+        if (groupId) {
+          navigate(`/home/groups/${groupId}`, { replace: true });
         }
-      } else {
-        throw new Error('Không thể tạo nhóm');
       }
-    } catch (error) {
-      console.error('Lỗi khi tạo nhóm:', error);
+    } catch (err: unknown) {
+      console.error('Lỗi khi tạo nhóm:', err);
+      toast.error('Lỗi khi tạo nhóm');
     } finally {
       setIsCreating(false);
     }
@@ -205,9 +203,10 @@ const GroupCreateModal: React.FC<GroupCreateModalProps> = ({ setCreateSuccess })
                 </div>
                 <div className="flex flex-col flex-1 min-w-0">
                   <span className="text-base font-semibold text-gray-800 truncate">
-                    {firstName} {lastName}
+                    {fullName}
                   </span>
                   <span className="text-sm text-gray-500">Người tạo nhóm</span>
+         
                 </div>
               </div>
 
@@ -275,29 +274,36 @@ const GroupCreateModal: React.FC<GroupCreateModalProps> = ({ setCreateSuccess })
                 </label>
 
                 {selectedImage ? (
-                  <div className="relative border border-gray-200 rounded-lg overflow-hidden">
+                  <div className="relative border border-gray-200 rounded-lg overflow-hidden group">
                     <button
                       type="button"
                       onClick={removeImage}
-                      className="absolute flex items-center justify-center w-8 h-8 text-white bg-gray-800 rounded-full z-10 top-2 right-2 bg-opacity-70 hover:bg-opacity-90 cursor-pointer"
+                      className="absolute hover:text-white hover:bg-gray-700 flex items-center justify-center w-8 h-8 text-white bg-gray-800 rounded-full z-10 top-2 right-2 bg-opacity-70 hover:bg-opacity-90 cursor-pointer transition-all"
                     >
                       <Icon icon="fluent:dismiss-24-filled" className="w-4 h-4" />
                     </button>
                     <img
                       src={selectedImage.preview}
                       alt="Group preview"
-                      className="object-cover w-full h-64"
+                      className="object-cover w-full"
                     />
-                    <label className="absolute bottom-3 left-3 flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-500 rounded-lg cursor-pointer hover:bg-blue-600">
-                      <Icon icon="fluent:camera-24-filled" className="w-4 h-4" />
-                      Thay đổi ảnh
-                      <input
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={handleImageSelect}
-                      />
-                    </label>
+                    <div className="absolute bottom-3 left-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                      <label>
+                        <TravelButton
+                          type="default"
+                          className="flex items-center hover:!bg-gray-200 gap-2 !cursor-pointer"
+                        >
+                          <Icon icon="fluent:camera-24-filled" className="w-4 h-4" />
+                          Thay đổi ảnh
+                        </TravelButton>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={handleImageSelect}
+                        />
+                      </label>
+                    </div>
                   </div>
                 ) : (
                   <label className="flex flex-col items-center justify-center w-full h-48 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer hover:border-blue-400 hover:bg-blue-50">
@@ -323,13 +329,20 @@ const GroupCreateModal: React.FC<GroupCreateModalProps> = ({ setCreateSuccess })
               <div className="pt-4 border-t border-gray-200">
                 <div className="flex justify-end">
                   <TravelButton
-                    type="default"
+                    type="primary"
                     htmlType="submit"
                     disabled={isCreating || !groupName.trim() || groupName.trim().length < 3}
                     loading={isCreating}
-                    className="px-6"
+                    className="px-6 transition-colors"
                   >
-                    Tạo Nhóm
+                    {isCreating ? (
+                      <div className="flex items-center justify-center space-x-2">
+                        <LoadingSpinner size={16} color="#374151" />
+                        <span>Đang tạo nhóm...</span>
+                      </div>
+                    ) : (
+                      "Tạo Nhóm"
+                    )}
                   </TravelButton>
                 </div>
               </div>

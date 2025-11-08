@@ -5,6 +5,7 @@ import { apiGetFriendsOfFriendsSuggestions, apiSendFriendRequest } from '../../.
 import type { FriendshipResponse } from '../../../types/friendship.types';
 import { toast } from 'react-toastify';
 import { useLoading } from '../../../hooks/useLoading';
+import avatardf from '../../../assets/images/avatar_default.png';
 
 const FriendsHomePage: React.FC = () => {
   const [friendSuggestions, setFriendSuggestions] = useState<FriendshipResponse[]>([]);
@@ -16,7 +17,7 @@ const FriendsHomePage: React.FC = () => {
   const fetchFriendSuggestions = async (pageNum: number = 0) => {
     try {
       showLoading();
-      const response = await apiGetFriendsOfFriendsSuggestions(pageNum, 20);
+      const response = await apiGetFriendsOfFriendsSuggestions(pageNum, 5);
       if (response.success && response.data) {
         setFriendSuggestions(response.data.content);
         setTotalPages(response.data.totalPages);
@@ -39,7 +40,6 @@ const FriendsHomePage: React.FC = () => {
     try {
       const response = await apiSendFriendRequest(userId);
       if (response.success) {
-        toast.success('Đã gửi lời mời kết bạn');
         // Remove the user from suggestions after sending request
         setFriendSuggestions(prev => prev.filter(friend => friend.friendProfile.userId !== userId));
       }
@@ -105,7 +105,7 @@ const FriendsHomePage: React.FC = () => {
               key={friend.friendProfile.userId}
               id={index + 1}
               name={friend.friendProfile.userProfile.fullName || friend.friendProfile.userName}
-              avatar={friend.friendProfile.avatarImg || 'https://via.placeholder.com/150'}
+              avatar={friend.friendProfile.avatarImg || avatardf}
               mutualFriends={null} // API doesn't provide mutual friends count yet
               followers={null}
               primaryAction={{

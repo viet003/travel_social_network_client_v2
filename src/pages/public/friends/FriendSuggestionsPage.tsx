@@ -20,7 +20,7 @@ const FriendSuggestionsPage: React.FC = () => {
   const fetchSuggestions = async (pageNum: number = 0) => {
     try {
       showLoading();
-      const response = await apiGetFriendsOfFriendsSuggestions(pageNum, 20);
+      const response = await apiGetFriendsOfFriendsSuggestions(pageNum, 5);
       if (response.success && response.data) {
         setSuggestions(response.data.content);
         setTotalPages(response.data.totalPages);
@@ -44,7 +44,6 @@ const FriendSuggestionsPage: React.FC = () => {
     try {
       const response = await apiSendFriendRequest(userId);
       if (response.success) {
-        toast.success('Đã gửi lời mời kết bạn');
         // Remove from suggestions after sending request
         setSuggestions(prev => prev.filter(sug => sug.friendProfile.userId !== userId));
         setTotalElements(prev => prev - 1);

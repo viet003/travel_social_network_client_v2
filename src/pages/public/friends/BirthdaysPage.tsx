@@ -4,6 +4,7 @@ import { apiGetFriendsBirthdays } from '../../../services/friendshipService';
 import type { UserResponse } from '../../../types/friendship.types';
 import { toast } from 'react-toastify';
 import { useLoading } from '../../../hooks/useLoading';
+import avatardf from '../../../assets/images/avatar_default.png';
 
 interface BirthdayFriend extends UserResponse {
   isToday?: boolean;
@@ -119,7 +120,7 @@ const BirthdaysPage: React.FC = () => {
               <div key={person.userId} className="bg-white border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors cursor-pointer">
                 <div className="flex items-center space-x-4">
                   <img
-                    src={person.avatarImg || 'https://via.placeholder.com/150'}
+                    src={person.avatarImg || avatardf}
                     alt={person.userProfile.fullName || person.userName}
                     className="w-16 h-16 rounded-full object-cover"
                   />
@@ -140,7 +141,7 @@ const BirthdaysPage: React.FC = () => {
                   <button 
                     className="text-white px-4 py-2 rounded-lg transition-colors text-sm cursor-pointer"
                     style={{ backgroundColor: 'var(--travel-primary-500)' }}
-                    onClick={() => toast.success(`Đã gửi lời chúc mừng sinh nhật đến ${person.userProfile.fullName || person.userName}`)}
+                    onClick={() => {}}
                   >
                     Chúc mừng sinh nhật
                   </button>
@@ -163,7 +164,7 @@ const BirthdaysPage: React.FC = () => {
               <div key={person.userId} className="bg-white border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors cursor-pointer">
                 <div className="flex items-center space-x-4">
                   <img
-                    src={person.avatarImg || 'https://via.placeholder.com/150'}
+                    src={person.avatarImg || avatardf}
                     alt={person.userProfile.fullName || person.userName}
                     className="w-16 h-16 rounded-full object-cover"
                   />
