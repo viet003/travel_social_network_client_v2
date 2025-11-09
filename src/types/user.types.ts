@@ -57,3 +57,20 @@ export interface ApiResponse<T = unknown> {
     timestamp?: string;
     status?: number;
 }
+
+export interface UserMediaResponse {
+    mediaId: string;
+    url: string;
+    createdAt: string;
+    postId: string;
+}
+
+export interface UserPhotosResponse {
+    avatars: UserMediaResponse[];
+    coverImages: UserMediaResponse[];
+    postPhotos: UserMediaResponse[];
+}
+
+export interface UserVideosResponse {
+    videos: UserMediaResponse[];
+}

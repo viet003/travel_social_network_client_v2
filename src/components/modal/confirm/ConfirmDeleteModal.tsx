@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Icon } from '@iconify/react';
 import { TravelButton, TravelInput } from '../../ui/customize';
 import { LoadingSpinner } from '../../ui/loading';
+import { ExpandableContent } from '../../ui';
 
 export type DeleteType = 'group' | 'conversation' | 'account' | 'post' | 'comment' | 'unfriend' | 'custom';
 
@@ -46,7 +47,7 @@ const ConfirmDeleteModal: React.FC<ConfirmDeleteModalProps> = ({
         return {
           title: `Xóa nhóm`,
           titleHighlight: itemName,
-          icon: 'fluent:people-team-delete-24-regular',
+          icon: 'fluent:people-team-delete-24-filled',
           iconBg: 'bg-red-100',
           iconColor: 'text-red-600',
           warning: 'Hành động này sẽ xóa vĩnh viễn nhóm và tất cả nội dung bên trong. Bạn không thể hoàn tác hành động này.',
@@ -55,16 +56,16 @@ const ConfirmDeleteModal: React.FC<ConfirmDeleteModalProps> = ({
         return {
           title: `Xóa cuộc trò chuyện với`,
           titleHighlight: itemName,
-          icon: 'fluent:chat-multiple-24-regular',
-          iconBg: 'bg-orange-100',
-          iconColor: 'text-orange-600',
+          icon: 'fluent:chat-delete-24-filled',
+          iconBg: 'bg-red-100',
+          iconColor: 'text-red-600',
           warning: 'Hành động này sẽ xóa vĩnh viễn cuộc trò chuyện và tất cả tin nhắn. Bạn không thể hoàn tác hành động này.',
         };
       case 'account':
         return {
           title: `Xóa tài khoản`,
           titleHighlight: itemName,
-          icon: 'fluent:person-delete-24-regular',
+          icon: 'fluent:person-delete-24-filled',
           iconBg: 'bg-red-100',
           iconColor: 'text-red-600',
           warning: 'Hành động này sẽ xóa vĩnh viễn tài khoản và tất cả dữ liệu liên quan. Bạn sẽ mất quyền truy cập vào tài khoản này mãi mãi.',
@@ -72,26 +73,26 @@ const ConfirmDeleteModal: React.FC<ConfirmDeleteModalProps> = ({
       case 'post':
         return {
           title: `Xóa bài viết`,
-          icon: 'fluent:document-delete-24-regular',
-          iconBg: 'bg-yellow-100',
-          iconColor: 'text-yellow-600',
+          icon: 'fluent:delete-24-filled',
+          iconBg: 'bg-red-100',
+          iconColor: 'text-red-600',
           warning: 'Hành động này sẽ xóa vĩnh viễn bài viết và tất cả bình luận, lượt thích. Bạn không thể hoàn tác hành động này.',
         };
       case 'comment':
         return {
           title: `Xóa bình luận`,
-          icon: 'fluent:comment-delete-24-regular',
-          iconBg: 'bg-blue-100',
-          iconColor: 'text-blue-600',
+          icon: 'fluent:comment-delete-24-filled',
+          iconBg: 'bg-red-100',
+          iconColor: 'text-red-600',
           warning: 'Hành động này sẽ xóa vĩnh viễn bình luận. Bạn không thể hoàn tác hành động này.',
         };
       case 'unfriend':
         return {
           title: `Hủy kết bạn với`,
           titleHighlight: `@${itemName}`,
-          icon: 'fluent:person-subtract-24-regular',
-          iconBg: 'bg-orange-100',
-          iconColor: 'text-orange-600',
+          icon: 'fluent:person-subtract-24-filled',
+          iconBg: 'bg-red-100',
+          iconColor: 'text-red-600',
           warning: 'Bạn sẽ không còn là bạn bè với người này. Bạn có thể gửi lời mời kết bạn lại sau.',
           buttonText: 'Hủy kết bạn',
         };
@@ -99,7 +100,7 @@ const ConfirmDeleteModal: React.FC<ConfirmDeleteModalProps> = ({
         return {
           title: `Xóa`,
           titleHighlight: itemName,
-          icon: 'fluent:delete-24-regular',
+          icon: 'fluent:delete-24-filled',
           iconBg: 'bg-red-100',
           iconColor: 'text-red-600',
           warning: 'Hành động này không thể hoàn tác.',
@@ -176,16 +177,26 @@ const ConfirmDeleteModal: React.FC<ConfirmDeleteModalProps> = ({
 
         {/* Body */}
         <div className="p-4 sm:p-6">
-          {/* Icon */}
+          {/* Icon - Show for all types */}
           <div className="flex justify-center mb-4">
             <div className={`w-16 h-16 rounded-full ${defaultContent.iconBg} flex items-center justify-center`}>
               <Icon icon={defaultContent.icon} className={`h-8 w-8 ${defaultContent.iconColor}`} />
             </div>
           </div>
 
-          {/* Item Name */}
+          {/* Item Name - Use ExpandableContent for post type */}
           <div className="text-center mb-4">
-            <h3 className="text-lg sm:text-xl font-bold text-gray-900">{itemName}</h3>
+            {type === 'post' ? (
+              <div className="text-left">
+                <ExpandableContent 
+                  content={itemName} 
+                  maxLines={3} 
+                  className="text-sm text-gray-700 text-center"
+                />
+              </div>
+            ) : (
+              <h3 className="text-lg sm:text-xl font-bold text-gray-900">{itemName}</h3>
+            )}
           </div>
 
           {/* Stats */}

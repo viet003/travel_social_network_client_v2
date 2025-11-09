@@ -73,7 +73,7 @@ const FriendsLayout: React.FC = () => {
       {/* Toggle Button for Mobile - Fixed position */}
       <button
         onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-        className="lg:hidden fixed top-20 left-4 z-50 w-12 h-12 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-gray-100 transition-colors cursor-pointer"
+        className="lg:hidden fixed top-[72px] left-4 z-50 w-12 h-12 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-gray-100 transition-colors cursor-pointer"
       >
         <Icon 
           icon={isSidebarOpen ? "fluent:dismiss-24-filled" : "fluent:navigation-24-filled"} 
@@ -84,8 +84,8 @@ const FriendsLayout: React.FC = () => {
       {/* Left Sidebar */}
       <div className={`
         w-90 bg-white border-r border-gray-200 
-        flex flex-col h-[calc(100vh-55px)]
-        fixed lg:sticky top-0 z-40
+        flex flex-col h-[calc(100vh-56px)]
+        fixed lg:sticky top-[56px] lg:top-0 z-40
         transform transition-transform duration-300 ease-in-out
         ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
         overflow-y-auto

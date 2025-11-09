@@ -4,7 +4,9 @@ import type {
     UpdateUserDto, 
     UpdateUserResponse, 
     PageableResponse,
-    ApiResponse 
+    ApiResponse,
+    UserPhotosResponse,
+    UserVideosResponse
 } from "../types/user.types";
 import type { PostResponse } from "../types/post.types";
 
@@ -134,6 +136,46 @@ export const apiUpdateUserProfile = async (
             method: 'PUT',
             url: '/users/me',
             data: updateUserDto
+        });
+        return response.data;
+    } catch (error: unknown) {
+        if (error && typeof error === 'object' && 'response' in error) {
+            throw (error as { response: { data: unknown } }).response.data;
+        }
+        throw error;
+    }
+};
+
+/**
+ * Get user photos (avatars, covers, and post images)
+ * @param userId - User UUID
+ * @returns User photos response
+ */
+export const apiGetUserPhotos = async (userId: string): Promise<ApiResponse<UserPhotosResponse>> => {
+    try {
+        const response = await axiosConfig({
+            method: 'GET',
+            url: `/users/${userId}/photos`
+        });
+        return response.data;
+    } catch (error: unknown) {
+        if (error && typeof error === 'object' && 'response' in error) {
+            throw (error as { response: { data: unknown } }).response.data;
+        }
+        throw error;
+    }
+};
+
+/**
+ * Get user videos from normal posts
+ * @param userId - User UUID
+ * @returns User videos response
+ */
+export const apiGetUserVideos = async (userId: string): Promise<ApiResponse<UserVideosResponse>> => {
+    try {
+        const response = await axiosConfig({
+            method: 'GET',
+            url: `/users/${userId}/videos`
         });
         return response.data;
     } catch (error: unknown) {

@@ -131,7 +131,6 @@ const HomePage: React.FC = () => {
         <div className="w-full max-w-2xl mx-auto px-3 sm:px-4 lg:px-0">
           {/* Post Create Modal */}
           <PostCreateModal 
-            location="home"
             setCreateSuccess={handlePostCreated}
           />
 
@@ -187,6 +186,7 @@ const HomePage: React.FC = () => {
                         onShare={() => {}}
                         liked={post.liked}
                         onHidePost={() => handleHidePost(post.postId)}
+                        onDeletePost={() => handleHidePost(post.postId)}
                       />
                     </div>
                   );
@@ -224,6 +224,7 @@ const HomePage: React.FC = () => {
                       onShare={() => {}}
                       liked={post.liked}
                       onHidePost={() => handleHidePost(post.postId)}
+                      onDeletePost={() => handleHidePost(post.postId)}
                     />
                   );
                 })}                {/* Loading indicator when fetching more */}

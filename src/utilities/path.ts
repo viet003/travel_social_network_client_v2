@@ -12,6 +12,7 @@ export const path = {
     HELP: "/help",
     USER: "user/:userId",
     USER_PHOTOS: "photos",
+    USER_VIDEOS: "videos",
     USER_REVIEWS: "reviews",
     USER_FRIENDS: "friends",
     FRIENDS: "friends",
@@ -30,6 +31,11 @@ export const path = {
     GROUP_MEMBERS: "members",
     GROUP_MEDIA: "media",
     WATCH: "watch",
+    WATCH_FEED: "feed",
+    MY_VIDEOS: "my-videos",
     EXPLORE: "explore",
+    POST_DETAIL: "post/:postId",
+    VIDEO_DETAIL: "video/:videoId",
+    MEDIA_POST_DETAIL: "post/:postId/media/:mediaId",
     STAR: "*"
 }

@@ -12,11 +12,19 @@ interface CreateCommentPayload {
   parentCommentId?: string;
 }
 
-export const apiGetAllCommentsByPost = async (postId: string, page: number): Promise<ApiResponse> => {
+export const apiGetAllCommentsByPost = async (
+  postId: string, 
+  page: number, 
+  sort?: 'newest' | 'oldest' | 'most_relevant'
+): Promise<ApiResponse> => {
   try {
+    let url = `comment/${postId}?page=${page}`;
+    if (sort) {
+      url += `&sort=${sort}`;
+    }
     const response = await axiosConfig({
       method: 'GET',
-      url: `comment/${postId}?page=${page}`,
+      url,
     });
     return response?.data;
   } catch (error: any) {

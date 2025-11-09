@@ -7,6 +7,28 @@ import type {
 } from "../types/post.types";
 
 /**
+ * Get post by post ID
+ * Endpoint: GET /post/detail/{postId}
+ * Description: Retrieve a single post by its ID
+ * @param postId - Post UUID
+ * @returns Post response
+ */
+export const apiGetPostById = async (postId: string): Promise<ApiResponse<PostResponse>> => {
+  try {
+    const response = await axiosConfig({
+      method: 'GET',
+      url: `/post/detail/${postId}`
+    });
+    return response.data;
+  } catch (error: unknown) {
+    if (error && typeof error === 'object' && 'response' in error) {
+      throw (error as { response: { data: unknown } }).response.data;
+    }
+    throw error;
+  }
+};
+
+/**
  * Get posts by user ID
  * Endpoint: GET /post/{userId}
  * Description: Retrieve posts created by a specific user. 
@@ -249,6 +271,36 @@ export const apiUpdatePostPrivacy = async (
       method: 'PATCH',
       url: `/post/${postId}/privacy`,
       params: { privacy }
+    });
+    return response.data;
+  } catch (error: unknown) {
+    if (error && typeof error === 'object' && 'response' in error) {
+      throw (error as { response: { data: unknown } }).response.data;
+    }
+    throw error;
+  }
+};
+
+/**
+ * Update post
+ * Endpoint: PUT /post/{postId}
+ * Description: Update post content, location, privacy, tags, or add new media. Only the owner can update.
+ * @param postId - Post UUID
+ * @param formData - FormData containing content, location, privacy, tags, mediaFiles, etc.
+ * @returns Updated post response
+ */
+export const apiUpdatePost = async (
+  postId: string,
+  formData: FormData
+): Promise<ApiResponse<PostResponse>> => {
+  try {
+    const response = await axiosConfig({
+      method: 'PUT',
+      url: `/post/${postId}`,
+      data: formData,
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
     });
     return response.data;
   } catch (error: unknown) {

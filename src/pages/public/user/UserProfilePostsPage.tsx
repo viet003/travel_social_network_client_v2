@@ -7,10 +7,9 @@ import avatardf from "../../../assets/images/avatar_default.png";
 import { path } from "../../../utilities/path";
 import { apiGetPostsByUser } from "../../../services/postService";
 import { apiGetMyFriends } from "../../../services/friendshipService";
-import { apiGetUserPhotos } from "../../../services/photoService";
+import { apiGetUserPhotos } from "../../../services/userService";
 import type { PostResponse, PageableResponse } from "../../../types/post.types";
-import type { UserResponse } from "../../../types/user.types";
-import type { UserPhotoResponse } from "../../../services/photoService";
+import type { UserResponse, UserPhotosResponse, UserMediaResponse } from "../../../types/user.types";
 
 // Types
 interface Post {
@@ -59,10 +58,15 @@ const UserProfilePostsPage: React.FC<UserProfilePostsPageProps> = ({
   const [page, setPage] = useState<number>(0);
   const [hasMore, setHasMore] = useState<boolean>(true);
   const [postCreated, setPostCreated] = useState<boolean>(false);
-  const [userPhotos, setUserPhotos] = useState<UserPhotoResponse[]>([]);
+  const [userPhotos, setUserPhotos] = useState<UserMediaResponse[]>([]);
   const [friends, setFriends] = useState<UserResponse[]>([]);
   const [totalFriends, setTotalFriends] = useState<number>(0);
   const observer = useRef<IntersectionObserver | null>(null);
+
+  // Handle delete post
+  const handleDeletePost = (postId: string) => {
+    setPosts(prevPosts => prevPosts.filter(post => post.postId !== postId));
+  };
 
   // Handle tab navigation
   const handleTabClick = (tabId: string) => {
@@ -107,7 +111,7 @@ const UserProfilePostsPage: React.FC<UserProfilePostsPageProps> = ({
       const [postsResponse, friendsResponse, photosResponse] = await Promise.all([
         apiGetPostsByUser(userId, 0, 5),
         apiGetMyFriends().catch(() => ({ data: [] })), // Catch error if not authorized
-        apiGetUserPhotos(userId).catch(() => ({ data: { data: { avatars: [], coverImages: [], postPhotos: [] } } })),
+        apiGetUserPhotos(userId).catch(() => ({ data: { avatars: [], coverImages: [], postPhotos: [] } })),
       ]);
 
       // Process posts
@@ -151,9 +155,9 @@ const UserProfilePostsPage: React.FC<UserProfilePostsPageProps> = ({
       }
 
       // Process photos
-      if (photosResponse.data?.data) {
-        const photosData = photosResponse.data.data;
-        const allPhotos: UserPhotoResponse[] = [];
+      if (photosResponse.data) {
+        const photosData = photosResponse.data as UserPhotosResponse;
+        const allPhotos: UserMediaResponse[] = [];
         
         // Combine all photos: avatars, coverImages, postPhotos
         if (photosData.avatars) allPhotos.push(...photosData.avatars);
@@ -338,7 +342,7 @@ const UserProfilePostsPage: React.FC<UserProfilePostsPageProps> = ({
               {userPhotos.length > 0 ? (
                 userPhotos.map((photo) => (
                   <div
-                    key={photo.photoId}
+                    key={photo.mediaId}
                     className="aspect-square bg-gray-200 rounded-lg overflow-hidden"
                   >
                     <Image
@@ -492,6 +496,7 @@ const UserProfilePostsPage: React.FC<UserProfilePostsPageProps> = ({
                     privacy={post.privacy}
                     postType={post.postType}
                     liked={post.liked}
+                    onDeletePost={() => handleDeletePost(post.postId)}
                   />
                 </div>
               );
@@ -516,6 +521,7 @@ const UserProfilePostsPage: React.FC<UserProfilePostsPageProps> = ({
               privacy={post.privacy}
               postType={post.postType}
               liked={post.liked}
+              onDeletePost={() => handleDeletePost(post.postId)}
             />
           );
         })

@@ -85,8 +85,10 @@ const NestedComment: React.FC<NestedCommentProps> = ({
   const longPressTimerRef = useRef<number | null>(null);
   const dropdownRef = useRef<HTMLDivElement | null>(null);
   
-  // Get current user ID from Redux
-  const currentUserId = useSelector((state: { auth: AuthState }) => state.auth.userId);
+  // Get current user ID and avatar from Redux
+  const currentUser = useSelector((state: { auth: AuthState }) => state.auth);
+  const currentUserId = currentUser.userId;
+  const currentUserAvatar = currentUser.avatar || avatardf;
   
   const canReply = level < maxLevel;
   const hasReplies = (comment.replyCount ?? 0) > 0;
@@ -486,7 +488,7 @@ const NestedComment: React.FC<NestedCommentProps> = ({
           {showReplyInput && canReply && (
             <div className="flex items-center gap-2 mt-2">
               <img 
-                src={avatardf} 
+                src={currentUserAvatar} 
                 alt="current user" 
                 className="flex-shrink-0 object-cover w-8 h-8 rounded-full border-2 border-gray-200" 
               />
