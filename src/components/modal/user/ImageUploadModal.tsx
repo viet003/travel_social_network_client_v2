@@ -248,11 +248,11 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
                 Hủy
               </TravelButton>
               <TravelButton
-                type="default"
+                type="primary"
                 htmlType="submit"
                 disabled={isUploading || !selectedFile}
                 loading={isUploading}
-                className="px-6 !bg-gray-100 hover:!bg-gray-200 transition-colors"
+                className="px-6 "
               >
                 {isUploading ? (
                   <div className="flex items-center justify-center space-x-2">

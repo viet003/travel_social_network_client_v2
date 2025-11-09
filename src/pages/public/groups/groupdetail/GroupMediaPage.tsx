@@ -53,8 +53,8 @@ const GroupMediaPage: React.FC = () => {
     { id: 'videos' as const, label: 'Video', icon: 'fluent:video-24-filled', count: videos.length },
   ];
 
-  const handleMediaClick = (postId: string) => {
-    navigate(`/post/${postId}`);
+  const handleMediaClick = (mediaId: string | number, postId: string) => {
+    navigate(`/home/post/${postId}/media/${String(mediaId)}`);
   };
 
   return (
@@ -138,7 +138,7 @@ const GroupMediaPage: React.FC = () => {
             <div
               key={photo.mediaId}
               className="group relative aspect-square rounded-lg overflow-hidden cursor-pointer hover:shadow-lg transition-shadow"
-              onClick={() => handleMediaClick(photo.postId)}
+              onClick={() => handleMediaClick(photo.mediaId, photo.postId)}
             >
               <img
                 src={photo.url}
@@ -165,7 +165,7 @@ const GroupMediaPage: React.FC = () => {
             <div
               key={video.mediaId}
               className="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
-              onClick={() => handleMediaClick(video.postId)}
+              onClick={() => handleMediaClick(video.mediaId, video.postId)}
             >
               <div className="relative aspect-video">
                 <img

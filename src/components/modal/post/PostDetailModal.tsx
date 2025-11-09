@@ -1,14 +1,23 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Icon } from '@iconify/react';
-import { CommentCreateModal, NestedComment } from '../comment';
-import { formatTimeAgo, formatPrivacy } from '../../../utilities/helper';
-import { LikeButton } from '../../common';
-import { useNavigate } from 'react-router-dom';
-import { TravelImage, ExpandableContent } from '../../ui';
-import avatardf from '../../../assets/images/avatar_default.png';
-import { apiGetAllCommentsByPost } from '../../../services/commentService';
-import type { PostResponse as PostResponseType } from '../../../types/post.types';
-import SharedPostPreview from './SharedPostPreview';
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { Icon } from "@iconify/react";
+import {
+  CommentCreateModal,
+  NestedComment,
+  CommentSortDropdown,
+  type SortOption,
+} from "../comment";
+import { formatTimeAgo, formatPrivacy } from "../../../utilities/helper";
+import { LikeButton } from "../../common";
+import { useNavigate } from "react-router-dom";
+import { TravelImage, ExpandableContent } from "../../ui";
+import avatardf from "../../../assets/images/avatar_default.png";
+import { apiGetAllCommentsByPost } from "../../../services/commentService";
+import type { PostResponse as PostResponseType } from "../../../types/post.types";
+import SharedPostPreview from "./SharedPostPreview";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Navigation, Pagination } from "swiper/modules";
+import type { Swiper as SwiperType } from "swiper";
+import "../../../styles/post-modal.css";
 
 // Types
 interface Comment {
@@ -49,7 +58,7 @@ interface PostDetailModalProps {
   isShare?: boolean;
   privacy?: string;
   group?: Group | null;
-  postType?: 'NORMAL' | 'AVATAR_UPDATE' | 'COVER_UPDATE';
+  postType?: "NORMAL" | "AVATAR_UPDATE" | "COVER_UPDATE";
   postLikeCount?: number;
   setPostLikeCount?: (count: number) => void;
   isLiked?: boolean;
@@ -80,7 +89,7 @@ const PostDetailModal: React.FC<PostDetailModalProps> = ({
   isShare = false,
   privacy,
   group = null,
-  postType = 'NORMAL',
+  postType = "NORMAL",
   postLikeCount = 0,
   setPostLikeCount,
   isLiked,
@@ -92,13 +101,17 @@ const PostDetailModal: React.FC<PostDetailModalProps> = ({
   onShare,
   sharedPost,
 }) => {
-  const [currentImageIndex, setCurrentImageIndex] = useState<number>(selectedImageIndex || 0);
+  const [currentImageIndex, setCurrentImageIndex] = useState<number>(
+    selectedImageIndex || 0
+  );
   const [newComment, setNewComment] = useState<Comment | null>(null);
   const [comments, setComments] = useState<Comment[]>([]);
   const [page, setPage] = useState<number>(0);
   const [hasMore, setHasMore] = useState<boolean>(true);
   const [loading, setLoading] = useState<boolean>(false);
+  const [commentSort, setCommentSort] = useState<SortOption>("most_relevant");
   const observer = useRef<IntersectionObserver | null>(null);
+  const swiperRef = useRef<SwiperType | null>(null);
   const navigate = useNavigate();
 
   const handleGroupClick = () => {
@@ -118,7 +131,7 @@ const PostDetailModal: React.FC<PostDetailModalProps> = ({
             setPage((prevPage) => prevPage + 1);
           }
         },
-        { rootMargin: '100px' }
+        { rootMargin: "100px" }
       );
       if (node) observer.current.observe(node);
     },
@@ -129,7 +142,11 @@ const PostDetailModal: React.FC<PostDetailModalProps> = ({
   const fetchPostComments = async (pageNum: number) => {
     setLoading(true);
     try {
-      const commentResponse = await apiGetAllCommentsByPost(postId, pageNum);
+      const commentResponse = await apiGetAllCommentsByPost(
+        postId,
+        pageNum,
+        commentSort
+      );
       console.log("User comments data:", commentResponse);
       const comments = commentResponse?.data?.content || [];
       if (pageNum === 0) {
@@ -145,16 +162,16 @@ const PostDetailModal: React.FC<PostDetailModalProps> = ({
     }
   };
 
-  // Tải bài viết khi page hoặc userId thay đổi
+  // Tải bài viết khi page, isOpen hoặc commentSort thay đổi
   useEffect(() => {
     if (!isOpen || !hasMore) return;
     fetchPostComments(page);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page, isOpen]);
+  }, [page, isOpen, commentSort]);
 
   useEffect(() => {
     if (newComment) {
-      setComments(prev => [newComment, ...prev]);
+      setComments((prev) => [newComment, ...prev]);
     }
   }, [newComment]);
 
@@ -162,42 +179,35 @@ const PostDetailModal: React.FC<PostDetailModalProps> = ({
     setCurrentImageIndex(index);
   };
 
-  const handlePrevImage = () => {
-    setCurrentImageIndex((prev) =>
-      prev === 0 ? displayImages.length - 1 : prev - 1
-    );
-  };
-
-  const handleNextImage = () => {
-    setCurrentImageIndex((prev) =>
-      prev === displayImages.length - 1 ? 0 : prev + 1
-    );
-  };
-
   // Render header text based on postType
   const renderHeaderText = () => {
-    if (postType === 'AVATAR_UPDATE') {
+    if (postType === "AVATAR_UPDATE") {
       return (
         <span className="text-xs sm:text-sm text-gray-600">{content}</span>
       );
     }
-    
-    if (postType === 'COVER_UPDATE') {
+
+    if (postType === "COVER_UPDATE") {
       return (
         <span className="text-xs sm:text-sm text-gray-600">{content}</span>
       );
     }
-    
+
     // NORMAL post with location
     if (location) {
       return (
         <>
-          <span className="text-xs sm:text-sm text-gray-600"> đã chia sẻ khoảnh khắc tại </span>
-          <span className="text-xs sm:text-sm text-gray-500 truncate">{location}</span>
+          <span className="text-xs sm:text-sm text-gray-600">
+            {" "}
+            đã chia sẻ khoảnh khắc tại{" "}
+          </span>
+          <span className="text-xs sm:text-sm text-gray-500 truncate">
+            {location}
+          </span>
         </>
       );
     }
-    
+
     return null;
   };
 
@@ -215,13 +225,13 @@ const PostDetailModal: React.FC<PostDetailModalProps> = ({
   );
 
   const renderSingleImage = (img: string, index: number) => (
-    <div key={index} style={{ marginBottom: '12px' }}>
+    <div key={index} style={{ marginBottom: "12px" }}>
       <TravelImage
         src={img}
         alt="post"
         onClick={() => handleImageClick(index)}
         preview={{
-          mask: 'Xem ảnh',
+          mask: "Xem ảnh",
         }}
       />
     </div>
@@ -236,35 +246,64 @@ const PostDetailModal: React.FC<PostDetailModalProps> = ({
 
     return (
       <div className="relative mb-3">
-        {/* Main Image */}
-        <div style={{ position: 'relative', overflow: 'hidden', borderRadius: '8px', maxHeight: '350px' }}>
-          <TravelImage
-            src={displayImages[currentImageIndex]}
-            alt={`post-${currentImageIndex}`}
-            preview={{
-              mask: 'Xem ảnh',
-            }}
-          />
+        <Swiper
+          onSwiper={(swiper) => {
+            swiperRef.current = swiper;
+          }}
+          modules={[Navigation, Pagination]}
+          navigation={false}
+          pagination={{
+            clickable: true,
+            dynamicBullets: true,
+          }}
+          spaceBetween={0}
+          slidesPerView={1}
+          initialSlide={currentImageIndex}
+          onSlideChange={(swiper) => setCurrentImageIndex(swiper.activeIndex)}
+          className="post-swiper rounded-xl"
+          style={
+            {
+              borderRadius: "12px",
+            } as React.CSSProperties
+          }
+        >
+          {displayImages.map((img, index) => (
+            <SwiperSlide key={index}>
+              <TravelImage
+                src={img}
+                alt={`post-${index}`}
+                className="w-full"
+                style={{ borderRadius: "12px" }}
+                preview={{
+                  mask: "Xem ảnh",
+                }}
+              />
+            </SwiperSlide>
+          ))}
+        </Swiper>
 
-          {/* Navigation Arrows */}
+        {/* Custom Navigation Buttons */}
+        {currentImageIndex > 0 && (
           <button
-            onClick={handlePrevImage}
-            className="absolute p-2 text-white transition-all duration-200 transform -translate-y-1/2 bg-black bg-opacity-50 rounded-full left-2 top-1/2 hover:bg-opacity-70 hover:scale-110 cursor-pointer active:scale-95"
+            onClick={() => swiperRef.current?.slidePrev()}
+            className="absolute p-2 text-white transition-all duration-200 transform -translate-y-1/2 bg-black bg-opacity-50 rounded-full left-2 top-1/2 hover:bg-opacity-70 hover:scale-110 cursor-pointer active:scale-95 z-10"
           >
             <Icon icon="fluent:chevron-left-20-filled" className="w-5 h-5" />
           </button>
+        )}
 
+        {currentImageIndex < displayImages.length - 1 && (
           <button
-            onClick={handleNextImage}
-            className="absolute p-2 text-white transition-all duration-200 transform -translate-y-1/2 bg-black bg-opacity-50 rounded-full right-2 top-1/2 hover:bg-opacity-70 hover:scale-110 cursor-pointer active:scale-95"
+            onClick={() => swiperRef.current?.slideNext()}
+            className="absolute p-2 text-white transition-all duration-200 transform -translate-y-1/2 bg-black bg-opacity-50 rounded-full right-2 top-1/2 hover:bg-opacity-70 hover:scale-110 cursor-pointer active:scale-95 z-10"
           >
             <Icon icon="fluent:chevron-right-24-filled" className="w-5 h-5" />
           </button>
+        )}
 
-          {/* Image Counter */}
-          <div className="absolute px-2 py-1 text-sm text-white bg-black bg-opacity-50 rounded-full bottom-2 right-2">
-            {currentImageIndex + 1} / {displayImages.length}
-          </div>
+        {/* Image Counter */}
+        <div className="absolute px-2 py-1 text-sm text-white bg-black bg-opacity-50 rounded-full bottom-2 right-2 z-10">
+          {currentImageIndex + 1} / {displayImages.length}
         </div>
       </div>
     );
@@ -300,32 +339,41 @@ const PostDetailModal: React.FC<PostDetailModalProps> = ({
               className="w-12 h-12 object-cover rounded-lg"
             />
             {/* User Avatar Overlay */}
-            <img 
-              src={avatar || avatardf} 
-              alt="avatar" 
+            <img
+              src={avatar || avatardf}
+              alt="avatar"
               className="absolute -bottom-1 -right-1 w-7 h-7 object-cover rounded-full border-2 border-white cursor-pointer"
-              onClick={() => { navigate(`/user/${userId}`) }}
+              onClick={() => {
+                navigate(`/user/${userId}`);
+              }}
             />
           </div>
-          
+
           {/* Group and User Info */}
           <div className="flex-1">
             <div className="flex items-center gap-2">
-              <span 
+              <span
                 className="font-semibold text-gray-800 hover:underline cursor-pointer"
                 onClick={handleGroupClick}
               >
                 {group.groupName}
               </span>
               <span className="text-gray-500">•</span>
-              <span className="text-sm text-gray-500">{formatTimeAgo(timeAgo)}</span>
+              <span className="text-sm text-gray-500">
+                {formatTimeAgo(timeAgo)}
+              </span>
               <span className="text-gray-500">•</span>
-              <Icon icon="fluent:globe-24-filled" className="w-4 h-4 text-gray-500" />
+              <Icon
+                icon="fluent:globe-24-filled"
+                className="w-4 h-4 text-gray-500"
+              />
             </div>
             <div className="flex items-center gap-1 text-sm text-gray-600 mt-1">
-              <span 
+              <span
                 className="hover:underline cursor-pointer"
-                onClick={() => { navigate(`/user/${userId}`) }}
+                onClick={() => {
+                  navigate(`/user/${userId}`);
+                }}
               >
                 {userName}
               </span>
@@ -337,11 +385,17 @@ const PostDetailModal: React.FC<PostDetailModalProps> = ({
               )}
             </div>
           </div>
-          
+
           {/* Menu button */}
           <div className="ml-auto">
             <button className="text-gray-400 hover:text-gray-600 p-2 rounded-full hover:bg-gray-100 transition-colors">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                viewBox="0 0 24 24"
+              >
                 <circle cx="12" cy="6" r="1.5" />
                 <circle cx="12" cy="12" r="1.5" />
                 <circle cx="12" cy="18" r="1.5" />
@@ -358,17 +412,21 @@ const PostDetailModal: React.FC<PostDetailModalProps> = ({
 
     return (
       <div className="flex items-center gap-3 mb-3">
-        <img 
-          src={avatar || avatardf} 
-          alt="avatar" 
-          className="object-cover w-10 h-10 rounded-full cursor-pointer" 
-          onClick={() => { navigate(`/user/${userId}`) }}
+        <img
+          src={avatar || avatardf}
+          alt="avatar"
+          className="object-cover w-10 h-10 rounded-full cursor-pointer"
+          onClick={() => {
+            navigate(`/user/${userId}`);
+          }}
         />
-        <div className='flex flex-col'>
+        <div className="flex flex-col">
           <div className="flex items-center gap-2">
-            <span 
+            <span
               className="font-semibold text-gray-800 cursor-pointer hover:underline"
-              onClick={() => { navigate(`/user/${userId}`) }}
+              onClick={() => {
+                navigate(`/user/${userId}`);
+              }}
             >
               {userName}
             </span>
@@ -377,14 +435,14 @@ const PostDetailModal: React.FC<PostDetailModalProps> = ({
           <span className="flex items-center gap-1 text-xs text-gray-400">
             {formatTimeAgo(timeAgo)}
             <Icon icon="fluent:globe-24-filled" className="w-3 h-3" />
-            {privacy && <span className="ml-1 text-xs">• {formatPrivacy(privacy)}</span>}
+            {privacy && (
+              <span className="ml-1 text-xs">• {formatPrivacy(privacy)}</span>
+            )}
           </span>
         </div>
       </div>
     );
   };
-
-
 
   if (!isOpen) return null;
 
@@ -404,13 +462,16 @@ const PostDetailModal: React.FC<PostDetailModalProps> = ({
         <div className="sticky top-0 z-10 flex items-center justify-between p-6 bg-white border-b border-gray-200">
           <div className="flex flex-col items-start">
             <span className="flex items-center mb-2 text-xl font-bold text-blue-600">
-              <Icon icon="fluent:compass-northwest-24-regular" className="text-blue-600 w-7 h-7" />
+              <Icon
+                icon="fluent:compass-northwest-24-regular"
+                className="text-blue-600 w-7 h-7"
+              />
               TravelNest
             </span>
             <h2 className="text-2xl font-bold text-gray-800">
               {group ? (
                 <>
-                  <span 
+                  <span
                     className="hover:underline cursor-pointer !text-blue-600"
                     onClick={(e) => {
                       e.stopPropagation();
@@ -419,8 +480,8 @@ const PostDetailModal: React.FC<PostDetailModalProps> = ({
                   >
                     {group.groupName}
                   </span>
-                  {' - Bài viết của '}
-                  <span 
+                  {" - Bài viết của "}
+                  <span
                     className="hover:underline cursor-pointer !text-blue-600"
                     onClick={(e) => {
                       e.stopPropagation();
@@ -432,8 +493,8 @@ const PostDetailModal: React.FC<PostDetailModalProps> = ({
                 </>
               ) : (
                 <>
-                  {'Bài viết của '}
-                  <span 
+                  {"Bài viết của "}
+                  <span
                     className="hover:underline cursor-pointer text-blue-600"
                     onClick={(e) => {
                       e.stopPropagation();
@@ -466,7 +527,7 @@ const PostDetailModal: React.FC<PostDetailModalProps> = ({
                 <span>Đã chia sẻ một bài viết</span>
               </div>
             )}
-            
+
             {/* Group Header or User Header */}
             {renderGroupHeader()}
             {renderUserHeader()}
@@ -478,7 +539,9 @@ const PostDetailModal: React.FC<PostDetailModalProps> = ({
             {renderTags()}
 
             {/* Shared Post Preview */}
-            {isShare && sharedPost && <SharedPostPreview sharedPost={sharedPost} />}
+            {isShare && sharedPost && (
+              <SharedPostPreview sharedPost={sharedPost} />
+            )}
 
             {/* Main Media Display - Only show if not a share post */}
             {!isShare && displayVideo && renderVideo(displayVideo)}
@@ -487,62 +550,111 @@ const PostDetailModal: React.FC<PostDetailModalProps> = ({
             {/* Action buttons */}
             <div className="flex items-center gap-6 pt-3 text-sm text-gray-500">
               <div className="flex items-center gap-1">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M14 9l-2-2-2 2m0 6l2 2 2-2" />
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M14 9l-2-2-2 2m0 6l2 2 2-2"
+                  />
                 </svg>
               </div>
-              <LikeButton 
-                postId={postId} 
-                isLiked={isLiked || false} 
-                setIsLiked={setIsLiked || (() => {})} 
-                likeCount={postLikeCount} 
-                setLikeCount={setPostLikeCount || (() => {})} 
+              <LikeButton
+                postId={postId}
+                isLiked={isLiked || false}
+                setIsLiked={setIsLiked || (() => {})}
+                likeCount={postLikeCount}
+                setLikeCount={setPostLikeCount || (() => {})}
               />
               <div className="flex items-center gap-1 transition-colors cursor-pointer hover:text-blue-500">
                 <Icon icon="fluent:chat-24-filled" className="w-5 h-5" />
-                {postCommentCount}
+                <span>
+                  Bình luận{" "}
+                  {(postCommentCount || 0) > 0 && `(${postCommentCount})`}
+                </span>
               </div>
-              <div className="flex items-center gap-1 transition-colors cursor-pointer hover:text-green-500" onClick={onShare}>
+              <div
+                className="flex items-center gap-1 transition-colors cursor-pointer hover:text-green-500"
+                onClick={onShare}
+              >
                 <Icon icon="fluent:arrow-reply-24-filled" className="w-5 h-5" />
-                {postShareCount}
+                <span>
+                  Chia sẻ {postShareCount > 0 && `(${postShareCount})`}
+                </span>
               </div>
             </div>
           </div>
 
           {/* Comments List */}
           <div className="p-6 space-y-3">
-            {/* Comments Header */}
-            <div className="flex items-center gap-2 mb-6">
-              <Icon icon="fluent:comment-multiple-24-filled" className="w-6 h-6 text-blue-600" />
-              <h2 className="text-xl font-bold text-gray-800">
-                Comments ({postCommentCount})
-              </h2>
+            {/* Comments Header with Sort Dropdown */}
+            <div className="flex flex-col items-start justify-items-start mb-6">
+              <div className="flex items-center gap-2">
+                <Icon
+                  icon="fluent:comment-multiple-24-filled"
+                  className="w-6 h-6 text-blue-600"
+                />
+                <h2 className="text-xl font-bold text-gray-800">
+                  Comments ({postCommentCount})
+                </h2>
+              </div>
+              <CommentSortDropdown
+                currentSort={commentSort}
+                onSortChange={(sort) => {
+                  setCommentSort(sort);
+                  // Reset and refetch comments with new sort
+                  setPage(0);
+                  setComments([]);
+                  setHasMore(true);
+                }}
+              />
             </div>
             {comments.length === 0 ? (
               <div className="flex flex-col items-center justify-center text-center">
                 <div className="mb-4">
-                  <Icon icon="fluent:comment-24-regular" className="w-16 h-16 text-gray-300" />
+                  <Icon
+                    icon="fluent:comment-24-regular"
+                    className="w-16 h-16 text-gray-300"
+                  />
                 </div>
-                <h3 className="mb-2 text-lg font-semibold text-gray-700">Chưa có bình luận nào</h3>
-                <p className="text-sm text-gray-500">Hãy là người đầu tiên bình luận.</p>
+                <h3 className="mb-2 text-lg font-semibold text-gray-700">
+                  Chưa có bình luận nào
+                </h3>
+                <p className="text-sm text-gray-500">
+                  Hãy là người đầu tiên bình luận.
+                </p>
               </div>
             ) : (
               <>
                 {comments.map((comment, idx) => (
-                  <div key={comment.id || comment.commentId || idx} ref={comments.length === idx + 1 ? lastCommentElementRef : null}>
+                  <div
+                    key={comment.id || comment.commentId || idx}
+                    ref={
+                      comments.length === idx + 1 ? lastCommentElementRef : null
+                    }
+                  >
                     <NestedComment
                       comment={comment}
                       level={0}
                       maxLevel={2}
                       postId={postId}
                       onReply={(parentId, content) => {
-                        console.log('Reply to:', parentId, 'Content:', content);
+                        console.log("Reply to:", parentId, "Content:", content);
                         // Handle reply logic here
                       }}
                       onCommentCreated={onCommentCountChange}
                       onCommentDeleted={(deletedId) => {
                         // Remove deleted comment from list
-                        setComments(prev => prev.filter(c => (c.id || c.commentId) !== deletedId));
+                        setComments((prev) =>
+                          prev.filter(
+                            (c) => (c.id || c.commentId) !== deletedId
+                          )
+                        );
                         // Decrement comment count
                         onCommentCountChange?.();
                       }}
@@ -552,23 +664,25 @@ const PostDetailModal: React.FC<PostDetailModalProps> = ({
                 {loading && (
                   <div className="flex items-center justify-center py-4">
                     <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-                    <span className="ml-2 text-sm text-gray-500">Đang tải thêm bình luận...</span>
+                    <span className="ml-2 text-sm text-gray-500">
+                      Đang tải thêm bình luận...
+                    </span>
                   </div>
                 )}
               </>
             )}
           </div>
 
-          <div className='h-[10px]'></div>
+          <div className="h-[10px]"></div>
           {/* Comment Input */}
-          <div className='absolute bottom-0 left-0 w-full bg-white rounded-b-xl'>
-             <CommentCreateModal 
-               postId={postId} 
-               handleComment={handleComment || (() => {})} 
-               setNewComment={(comment: Comment) => setNewComment(comment)} 
-               currentUserAvatar={currentUserAvatar} 
-               setLoading={setLoading} 
-             />
+          <div className="absolute bottom-0 left-0 w-full bg-white rounded-b-xl">
+            <CommentCreateModal
+              postId={postId}
+              handleComment={handleComment || (() => {})}
+              setNewComment={(comment: Comment) => setNewComment(comment)}
+              currentUserAvatar={currentUserAvatar}
+              setLoading={setLoading}
+            />
           </div>
         </div>
       </div>
@@ -577,5 +691,3 @@ const PostDetailModal: React.FC<PostDetailModalProps> = ({
 };
 
 export default PostDetailModal;
-
-

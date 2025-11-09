@@ -245,11 +245,11 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
                 Hủy
               </TravelButton>
               <TravelButton
-                type="default"
+                type="primary"
                 htmlType="submit"
                 disabled={isSubmitting || !form.firstName.trim() || !form.lastName.trim() || !form.userName.trim()}
                 loading={isSubmitting}
-                className="px-6 !bg-gray-100 hover:!bg-gray-200 transition-colors"
+                className="px-6 "
               >
                 {isSubmitting ? (
                   <div className="flex items-center justify-center space-x-2">

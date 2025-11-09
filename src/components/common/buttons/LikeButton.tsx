@@ -33,9 +33,13 @@ const LikeButton: React.FC<LikeButtonProps> = ({
       const previousLiked = isLiked;
       const previousCount = likeCount;
       
-      // Optimistic UI update
-      const newLikedState = !isLiked;
-      const optimisticLikeCount = newLikedState ? likeCount + 1 : Math.max(0, likeCount - 1);
+      // Optimistic UI update - UPDATE IMMEDIATELY
+      const newLikedState = !previousLiked;
+      const optimisticLikeCount = newLikedState ? previousCount + 1 : Math.max(0, previousCount - 1);
+      
+      // Update UI first
+      setIsLiked(newLikedState);
+      setLikeCount(optimisticLikeCount);
       
       // Trigger animation only when liking
       if (newLikedState) {
@@ -43,31 +47,24 @@ const LikeButton: React.FC<LikeButtonProps> = ({
         setTimeout(() => setIsAnimating(false), 600);
       }
       
-      setIsLiked(newLikedState);
-      setLikeCount(optimisticLikeCount);
-      
       // Call API
       const response = await apiToggleLikePost(postId);
       
-      console.log('Like API response:', response); // Debug log
-      
-      if (response.success && response.data) {
-        // Sync with server response
-        console.log('Server returned - isLiked:', response.data.isLiked, 'likeCount:', response.data.likeCount);
-        setIsLiked(response.data.isLiked);
-        setLikeCount(response.data.likeCount);
-      } else {
-        // If response is not successful, rollback
-        console.error('API returned unsuccessful response:', response);
-        setIsLiked(previousLiked);
-        setLikeCount(previousCount);
-        message.error('Không thể cập nhật lượt thích. Vui lòng thử lại!');
+      // Verify response and sync if needed
+      if (response?.data) {
+        // Only update if server data is different from optimistic update
+        if (response.data.liked !== undefined && response.data.liked !== newLikedState) {
+          setIsLiked(response.data.liked);
+        }
+        if (response.data.likeCount !== undefined && response.data.likeCount !== optimisticLikeCount) {
+          setLikeCount(response.data.likeCount);
+        }
       }
     } catch (error) {
       console.error('Error toggling like:', error);
       
-      // Revert optimistic update on error (revert to opposite of current state)
-      setIsLiked(!isLiked);
+      // Revert to previous state on error
+      setIsLiked(!isLiked); // Revert to opposite (which is the original state)
       setLikeCount(isLiked ? likeCount - 1 : likeCount + 1);
       
       message.error('Không thể cập nhật lượt thích. Vui lòng thử lại!');

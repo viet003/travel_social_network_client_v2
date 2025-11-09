@@ -1,10 +1,14 @@
 import React, { useEffect, useRef } from 'react';
 import { Icon } from '@iconify/react';
+import { useSelector } from 'react-redux';
 
 interface PostOptionsDropdownProps {
   onClose: () => void;
   isOwner?: boolean;
   postId?: string;
+  userId?: string;
+  onEdit?: () => void;
+  onDelete?: () => void;
 }
 
 interface PostMenuItem {
@@ -14,17 +18,46 @@ interface PostMenuItem {
   description?: string;
   onClick?: () => void;
   isDivider?: boolean;
+  variant?: 'default' | 'danger';
+}
+
+interface AuthState {
+  userId: string;
+  avatar: string | null;
+  firstName: string;
+  lastName: string;
 }
 
 const PostOptionsDropdown: React.FC<PostOptionsDropdownProps> = ({ 
   onClose, 
   isOwner = false,
-  postId 
+  postId,
+  userId,
+  onEdit,
+  onDelete
 }) => {
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const currentUserId = useSelector((state: { auth: AuthState }) => state.auth.userId);
+  const isPostOwner = userId === currentUserId;
 
   // Menu items for post owner
   const ownerMenuItems: PostMenuItem[] = [
+    ...(isPostOwner ? [
+      {
+        id: 'edit',
+        icon: 'fluent:edit-24-regular',
+        title: 'Chỉnh sửa bài viết',
+        description: 'Thay đổi nội dung hoặc quyền riêng tư của bài viết.',
+        variant: 'default' as const
+      },
+      {
+        id: 'delete',
+        icon: 'fluent:delete-24-regular',
+        title: 'Xóa bài viết',
+        description: 'Bài viết sẽ bị xóa vĩnh viễn.',
+        variant: 'danger' as const
+      }
+    ] : []),
     {
       id: 'interested',
       icon: 'fluent:add-circle-24-regular',
@@ -75,6 +108,22 @@ const PostOptionsDropdown: React.FC<PostOptionsDropdownProps> = ({
 
   // Menu items for non-owner
   const nonOwnerMenuItems: PostMenuItem[] = [
+    ...(isPostOwner ? [
+      {
+        id: 'edit',
+        icon: 'fluent:edit-24-regular',
+        title: 'Chỉnh sửa bài viết',
+        description: 'Thay đổi nội dung hoặc quyền riêng tư của bài viết.',
+        variant: 'default' as const
+      },
+      {
+        id: 'delete',
+        icon: 'fluent:delete-24-regular',
+        title: 'Xóa bài viết',
+        description: 'Bài viết sẽ bị xóa vĩnh viễn.',
+        variant: 'danger' as const
+      }
+    ] : []),
     {
       id: 'interested',
       icon: 'fluent:add-circle-24-regular',
@@ -146,6 +195,13 @@ const PostOptionsDropdown: React.FC<PostOptionsDropdownProps> = ({
 
   const handleMenuClick = (itemId: string) => {
     console.log(`Post ${postId} - Action: ${itemId}`);
+    
+    // Handle specific actions
+    if (itemId === 'edit' && onEdit) {
+      onEdit();
+    } else if (itemId === 'delete' && onDelete) {
+      onDelete();
+    }
     // Add your logic here based on itemId
     
     // Close dropdown after action
@@ -163,17 +219,40 @@ const PostOptionsDropdown: React.FC<PostOptionsDropdownProps> = ({
           <button
             key={item.id}
             onClick={() => handleMenuClick(item.id)}
-            className="w-full flex items-start gap-3 py-2 px-3 hover:bg-gray-100 transition-colors cursor-pointer"
+            className={`w-full flex items-start gap-3 py-2 px-3 transition-colors cursor-pointer ${
+              item.variant === 'danger' 
+                ? 'hover:bg-red-50' 
+                : 'hover:bg-gray-100'
+            }`}
           >
-            <div className="flex-shrink-0 w-9 h-9 bg-gray-200 rounded-full flex items-center justify-center mt-0.5">
-              <Icon icon={item.icon} className="w-5 h-5 text-gray-700" />
+            <div className={`flex-shrink-0 w-9 h-9 rounded-full flex items-center justify-center mt-0.5 ${
+              item.variant === 'danger' 
+                ? 'bg-red-100' 
+                : 'bg-gray-200'
+            }`}>
+              <Icon 
+                icon={item.icon} 
+                className={`w-5 h-5 ${
+                  item.variant === 'danger' 
+                    ? 'text-red-600' 
+                    : 'text-gray-700'
+                }`} 
+              />
             </div>
             <div className="flex-1 text-left min-w-0">
-              <p className="text-sm font-medium text-gray-900 leading-tight">
+              <p className={`text-sm font-medium leading-tight ${
+                item.variant === 'danger' 
+                  ? 'text-red-600' 
+                  : 'text-gray-900'
+              }`}>
                 {item.title}
               </p>
               {item.description && (
-                <p className="text-xs text-gray-500 mt-0.5 leading-tight">
+                <p className={`text-xs mt-0.5 leading-tight ${
+                  item.variant === 'danger' 
+                    ? 'text-red-500' 
+                    : 'text-gray-500'
+                }`}>
                   {item.description}
                 </p>
               )}

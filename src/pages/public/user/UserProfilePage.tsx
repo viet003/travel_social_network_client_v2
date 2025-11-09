@@ -70,6 +70,7 @@ const UserProfilePage: React.FC = () => {
   const getActiveTab = () => {
     const pathname = location.pathname;
     if (pathname.includes(`/${path.USER_PHOTOS}`)) return "photos";
+    if (pathname.includes(`/${path.USER_VIDEOS}`)) return "videos";
     if (pathname.includes(`/${path.USER_REVIEWS}`)) return "reviews";
     if (pathname.includes(`/${path.USER_FRIENDS}`)) return "friends";
     return "posts";
@@ -288,6 +289,9 @@ const UserProfilePage: React.FC = () => {
         break;
       case "photos":
         navigate(`${basePath}/${path.USER_PHOTOS}`);
+        break;
+      case "videos":
+        navigate(`${basePath}/${path.USER_VIDEOS}`);
         break;
       case "reviews":
         navigate(`${basePath}/${path.USER_REVIEWS}`);
@@ -611,6 +615,7 @@ const UserProfilePage: React.FC = () => {
             {[
               { id: "posts", label: "Bài viết", icon: "lucide:camera", tooltip: "Xem bài viết" },
               { id: "photos", label: "Ảnh", icon: "lucide:image", tooltip: "Xem ảnh" },
+              { id: "videos", label: "Video", icon: "fluent:video-24-filled", tooltip: "Xem video" },
               {
                 id: "reviews",
                 label: "Đánh giá",

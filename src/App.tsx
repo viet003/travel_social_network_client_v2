@@ -9,9 +9,12 @@ import {
   FAQPage,
   WatchPage,
   ExplorePage,
+  VideoDetailPage,
+  MediaPostDetailPage,
   UserProfilePage,
   UserProfilePostsPage,
   UserProfilePhotosPage,
+  UserProfileVideosPage,
   UserProfileReviewsPage,
   UserProfileFriendsPage
 } from './pages';
@@ -36,6 +39,10 @@ import {
   GroupMembersPage,
   GroupMediaPage
 } from './pages/public/groups/groupdetail';
+import {
+  WatchFeedPage,
+  MyVideosPage
+} from './pages/public/watch';
 import { LoginForm, SignUpForm, ForgotPasswordForm, ResetPasswordForm } from './components/auth';
 import { ToastContainer } from 'react-toastify';
 import { ProtectedRoute, ProtectedResetRoute } from './components/index';
@@ -99,11 +106,17 @@ function App() {
             <Route path={path.GROUP_MEMBERS} element={<GroupMembersPage />} />
             <Route path={path.GROUP_MEDIA} element={<GroupMediaPage />} />
           </Route>
-          <Route path={path.WATCH} element={<WatchPage />} />
+          <Route path={path.WATCH} element={<WatchPage />}>
+            <Route index element={<WatchFeedPage />} />
+            <Route path={path.MY_VIDEOS} element={<MyVideosPage />} />
+          </Route>
           <Route path={path.EXPLORE} element={<ExplorePage />} />
+          <Route path={path.VIDEO_DETAIL} element={<VideoDetailPage />} />
+          <Route path={path.MEDIA_POST_DETAIL} element={<MediaPostDetailPage />} />
           <Route path={path.USER} element={<UserProfilePage />}>
             <Route index element={<UserProfilePostsPage />} />
             <Route path={path.USER_PHOTOS} element={<UserProfilePhotosPage />} />
+            <Route path={path.USER_VIDEOS} element={<UserProfileVideosPage />} />
             <Route path={path.USER_REVIEWS} element={<UserProfileReviewsPage />} />
             <Route path={path.USER_FRIENDS} element={<UserProfileFriendsPage />} />
           </Route>

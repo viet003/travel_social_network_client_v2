@@ -1,24 +1,29 @@
-import React, { useState } from 'react';
-import { Icon } from '@iconify/react';
-import PostDetailModal from './PostDetailModal';
-import SharePostModal from './SharePostModal';
-import SharedPostPreview from './SharedPostPreview';
-import { ExpandableContent } from '../../ui';
-import { useSelector } from 'react-redux';
-import avatardf from '../../../assets/images/avatar_default.png';
+import React, { useState, useRef } from "react";
+import { Icon } from "@iconify/react";
+import PostDetailModal from "./PostDetailModal";
+import SharePostModal from "./SharePostModal";
+import PostEditModal from "./PostEditModal";
+import ConfirmDeleteModal from "../confirm/ConfirmDeleteModal";
+import SharedPostPreview from "./SharedPostPreview";
+import { ExpandableContent } from "../../ui";
+import { useSelector } from "react-redux";
+import avatardf from "../../../assets/images/avatar_default.png";
 import { formatTimeAgo, formatPrivacy } from "../../../utilities/helper";
-import { useNavigate } from 'react-router-dom';
-import { LikeButton } from '../../common';
-import { TravelImage } from '../../ui/customize';
-import { Swiper, SwiperSlide } from 'swiper/react';
-import { Navigation, Pagination } from 'swiper/modules';
-import { PostOptionsDropdown } from '../../common/dropdowns';
-import type { PostResponse } from '../../../types/post.types';
-import '../../../styles/post-modal.css';
+import { useNavigate } from "react-router-dom";
+import { LikeButton } from "../../common";
+import { TravelImage } from "../../ui/customize";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Navigation, Pagination } from "swiper/modules";
+import type { Swiper as SwiperType } from "swiper";
+import { PostOptionsDropdown } from "../../common/dropdowns";
+import type { PostResponse } from "../../../types/post.types";
+import { toast } from "react-toastify";
+import { apiDeletePost } from "../../../services/postService";
+import "../../../styles/post-modal.css";
 
 // Types
 interface MediaItem {
-  type: 'IMAGE' | 'VIDEO';
+  type: "IMAGE" | "VIDEO";
   url: string;
 }
 
@@ -53,11 +58,13 @@ interface PostModalProps {
   sharedPost?: PostResponse | null;
   privacy?: string;
   group?: Group | null;
-  postType?: 'NORMAL' | 'AVATAR_UPDATE' | 'COVER_UPDATE';
+  postType?: "NORMAL" | "AVATAR_UPDATE" | "COVER_UPDATE";
   onShare?: () => void;
   onImageClick?: (img: string, index: number) => void;
   liked?: boolean;
   onHidePost?: () => void;
+  onEditPost?: () => void;
+  onDeletePost?: () => void;
 }
 
 const PostModal: React.FC<PostModalProps> = ({
@@ -79,35 +86,128 @@ const PostModal: React.FC<PostModalProps> = ({
   sharedPost = null,
   privacy,
   group = null,
-  postType = 'NORMAL',
+  postType = "NORMAL",
   onShare,
   onImageClick,
   liked = false,
-  onHidePost
+  onHidePost,
+  onEditPost,
+  onDeletePost,
 }) => {
   const [selectedImageIndex, setSelectedImageIndex] = useState<number>(0);
   const [showCommentModal, setShowCommentModal] = useState<boolean>(false);
   const [showShareModal, setShowShareModal] = useState<boolean>(false);
+  const [showEditModal, setShowEditModal] = useState<boolean>(false);
   const [isLiked, setIsLiked] = useState<boolean>(liked);
-  const [showOptionsDropdown, setShowOptionsDropdown] = useState<boolean>(false);
-  const { avatar: currentUserAvatar, firstName, lastName } = useSelector((state: { auth: AuthState }) => state.auth);
-  const currentUserName = `${firstName || ''} ${lastName || ''}`.trim() || 'Bạn';
+  const [showOptionsDropdown, setShowOptionsDropdown] =
+    useState<boolean>(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState<boolean>(false);
+  const {
+    avatar: currentUserAvatar,
+    firstName,
+    lastName,
+  } = useSelector((state: { auth: AuthState }) => state.auth);
+  const currentUserName =
+    `${firstName || ""} ${lastName || ""}`.trim() || "Bạn";
   const [postLikeCount, setPostLikeCount] = useState<number>(likeCount);
-  const [postCommentCount, setPostCommentCount] = useState<number>(commentCount);
+  const [postCommentCount, setPostCommentCount] =
+    useState<number>(commentCount);
   const [postShareCount, setPostShareCount] = useState<number>(shareCount);
+  const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
+
+  // State for updated post data
+  const [updatedContent, setUpdatedContent] = useState<string>(content);
+  const [updatedLocation, setUpdatedLocation] = useState<string | undefined>(
+    location
+  );
+  const [updatedPrivacy, setUpdatedPrivacy] = useState<string | undefined>(
+    privacy
+  );
+  const [updatedTags, setUpdatedTags] = useState<string[]>(tags);
+  const [updatedMediaList, setUpdatedMediaList] =
+    useState<MediaItem[]>(mediaList);
+
+  const swiperRef = useRef<SwiperType | null>(null);
 
   const navigate = useNavigate();
 
   // Debug logging
-  console.log('PostModal render:', { isShare, hasSharedPost: !!sharedPost, sharedPost });
+  console.log("PostModal render:", {
+    isShare,
+    hasSharedPost: !!sharedPost,
+    sharedPost,
+  });
 
   // Process mediaList to separate images and videos
-  const imageMedia = mediaList.filter(media => media.type === 'IMAGE');
-  const videoMedia = mediaList.filter(media => media.type === 'VIDEO');
+  const imageMedia = updatedMediaList.filter((media) => media.type === "IMAGE");
+  const videoMedia = updatedMediaList.filter((media) => media.type === "VIDEO");
 
   // Handle both single image and multiple images from mediaList
-  const displayImages = imageMedia.length > 0 ? imageMedia.map(media => media.url) : (image ? [image] : []);
+  const displayImages =
+    imageMedia.length > 0
+      ? imageMedia.map((media) => media.url)
+      : image
+      ? [image]
+      : [];
   const displayVideo = videoMedia.length > 0 ? videoMedia[0].url : video;
+
+  // Create post object for edit modal
+  const currentPost: PostResponse = {
+    postId,
+    content: updatedContent,
+    location: updatedLocation || null,
+    privacy: (updatedPrivacy || "PUBLIC") as
+      | "PUBLIC"
+      | "FRIENDS_ONLY"
+      | "PRIVATE",
+    postType,
+    createdAt: timeAgo, // Using timeAgo as createdAt for display
+    user: {
+      userId,
+      fullName: userName,
+      avatarImg: avatar || null,
+    },
+    likeCount: postLikeCount,
+    commentCount: postCommentCount,
+    shareCount: postShareCount,
+    mediaList: updatedMediaList.map((media) => ({
+      mediaId: media.url, // Using URL as temporary ID
+      url: media.url,
+      type: media.type,
+    })),
+    tags: updatedTags,
+    isShare,
+    sharedPost,
+    group: group
+      ? {
+          groupId: group.groupId,
+          groupName: group.groupName,
+          coverImageUrl: group.coverImageUrl || null,
+        }
+      : null,
+    liked: isLiked,
+  };
+
+  const handleUpdateSuccess = (updatedPost: PostResponse) => {
+    // Update local state with new post data
+    setUpdatedContent(updatedPost.content);
+    setUpdatedLocation(updatedPost.location || undefined);
+    setUpdatedPrivacy(updatedPost.privacy);
+    setUpdatedTags(updatedPost.tags);
+    setUpdatedMediaList(
+      updatedPost.mediaList.map((media) => ({
+        type: media.type,
+        url: media.url,
+      }))
+    );
+
+    toast.success("Bài viết đã được cập nhật!");
+
+    // Call parent callback if provided to refresh data
+    if (onEditPost) {
+      onEditPost();
+    }
+  };
 
   const handleImageClick = (img: string, index: number) => {
     setSelectedImageIndex(index);
@@ -117,7 +217,7 @@ const PostModal: React.FC<PostModalProps> = ({
   };
 
   const handleComment = () => {
-    setPostCommentCount(prev => prev + 1);
+    setPostCommentCount((prev) => prev + 1);
   };
 
   const openCommentModal = () => {
@@ -137,8 +237,39 @@ const PostModal: React.FC<PostModalProps> = ({
   };
 
   const handleShareSuccess = () => {
-    setPostShareCount(prev => prev + 1);
+    setPostShareCount((prev) => prev + 1);
     onShare?.();
+  };
+
+  const handleEditPost = () => {
+    setShowEditModal(true);
+    setShowOptionsDropdown(false);
+  };
+
+  const handleDeletePost = () => {
+    setShowDeleteConfirm(true);
+    setShowOptionsDropdown(false);
+  };
+
+  const confirmDeletePost = async () => {
+    try {
+      await apiDeletePost(postId);
+      toast.success("Xóa bài viết thành công!");
+      setShowDeleteConfirm(false);
+
+      // Call parent callback if provided
+      if (onDeletePost) {
+        onDeletePost();
+      }
+    } catch (error) {
+      console.error("Error deleting post:", error);
+      toast.error("Không thể xóa bài viết. Vui lòng thử lại!");
+      throw error; // Re-throw to let ConfirmDeleteModal handle the error state
+    }
+  };
+
+  const cancelDeletePost = () => {
+    setShowDeleteConfirm(false);
   };
 
   const handleGroupClick = () => {
@@ -149,39 +280,44 @@ const PostModal: React.FC<PostModalProps> = ({
 
   // Render header text based on postType
   const renderHeaderText = () => {
-    if (postType === 'AVATAR_UPDATE') {
+    if (postType === "AVATAR_UPDATE") {
       return (
         <span className="text-xs sm:text-sm text-gray-600">{content}</span>
       );
     }
-    
-    if (postType === 'COVER_UPDATE') {
+
+    if (postType === "COVER_UPDATE") {
       return (
         <span className="text-xs sm:text-sm text-gray-600">{content}</span>
       );
     }
-    
+
     // NORMAL post with location
-    if (location) {
+    if (updatedLocation) {
       return (
         <>
-          <span className="text-xs sm:text-sm text-gray-600"> đã chia sẻ khoảnh khắc tại </span>
-          <span className="text-xs sm:text-sm text-gray-500 truncate">{location}</span>
+          <span className="text-xs sm:text-sm text-gray-600">
+            {" "}
+            đã chia sẻ khoảnh khắc tại{" "}
+          </span>
+          <span className="text-xs sm:text-sm text-gray-500 truncate">
+            {updatedLocation}
+          </span>
         </>
       );
     }
-    
+
     return null;
   };
 
   const renderSingleImage = (img: string, index: number) => (
-    <div key={index} style={{ marginBottom: '12px' }}>
+    <div key={index} style={{ marginBottom: "12px" }}>
       <TravelImage
         src={img}
         alt="post"
         onClick={() => handleImageClick(img, index)}
         preview={{
-          mask: 'Xem ảnh',
+          mask: "Xem ảnh",
         }}
       />
     </div>
@@ -210,19 +346,24 @@ const PostModal: React.FC<PostModalProps> = ({
     return (
       <div className="relative mb-3">
         <Swiper
+          onSwiper={(swiper) => {
+            swiperRef.current = swiper;
+          }}
           modules={[Navigation, Pagination]}
-          navigation
-          pagination={{ 
+          navigation={false}
+          pagination={{
             clickable: true,
-            dynamicBullets: true
+            dynamicBullets: true,
           }}
           spaceBetween={0}
           slidesPerView={1}
+          onSlideChange={(swiper) => setCurrentImageIndex(swiper.activeIndex)}
           className="post-swiper rounded-xl"
-          style={{ 
-            borderRadius: '12px',
-            '--swiper-navigation-size': '20px'
-          } as React.CSSProperties}
+          style={
+            {
+              borderRadius: "12px",
+            } as React.CSSProperties
+          }
         >
           {displayImages.map((img, index) => (
             <SwiperSlide key={index}>
@@ -230,23 +371,47 @@ const PostModal: React.FC<PostModalProps> = ({
                 src={img}
                 alt={`post-${index}`}
                 className="w-full"
-                style={{ borderRadius: '12px' }}
+                style={{ borderRadius: "12px" }}
                 preview={{
-                  mask: 'Xem ảnh',
+                  mask: "Xem ảnh",
                 }}
               />
             </SwiperSlide>
           ))}
         </Swiper>
+
+        {/* Custom Navigation Buttons */}
+        {currentImageIndex > 0 && (
+          <button
+            onClick={() => swiperRef.current?.slidePrev()}
+            className="absolute p-2 text-white transition-all duration-200 transform -translate-y-1/2 bg-black bg-opacity-50 rounded-full left-2 top-1/2 hover:bg-opacity-70 hover:scale-110 cursor-pointer active:scale-95 z-10"
+          >
+            <Icon icon="fluent:chevron-left-20-filled" className="w-5 h-5" />
+          </button>
+        )}
+
+        {currentImageIndex < displayImages.length - 1 && (
+          <button
+            onClick={() => swiperRef.current?.slideNext()}
+            className="absolute p-2 text-white transition-all duration-200 transform -translate-y-1/2 bg-black bg-opacity-50 rounded-full right-2 top-1/2 hover:bg-opacity-70 hover:scale-110 cursor-pointer active:scale-95 z-10"
+          >
+            <Icon icon="fluent:chevron-right-24-filled" className="w-5 h-5" />
+          </button>
+        )}
+
+        {/* Image Counter */}
+        <div className="absolute px-2 py-1 text-sm text-white bg-black bg-opacity-50 rounded-full bottom-2 right-2 z-10">
+          {currentImageIndex + 1} / {displayImages.length}
+        </div>
       </div>
     );
   };
 
   const renderTags = () => {
-    if (!tags || tags.length === 0) return null;
+    if (!updatedTags || updatedTags.length === 0) return null;
     return (
       <div className="flex flex-wrap gap-2 mb-3">
-        {tags.map((tag, index) => (
+        {updatedTags.map((tag, index) => (
           <span
             key={index}
             className="px-2 py-1 text-xs text-blue-600 bg-blue-100 rounded-full cursor-pointer hover:bg-blue-200"
@@ -257,8 +422,6 @@ const PostModal: React.FC<PostModalProps> = ({
       </div>
     );
   };
-
-
 
   const renderGroupHeader = () => {
     if (!group) return null;
@@ -278,7 +441,10 @@ const PostModal: React.FC<PostModalProps> = ({
               src={avatar || avatardf}
               alt="avatar"
               className="absolute -bottom-1 -right-1 w-6 h-6 sm:w-7 sm:h-7 object-cover rounded-full border-2 border-white cursor-pointer"
-              onClick={() => { console.log(userId); navigate(`/home/user/${userId}`) }}
+              onClick={() => {
+                console.log(userId);
+                navigate(`/home/user/${userId}`);
+              }}
             />
           </div>
 
@@ -292,14 +458,21 @@ const PostModal: React.FC<PostModalProps> = ({
                 {group.groupName}
               </span>
               <span className="text-gray-500 text-xs sm:text-sm">•</span>
-              <span className="text-xs sm:text-sm text-gray-500 whitespace-nowrap">{formatTimeAgo(timeAgo)}</span>
+              <span className="text-xs sm:text-sm text-gray-500 whitespace-nowrap">
+                {formatTimeAgo(timeAgo)}
+              </span>
               <span className="text-gray-500 text-xs sm:text-sm">•</span>
-              <Icon icon="fluent:globe-24-filled" className="w-3 h-3 sm:w-4 sm:h-4 text-gray-500" />
+              <Icon
+                icon="fluent:globe-24-filled"
+                className="w-3 h-3 sm:w-4 sm:h-4 text-gray-500"
+              />
             </div>
             <div className="flex items-center gap-1 text-xs sm:text-sm text-gray-600 mt-1">
               <span
                 className="hover:underline cursor-pointer truncate"
-                onClick={() => { navigate(`/home/user/${userId}`) }}
+                onClick={() => {
+                  navigate(`/home/user/${userId}`);
+                }}
               >
                 {userName}
               </span>
@@ -311,33 +484,45 @@ const PostModal: React.FC<PostModalProps> = ({
           <div className="ml-auto flex-shrink-0 relative">
             <div className="flex items-center gap-1">
               {/* Options button */}
-              <button 
+              <button
                 className="text-gray-400 hover:text-gray-600 p-1 sm:p-2 rounded-full hover:bg-gray-100 transition-colors"
                 onClick={() => setShowOptionsDropdown(!showOptionsDropdown)}
               >
-                <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                <svg
+                  className="w-4 h-4 sm:w-5 sm:h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  viewBox="0 0 24 24"
+                >
                   <circle cx="12" cy="6" r="1.5" />
                   <circle cx="12" cy="12" r="1.5" />
                   <circle cx="12" cy="18" r="1.5" />
                 </svg>
               </button>
-              
+
               {/* Hide post button */}
               {onHidePost && (
-                <button 
+                <button
                   className="text-gray-400 cursor-pointer hover:text-gray-600 p-1 sm:p-2 rounded-full hover:bg-gray-100 transition-colors"
                   onClick={onHidePost}
                   title="Ẩn bài viết"
                 >
-                  <Icon icon="fluent:dismiss-24-filled" className="w-4 h-4 sm:w-5 sm:h-5" />
+                  <Icon
+                    icon="fluent:dismiss-24-filled"
+                    className="w-4 h-4 sm:w-5 sm:h-5"
+                  />
                 </button>
               )}
             </div>
             {showOptionsDropdown && (
-              <PostOptionsDropdown 
+              <PostOptionsDropdown
                 onClose={() => setShowOptionsDropdown(false)}
                 postId={postId}
+                userId={userId}
                 isOwner={false}
+                onEdit={handleEditPost}
+                onDelete={handleDeletePost}
               />
             )}
           </div>
@@ -352,7 +537,10 @@ const PostModal: React.FC<PostModalProps> = ({
         {/* Share indicator */}
         {isShare && (
           <div className="flex items-center gap-2 mb-2 text-xs sm:text-sm text-gray-500">
-            <Icon icon="fluent:arrow-reply-24-filled" className="w-3 h-3 sm:w-4 sm:h-4" />
+            <Icon
+              icon="fluent:arrow-reply-24-filled"
+              className="w-3 h-3 sm:w-4 sm:h-4"
+            />
             <span>Đã chia sẻ một bài viết</span>
           </div>
         )}
@@ -367,51 +555,73 @@ const PostModal: React.FC<PostModalProps> = ({
               src={avatar || avatardf}
               alt="avatar"
               className="object-cover w-8 h-8 sm:w-10 sm:h-10 rounded-full cursor-pointer flex-shrink-0"
-              onClick={() => { console.log(userId); navigate(`/home/user/${userId}`) }}
+              onClick={() => {
+                console.log(userId);
+                navigate(`/home/user/${userId}`);
+              }}
             />
-            <div className='flex flex-col flex-1 min-w-0'>
+            <div className="flex flex-col flex-1 min-w-0">
               <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
-                <span className="font-semibold text-sm sm:text-base text-gray-800 cursor-pointer hover:underline hover:text-blue-600 truncate"
-                  onClick={() => { navigate(`/home/user/${userId}`) }}
-                >{userName}</span>
+                <span
+                  className="font-semibold text-sm sm:text-base text-gray-800 cursor-pointer hover:underline hover:text-blue-600 truncate"
+                  onClick={() => {
+                    navigate(`/home/user/${userId}`);
+                  }}
+                >
+                  {userName}
+                </span>
                 {renderHeaderText()}
               </div>
               <div className="flex items-center gap-1 text-xs text-gray-400 flex-wrap">
                 <span>{formatTimeAgo(timeAgo)}</span>
                 <Icon icon="fluent:globe-24-filled" className="w-3 h-3 ml-1" />
-                {privacy && <span className="ml-1">• {formatPrivacy(privacy)}</span>}
+                {privacy && (
+                  <span className="ml-1">• {formatPrivacy(privacy)}</span>
+                )}
               </div>
             </div>
             <div className="ml-auto flex-shrink-0 relative">
               <div className="flex items-center gap-1">
                 {/* Options button */}
-                <button 
+                <button
                   className="text-gray-400 hover:text-gray-600 p-1 sm:p-2 rounded-full hover:bg-gray-100 transition-colors cursor-pointer"
                   onClick={() => setShowOptionsDropdown(!showOptionsDropdown)}
                 >
-                  <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  <svg
+                    className="w-4 h-4 sm:w-5 sm:h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    viewBox="0 0 24 24"
+                  >
                     <circle cx="12" cy="6" r="1.5" />
                     <circle cx="12" cy="12" r="1.5" />
                     <circle cx="12" cy="18" r="1.5" />
                   </svg>
                 </button>
-                
+
                 {/* Hide post button */}
                 {onHidePost && (
-                  <button 
+                  <button
                     className="text-gray-400 cursor-pointer hover:text-gray-600 p-1 sm:p-2 rounded-full hover:bg-gray-100 transition-colors"
                     onClick={onHidePost}
                     title="Ẩn bài viết"
                   >
-                    <Icon icon="fluent:dismiss-24-filled" className="w-4 h-4 sm:w-5 sm:h-5" />
+                    <Icon
+                      icon="fluent:dismiss-24-filled"
+                      className="w-4 h-4 sm:w-5 sm:h-5"
+                    />
                   </button>
                 )}
               </div>
               {showOptionsDropdown && (
-                <PostOptionsDropdown 
+                <PostOptionsDropdown
                   onClose={() => setShowOptionsDropdown(false)}
                   postId={postId}
+                  userId={userId}
                   isOwner={false}
+                  onEdit={handleEditPost}
+                  onDelete={handleDeletePost}
                 />
               )}
             </div>
@@ -419,15 +629,24 @@ const PostModal: React.FC<PostModalProps> = ({
         )}
 
         {/* Content with expandable functionality */}
-        {postType === 'NORMAL' && (
-          <ExpandableContent content={content} maxLines={3} className="text-sm sm:text-base leading-relaxed break-words" />
+        {postType === "NORMAL" && (
+          <ExpandableContent
+            content={updatedContent}
+            maxLines={3}
+            className="text-sm sm:text-base leading-relaxed break-words"
+          />
         )}
 
         {/* Tags */}
         {renderTags()}
 
         {/* Shared Post Preview - Only show if this is a share post */}
-        {isShare && sharedPost && <SharedPostPreview sharedPost={sharedPost} onImageClick={handleImageClick} />}
+        {isShare && sharedPost && (
+          <SharedPostPreview
+            sharedPost={sharedPost}
+            onImageClick={handleImageClick}
+          />
+        )}
 
         {/* Media rendering logic - Only show if NOT a share post */}
         {!isShare && displayVideo && renderVideo(displayVideo)}
@@ -436,8 +655,18 @@ const PostModal: React.FC<PostModalProps> = ({
         {/* Action buttons */}
         <div className="flex items-center gap-3 sm:gap-6 pt-3 text-xs sm:text-sm text-gray-500">
           <div className="flex items-center gap-1">
-            <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M14 9l-2-2-2 2m0 6l2 2 2-2" />
+            <svg
+              className="w-4 h-4 sm:w-5 sm:h-5"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M14 9l-2-2-2 2m0 6l2 2 2-2"
+              />
             </svg>
           </div>
           <LikeButton
@@ -447,15 +676,27 @@ const PostModal: React.FC<PostModalProps> = ({
             likeCount={postLikeCount}
             setLikeCount={setPostLikeCount}
           />
-          <div className="flex items-center gap-1 transition-colors cursor-pointer hover:text-blue-500" onClick={openCommentModal}>
-            <Icon icon="fluent:chat-24-filled" className="w-4 h-4 sm:w-5 sm:h-5" />
-            <span className="hidden xs:inline">{postCommentCount}</span>
-            <span className="xs:hidden">{postCommentCount > 99 ? '99+' : postCommentCount}</span>
+          <div
+            className="flex items-center gap-1 transition-colors cursor-pointer hover:text-blue-500"
+            onClick={openCommentModal}
+          >
+            <Icon
+              icon="fluent:chat-24-filled"
+              className="w-4 h-4 sm:w-5 sm:h-5"
+            />
+            <span>
+              Bình luận {postCommentCount > 0 && `(${postCommentCount})`}
+            </span>
           </div>
-          <div className="flex items-center gap-1 transition-colors cursor-pointer hover:text-green-500" onClick={handleShareClick}>
-            <Icon icon="fluent:arrow-reply-24-filled" className="w-4 h-4 sm:w-5 sm:h-5" />
-            <span className="hidden xs:inline">{postShareCount}</span>
-            <span className="xs:hidden">{postShareCount > 99 ? '99+' : postShareCount}</span>
+          <div
+            className="flex items-center gap-1 transition-colors cursor-pointer hover:text-green-500"
+            onClick={handleShareClick}
+          >
+            <Icon
+              icon="fluent:arrow-reply-24-filled"
+              className="w-4 h-4 sm:w-5 sm:h-5"
+            />
+            <span>Chia sẻ {postShareCount > 0 && `(${postShareCount})`}</span>
           </div>
         </div>
 
@@ -473,7 +714,10 @@ const PostModal: React.FC<PostModalProps> = ({
                   Viết bình luận...
                 </div>
                 <div className="absolute text-gray-400 transform -translate-y-1/2 right-2 sm:right-3 top-1/2">
-                  <Icon icon="fluent:emoji-happy-24-filled" className="w-4 h-4 sm:w-5 sm:h-5" />
+                  <Icon
+                    icon="fluent:emoji-happy-24-filled"
+                    className="w-4 h-4 sm:w-5 sm:h-5"
+                  />
                 </div>
               </div>
             </div>
@@ -489,9 +733,9 @@ const PostModal: React.FC<PostModalProps> = ({
         userId={userId}
         avatar={avatar}
         userName={userName}
-        location={location}
+        location={updatedLocation}
         timeAgo={timeAgo}
-        content={content}
+        content={updatedContent}
         displayImages={displayImages}
         displayVideo={displayVideo}
         selectedImageIndex={selectedImageIndex}
@@ -503,9 +747,9 @@ const PostModal: React.FC<PostModalProps> = ({
         handleComment={handleComment}
         onCommentCountChange={handleComment}
         currentUserAvatar={currentUserAvatar}
-        tags={tags}
+        tags={updatedTags}
         isShare={isShare}
-        privacy={privacy}
+        privacy={updatedPrivacy}
         group={group}
         postShareCount={postShareCount}
         onShare={handleShareClick}
@@ -518,13 +762,33 @@ const PostModal: React.FC<PostModalProps> = ({
         isOpen={showShareModal}
         onClose={closeShareModal}
         postId={postId}
-        originalPostContent={content}
+        originalPostContent={updatedContent}
         originalPostAuthor={userName}
         originalPostAuthorId={userId}
         originalPostImages={displayImages}
         currentUserAvatar={currentUserAvatar}
         currentUserName={currentUserName}
         onShareSuccess={handleShareSuccess}
+      />
+
+      {/* Edit Post Modal */}
+      <PostEditModal
+        isOpen={showEditModal}
+        onClose={() => setShowEditModal(false)}
+        post={currentPost}
+        onUpdateSuccess={handleUpdateSuccess}
+      />
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmDeleteModal
+        isOpen={showDeleteConfirm}
+        onClose={cancelDeletePost}
+        onConfirm={confirmDeletePost}
+        type="post"
+        itemName={
+          updatedContent.slice(0, 50) +
+          (updatedContent.length > 50 ? "..." : "")
+        }
       />
     </>
   );
