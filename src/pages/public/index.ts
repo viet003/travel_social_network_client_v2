@@ -4,9 +4,10 @@ export { default as PrivacyPage } from './static/PrivacyPage';
 export { default as DesktopAppPage } from './static/DesktopAppPage';
 export { default as FAQPage } from './static/FAQPage';
 export { default as WatchPage } from './watch/WatchPage';
-export { default as ExplorePage } from './ExplorePage';
-export { default as VideoDetailPage } from './VideoDetailPage';
-export { default as MediaPostDetailPage } from './MediaPostDetailPage';
+export { default as ExplorePage } from './explore/ExplorePage';
+export { default as VideoDetailPage } from './detail/MediaWatchDetailPage';
+export { default as MediaWatchDetailPage } from './detail/MediaWatchDetailPage';
+export { default as MediaPostDetailPage } from './detail/MediaPostDetailPage';
 export { 
   UserProfilePage,
   UserProfilePostsPage,

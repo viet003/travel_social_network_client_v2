@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Icon } from '@iconify/react';
 import { TravelInput } from '../../ui/customize';
 import avatardf from '../../../assets/images/avatar_default.png';
-import { apiCreateCommentService } from '../../../services/commentService';
+import { apiCreateCommentForContent } from '../../../services/commentService';
 import { message } from 'antd';
 
 // Types
@@ -19,7 +19,8 @@ interface Comment {
 }
 
 interface CommentCreateModalProps {
-  postId: string;
+  postId?: string;
+  watchId?: string;
   handleComment?: (comment: Comment) => void;
   setNewComment: (comment: Comment) => void;
   currentUserAvatar?: string;
@@ -28,6 +29,7 @@ interface CommentCreateModalProps {
 
 const CommentCreateModal: React.FC<CommentCreateModalProps> = ({
   postId,
+  watchId,
   handleComment,
   setNewComment,
   currentUserAvatar,
@@ -46,10 +48,17 @@ const CommentCreateModal: React.FC<CommentCreateModalProps> = ({
 
     try {
       // Call API to create comment
-      const response = await apiCreateCommentService({
-        postId: postId,
+      const payload: { postId?: string; watchId?: string; content: string } = {
         content: commentText
-      });
+      };
+      
+      if (postId) {
+        payload.postId = postId;
+      } else if (watchId) {
+        payload.watchId = watchId;
+      }
+      
+      const response = await apiCreateCommentForContent(payload);
 
       console.log('Comment created:', response);
 

@@ -1,145 +1,176 @@
 import React, { useRef } from 'react';
 import { Icon } from '@iconify/react';
+import { useNavigate } from 'react-router-dom';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination, Autoplay } from 'swiper/modules';
 import type { Swiper as SwiperType } from 'swiper';
+import WatchModal from '../../../components/modal/watch/WatchModal';
+import { VideoThumbnailCard } from '../../../components/common/cards';
+import type { WatchResponse } from '../../../types/video.types';
 import '../../../styles/swiper-custom.css';
 
-// Real video data
+// Featured videos data (for carousel)
 const featuredVideos = [
   {
-    id: 1,
+    id: '550e8400-e29b-41d4-a716-446655440001',
     title: 'Khám phá Hạ Long - Kỳ quan thế giới',
-    videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
-    thumbnail: 'https://images.unsplash.com/photo-1528127269322-539801943592?w=800&q=80',
+    videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1559592413-7cec4d0cae2b?w=800',
     author: 'Travel Vietnam',
     views: '125K',
     time: '2 giờ trước'
   },
   {
-    id: 2,
+    id: '550e8400-e29b-41d4-a716-446655440002',
     title: 'Phố cổ Hội An về đêm',
-    videoUrl: 'https://www.youtube.com/embed/3JZ_D3ELwOQ',
-    thumbnail: 'https://images.unsplash.com/photo-1583417319070-4a69db38a482?w=800&q=80',
+    videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1583417319070-4a69db38a482?w=800',
     author: 'Discover Quang Nam',
     views: '89K',
     time: '5 giờ trước'
   },
   {
-    id: 3,
+    id: '550e8400-e29b-41d4-a716-446655440003',
     title: 'Đà Lạt - Thành phố ngàn hoa',
-    videoUrl: 'https://www.youtube.com/embed/kJQP7kiw5Fk',
-    thumbnail: 'https://images.unsplash.com/photo-1583417319070-4a69db38a482?w=800&q=80',
+    videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1568849676085-51415703900f?w=800',
     author: 'Vietnam Adventures',
     views: '156K',
     time: '1 ngày trước'
   },
   {
-    id: 4,
+    id: '550e8400-e29b-41d4-a716-446655440004',
     title: 'Sapa mùa lúa chín vàng',
-    videoUrl: 'https://www.youtube.com/embed/kJQP7kiw5Fk',
-    thumbnail: 'https://images.unsplash.com/photo-1570168007204-dfb528c6958f?w=800&q=80',
+    videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1591696331111-ef9586a5b17a?w=800',
     author: 'Highland Journey',
     views: '203K',
     time: '1 ngày trước'
   },
   {
-    id: 5,
+    id: '550e8400-e29b-41d4-a716-446655440005',
     title: 'Phú Quốc - Đảo ngọc thiên đường',
-    videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
-    thumbnail: 'https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=800&q=80',
+    videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1559628376-f3fe5f782a2e?w=800',
     author: 'Beach Lovers',
     views: '178K',
     time: '2 ngày trước'
-  },
-  {
-    id: 6,
-    title: 'Ninh Bình - Vịnh Hạ Long trên cạn',
-    videoUrl: 'https://www.youtube.com/embed/3JZ_D3ELwOQ',
-    thumbnail: 'https://images.unsplash.com/photo-1528127269322-539801943592?w=800&q=80',
-    author: 'Nature Explorer',
-    views: '142K',
-    time: '3 ngày trước'
-  },
-  {
-    id: 7,
-    title: 'Mũi Né - Bình Minh trên đồi cát',
-    videoUrl: 'https://www.youtube.com/embed/kJQP7kiw5Fk',
-    thumbnail: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80',
-    author: 'Desert Dreams',
-    views: '98K',
-    time: '4 ngày trước'
-  },
-  {
-    id: 8,
-    title: 'Cần Thơ - Chợ nổi miền Tây',
-    videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
-    thumbnail: 'https://images.unsplash.com/photo-1528127269322-539801943592?w=800&q=80',
-    author: 'Mekong Tales',
-    views: '167K',
-    time: '5 ngày trước'
-  },
-  {
-    id: 9,
-    title: 'Đảo Cát Bà - Thiên nhiên hoang sơ',
-    videoUrl: 'https://www.youtube.com/embed/3JZ_D3ELwOQ',
-    thumbnail: 'https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=800&q=80',
-    author: 'Wild Vietnam',
-    views: '134K',
-    time: '1 tuần trước'
   }
 ];
 
-const recentVideos = [
+// Recent videos data matching WatchResponse interface
+const recentVideos: WatchResponse[] = [
   {
-    id: 1,
+    watchId: '550e8400-e29b-41d4-a716-446655440101',
+    user: {
+      userId: 'user-uuid-456',
+      userName: 'Mountain Explorer',
+      avatarImg: 'https://i.pravatar.cc/150?img=3'
+    },
     title: 'Săn mây Tà Xùa - Trải nghiệm độc đáo',
-    videoUrl: 'https://www.youtube.com/embed/9bZkp7q19f0',
-    thumbnail: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&q=80',
-    author: 'Mountain Explorer',
-    views: '45K',
-    time: '3 giờ trước',
-    description: 'Hành trình săn mây tại Tà Xùa, Yên Bái'
+    description: 'Hành trình săn mây tại Tà Xùa, Yên Bái. Cảnh quan thiên nhiên hùng vĩ và biển mây mờ ảo tạo nên trải nghiệm khó quên.',
+    videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800',
+    duration: 480,
+    location: 'Tà Xùa, Yên Bái',
+    privacy: 'PUBLIC',
+    likeCount: 1250,
+    commentCount: 89,
+    shareCount: 34,
+    viewCount: 45000,
+    createdAt: '2024-01-18T08:00:00Z',
+    tags: ['trekking', 'mountain', 'cloud', 'adventure'],
+    liked: false,
+    watched: false
   },
   {
-    id: 2,
+    watchId: '550e8400-e29b-41d4-a716-446655440102',
+    user: {
+      userId: 'user-uuid-789',
+      userName: 'Food Hunter',
+      avatarImg: 'https://i.pravatar.cc/150?img=5'
+    },
     title: 'Ẩm thực đường phố Sài Gòn',
-    videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
-    thumbnail: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400&q=80',
-    author: 'Food Hunter',
-    views: '78K',
-    time: '1 ngày trước',
-    description: 'Khám phá những món ăn vỉa hè Sài Gòn'
+    description: 'Khám phá những món ăn vỉa hè Sài Gòn đặc sắc. Từ bánh mì, phở, đến hủ tiếu - tất cả đều có tại đây!',
+    videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800',
+    duration: 600,
+    location: 'TP. Hồ Chí Minh',
+    privacy: 'PUBLIC',
+    likeCount: 2340,
+    commentCount: 156,
+    shareCount: 67,
+    viewCount: 78000,
+    createdAt: '2024-01-17T14:30:00Z',
+    tags: ['food', 'saigon', 'streetfood', 'vietnamese'],
+    liked: true,
+    watched: false
   },
   {
-    id: 3,
+    watchId: '550e8400-e29b-41d4-a716-446655440103',
+    user: {
+      userId: 'user-uuid-321',
+      userName: 'Island Paradise',
+      avatarImg: 'https://i.pravatar.cc/150?img=7'
+    },
     title: 'Cù Lao Chàm - Thiên đường biển đảo',
-    videoUrl: 'https://www.youtube.com/embed/kJQP7kiw5Fk',
-    thumbnail: 'https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=400&q=80',
-    author: 'Island Paradise',
-    views: '92K',
-    time: '2 ngày trước',
-    description: 'Tour khám phá Cù Lao Chàm tuyệt đẹp'
+    description: 'Tour khám phá Cù Lao Chàm tuyệt đẹp. Biển xanh, cát trắng và không khí trong lành của đảo ngọc Quảng Nam.',
+    videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
+    duration: 720,
+    location: 'Cù Lao Chàm, Quảng Nam',
+    privacy: 'PUBLIC',
+    likeCount: 3100,
+    commentCount: 201,
+    shareCount: 89,
+    viewCount: 92000,
+    createdAt: '2024-01-16T10:15:00Z',
+    tags: ['island', 'beach', 'travel', 'culao cham'],
+    liked: false,
+    watched: false
   },
   {
-    id: 4,
+    watchId: '550e8400-e29b-41d4-a716-446655440104',
+    user: {
+      userId: 'user-uuid-654',
+      userName: 'Peak Climbers',
+      avatarImg: 'https://i.pravatar.cc/150?img=9'
+    },
     title: 'Trekking Fansipan - Nóc nhà Đông Dương',
-    videoUrl: 'https://www.youtube.com/embed/3JZ_D3ELwOQ',
-    thumbnail: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&q=80',
-    author: 'Peak Climbers',
-    views: '112K',
-    time: '3 ngày trước',
-    description: 'Chinh phục đỉnh Fansipan 3143m'
+    description: 'Chinh phục đỉnh Fansipan 3143m - nóc nhà Đông Dương. Hành trình đầy thử thách nhưng vô cùng ý nghĩa.',
+    videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4',
+    duration: 900,
+    location: 'Fansipan, Lào Cai',
+    privacy: 'PUBLIC',
+    likeCount: 4200,
+    commentCount: 287,
+    shareCount: 123,
+    viewCount: 112000,
+    createdAt: '2024-01-15T06:00:00Z',
+    tags: ['fansipan', 'trekking', 'mountain', 'sapa'],
+    liked: true,
+    watched: false
   }
 ];
 
 const WatchFeedPage: React.FC = () => {
+  const navigate = useNavigate();
   const swiperRef = useRef<SwiperType | null>(null);
   const [isBeginning, setIsBeginning] = React.useState(true);
   const [isEnd, setIsEnd] = React.useState(false);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      {/* Action Buttons */}
+      <div className="mb-6 flex justify-end gap-3 flex-wrap">
+        <button
+          onClick={() => navigate('/home/watch/trending')}
+          className="flex items-center cursor-pointer gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-700 text-white font-semibold rounded-lg hover:from-orange-600 hover:to-red-600 transition-all shadow-md hover:shadow-lg"
+        >
+          <Icon icon="fluent:fire-24-filled" className="w-5 h-5" />
+          Video thịnh hành
+        </button>
+      </div>
+
       {/* Featured Videos */}
       <div className="mb-8">
         <h2 className="text-xl font-semibold text-gray-900 mb-4">Video nổi bật</h2>
@@ -190,28 +221,15 @@ const WatchFeedPage: React.FC = () => {
           >
           {featuredVideos.map((video) => (
             <SwiperSlide key={video.id}>
-              <div className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer h-full">
-                <div className="aspect-video bg-gray-200 relative">
-                  <img 
-                    src={video.thumbnail} 
-                    alt={video.title}
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30 hover:bg-opacity-40 transition-all">
-                    <Icon icon="fluent:play-circle-24-filled" className="h-16 w-16 text-white" />
-                  </div>
-                </div>
-                <div className="p-4">
-                  <h3 className="font-medium text-gray-900 mb-2 line-clamp-2">{video.title}</h3>
-                  <div className="flex items-center justify-between text-sm text-gray-500">
-                    <span>{video.author}</span>
-                    <span>{video.time}</span>
-                  </div>
-                  <div className="text-sm text-gray-500 mt-1">
-                    {video.views} lượt xem
-                  </div>
-                </div>
-              </div>
+              <VideoThumbnailCard
+                id={video.id}
+                title={video.title}
+                videoUrl={video.videoUrl}
+                author={video.author}
+                views={video.views}
+                time={video.time}
+                onClick={() => navigate(`/home/watch/${video.id}`)}
+              />
             </SwiperSlide>
             ))}
           </Swiper>
@@ -238,33 +256,29 @@ const WatchFeedPage: React.FC = () => {
       </div>
 
       {/* Recent Videos */}
-      <div className="px-20">
+      <div>
         <h2 className="text-xl font-semibold text-gray-900 mb-4">Video gần đây</h2>
-        <div className="space-y-4">
+        <div className="space-y-6">
           {recentVideos.map((video) => (
-            <div key={video.id} className="bg-white rounded-lg shadow-sm p-4 flex space-x-4 hover:shadow-md transition-shadow cursor-pointer">
-              <div className="w-40 h-24 bg-gray-200 rounded-lg flex-shrink-0 relative overflow-hidden">
-                <img 
-                  src={video.thumbnail} 
-                  alt={video.title}
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30 hover:bg-opacity-40 transition-all">
-                  <Icon icon="fluent:play-circle-24-filled" className="h-10 w-10 text-white" />
-                </div>
-              </div>
-              <div className="flex-1">
-                <h3 className="font-medium text-gray-900 mb-1">{video.title}</h3>
-                <p className="text-sm text-gray-600 mb-2">{video.description}</p>
-                <div className="flex items-center space-x-4 text-sm text-gray-500">
-                  <span>{video.author}</span>
-                  <span>•</span>
-                  <span>{video.views} lượt xem</span>
-                  <span>•</span>
-                  <span>{video.time}</span>
-                </div>
-              </div>
-            </div>
+            <WatchModal
+              key={video.watchId}
+              videoId={video.watchId}
+              userId={video.user.userId}
+              avatar={video.user.avatarImg}
+              userName={video.user.userName || video.user.fullName || 'Unknown User'}
+              location={video.location}
+              timeAgo={video.createdAt}
+              content={video.description || ''}
+              videoUrl={video.videoUrl}
+              thumbnailUrl={video.thumbnailUrl}
+              likeCount={video.likeCount}
+              commentCount={video.commentCount}
+              shareCount={video.shareCount}
+              tags={video.tags}
+              privacy={video.privacy}
+              liked={video.liked}
+              onShare={() => console.log('Share video', video.watchId)}
+            />
           ))}
         </div>
       </div>

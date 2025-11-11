@@ -11,6 +11,7 @@ import {
   ExplorePage,
   VideoDetailPage,
   MediaPostDetailPage,
+  MediaWatchDetailPage,
   UserProfilePage,
   UserProfilePostsPage,
   UserProfilePhotosPage,
@@ -41,7 +42,10 @@ import {
 } from './pages/public/groups/groupdetail';
 import {
   WatchFeedPage,
-  MyVideosPage
+  MyVideosPage,
+  WatchTrendingPage,
+  WatchSavedPage,
+  WatchHistoryPage
 } from './pages/public/watch';
 import { LoginForm, SignUpForm, ForgotPasswordForm, ResetPasswordForm } from './components/auth';
 import { ToastContainer } from 'react-toastify';
@@ -108,10 +112,14 @@ function App() {
           </Route>
           <Route path={path.WATCH} element={<WatchPage />}>
             <Route index element={<WatchFeedPage />} />
+            <Route path={path.WATCH_TRENDING} element={<WatchTrendingPage />} />
+            <Route path={path.WATCH_SAVED} element={<WatchSavedPage />} />
+            <Route path={path.WATCH_HISTORY} element={<WatchHistoryPage />} />
             <Route path={path.MY_VIDEOS} element={<MyVideosPage />} />
           </Route>
           <Route path={path.EXPLORE} element={<ExplorePage />} />
           <Route path={path.VIDEO_DETAIL} element={<VideoDetailPage />} />
+          <Route path={path.MEDIA_WATCH_DETAIL} element={<MediaWatchDetailPage />} />
           <Route path={path.MEDIA_POST_DETAIL} element={<MediaPostDetailPage />} />
           <Route path={path.USER} element={<UserProfilePage />}>
             <Route index element={<UserProfilePostsPage />} />

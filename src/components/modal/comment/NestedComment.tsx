@@ -3,7 +3,7 @@ import { Icon } from '@iconify/react';
 import { useSelector } from 'react-redux';
 import avatardf from '../../../assets/images/avatar_default.png';
 import { formatTimeAgo } from '../../../utilities/helper';
-import { apiGetRepliesByComment, apiCreateCommentService, apiToggleLikeComment, apiUpdateComment, apiDeleteComment } from '../../../services/commentService';
+import { apiGetRepliesByCommentId, apiCreateCommentForContent, apiToggleLikeOnComment, apiUpdateCommentContent, apiDeleteCommentById } from '../../../services/commentService';
 import { TravelInput } from '../../ui/customize';
 import { ExpandableContent } from '../../ui';
 import { message } from 'antd';
@@ -43,10 +43,11 @@ interface NestedCommentProps {
   comment: Comment;
   level?: number;
   maxLevel?: number;
-  postId: string;
+  postId?: string;
+  watchId?: string;
   onReply?: (parentId: string, content: string) => void;
   customFetchReplies?: (commentId: string, page: number) => Promise<{ data: { content: Comment[] } }>;
-  onCommentCreated?: () => void; // Callback to increment post comment count
+  onCommentCreated?: () => void; // Callback to increment comment count
   onCommentDeleted?: (commentId: string) => void; // Callback when comment is deleted
 }
 
@@ -54,7 +55,8 @@ const NestedComment: React.FC<NestedCommentProps> = ({
   comment,
   level = 0,
   maxLevel = 2,
-  postId: _postId,
+  postId,
+  watchId,
   onReply,
   customFetchReplies,
   onCommentCreated,
@@ -101,7 +103,7 @@ const NestedComment: React.FC<NestedCommentProps> = ({
 
     setLoadingReplies(true);
     try {
-      const fetchFunction = customFetchReplies || apiGetRepliesByComment;
+      const fetchFunction = customFetchReplies || apiGetRepliesByCommentId;
       const response = await fetchFunction(commentId, page);
       const newReplies = response?.data?.content || [];
       
@@ -138,11 +140,18 @@ const NestedComment: React.FC<NestedCommentProps> = ({
     setIsSubmitting(true);
     try {
       // Call API to create reply
-      const response = await apiCreateCommentService({
-        postId: _postId,
+      const payload: { postId?: string; watchId?: string; content: string; parentCommentId: string } = {
         content: replyText,
         parentCommentId: commentId
-      });
+      };
+      
+      if (postId) {
+        payload.postId = postId;
+      } else if (watchId) {
+        payload.watchId = watchId;
+      }
+      
+      const response = await apiCreateCommentForContent(payload);
       
       console.log('Reply created:', response);
       
@@ -237,7 +246,7 @@ const NestedComment: React.FC<NestedCommentProps> = ({
 
     setIsUpdating(true);
     try {
-      const response = await apiUpdateComment(commentId, editText.trim());
+      const response = await apiUpdateCommentContent(commentId, editText.trim());
       
       if (response.success) {
         setLocalContent(editText.trim());
@@ -266,7 +275,7 @@ const NestedComment: React.FC<NestedCommentProps> = ({
 
     setIsDeleting(true);
     try {
-      const response = await apiDeleteComment(commentId);
+      const response = await apiDeleteCommentById(commentId);
       
       if (response.success) {
         message.success('Đã xóa bình luận!');
@@ -312,7 +321,7 @@ const NestedComment: React.FC<NestedCommentProps> = ({
     setLikeCount(newLikedState ? likeCount + 1 : likeCount - 1);
 
     try {
-      const response = await apiToggleLikeComment(commentId);
+      const response = await apiToggleLikeOnComment(commentId);
       
       if (response.success && response.data) {
         setIsLiked(response.data.liked);
@@ -554,7 +563,8 @@ const NestedComment: React.FC<NestedCommentProps> = ({
                 comment={reply}
                 level={level + 1}
                 maxLevel={maxLevel}
-                postId={_postId}
+                postId={postId}
+                watchId={watchId}
                 onReply={onReply}
                 customFetchReplies={customFetchReplies}
                 onCommentCreated={onCommentCreated}
