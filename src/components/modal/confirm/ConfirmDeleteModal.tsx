@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Icon } from '@iconify/react';
 import { TravelButton, TravelInput } from '../../ui/customize';
 import { LoadingSpinner } from '../../ui/loading';
@@ -117,8 +118,8 @@ const ConfirmDeleteModal: React.FC<ConfirmDeleteModalProps> = ({
   const buttonIcon = type === 'unfriend' ? 'fluent:person-subtract-24-filled' : 'fluent:delete-24-filled';
   const processingText = type === 'unfriend' ? 'Đang hủy...' : 'Đang xóa...';
   
-  // Post, Comment, and Unfriend don't need input confirmation
-  const needsInputConfirmation = !['post', 'comment', 'unfriend'].includes(type);
+  // Post, Comment, Unfriend, and Custom don't need input confirmation
+  const needsInputConfirmation = !['post', 'comment', 'unfriend', 'custom'].includes(type);
 
   const handleConfirm = async () => {
     // Skip input validation for post and comment
@@ -148,8 +149,8 @@ const ConfirmDeleteModal: React.FC<ConfirmDeleteModalProps> = ({
     ? (inputValue === textToConfirm && !isProcessing && !isDeleting)
     : (!isProcessing && !isDeleting);
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+  const modalContent = (
+    <div className="fixed inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4" style={{ zIndex: 9999 }}>
       <div className="bg-white rounded-lg overflow-hidden w-full max-w-md animate-in fade-in zoom-in duration-200">
         {/* Header */}
         <div className="sticky top-0 z-10 flex items-center justify-between p-6 bg-white border-b border-gray-200">
@@ -280,6 +281,8 @@ const ConfirmDeleteModal: React.FC<ConfirmDeleteModalProps> = ({
       </div>
     </div>
   );
+
+  return createPortal(modalContent, document.body);
 };
 
 export default ConfirmDeleteModal;

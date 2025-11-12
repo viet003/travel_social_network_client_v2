@@ -1,67 +1,152 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Icon } from '@iconify/react';
 import { useNavigate } from 'react-router-dom';
-
-// Mock data for user's videos
-const myVideos = [
-  {
-    id: 1,
-    title: 'Chuyến đi Đà Lạt mùa hoa dã quỳ',
-    videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
-    thumbnail: 'https://images.unsplash.com/photo-1583417319070-4a69db38a482?w=800&q=80',
-    views: '1.2K',
-    likes: 245,
-    comments: 32,
-    uploadTime: '2 ngày trước',
-    duration: '8:45',
-    status: 'published'
-  },
-  {
-    id: 2,
-    title: 'Khám phá ẩm thực Hội An',
-    videoUrl: 'https://www.youtube.com/embed/3JZ_D3ELwOQ',
-    thumbnail: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&q=80',
-    views: '890',
-    likes: 156,
-    comments: 18,
-    uploadTime: '5 ngày trước',
-    duration: '12:30',
-    status: 'published'
-  },
-  {
-    id: 3,
-    title: 'Trekking Tà Xùa săn mây',
-    videoUrl: 'https://www.youtube.com/embed/9bZkp7q19f0',
-    thumbnail: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80',
-    views: '2.5K',
-    likes: 478,
-    comments: 54,
-    uploadTime: '1 tuần trước',
-    duration: '15:20',
-    status: 'published'
-  },
-  {
-    id: 4,
-    title: 'Video đang chỉnh sửa...',
-    videoUrl: '',
-    thumbnail: 'https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=800&q=80',
-    views: '0',
-    likes: 0,
-    comments: 0,
-    uploadTime: 'Đang chỉnh sửa',
-    duration: '0:00',
-    status: 'draft'
-  }
-];
+import { VideoThumbnailCard } from '../../../components/common/cards';
+import { WatchEditModal } from '../../../components/modal/watch';
+import { ConfirmDeleteModal } from '../../../components/modal';
+import type { WatchResponse } from '../../../types/video.types';
+import { apiGetMyWatches, apiGetMyWatchStatistics, apiDeleteWatch, type WatchStatistics } from '../../../services/watchService';
+import { toast } from 'react-toastify';
 
 const MyVideosPage: React.FC = () => {
   const navigate = useNavigate();
-  const [filterStatus, setFilterStatus] = useState<'all' | 'published' | 'draft'>('all');
-
-  const filteredVideos = myVideos.filter(video => {
-    if (filterStatus === 'all') return true;
-    return video.status === filterStatus;
+  const [myVideos, setMyVideos] = useState<WatchResponse[]>([]);
+  const [statistics, setStatistics] = useState<WatchStatistics>({
+    totalVideos: 0,
+    totalViews: 0,
+    totalLikes: 0,
+    totalComments: 0,
+    totalShares: 0
   });
+  const [loading, setLoading] = useState(true);
+  const [page] = useState(0);
+  const [size] = useState(100); // Load nhiều videos
+  
+  // Edit modal state
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedVideoForEdit, setSelectedVideoForEdit] = useState<WatchResponse | null>(null);
+  
+  // Delete modal state
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [selectedVideoForDelete, setSelectedVideoForDelete] = useState<WatchResponse | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  useEffect(() => {
+    loadData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const loadData = async () => {
+    try {
+      setLoading(true);
+      
+      // Load videos và statistics song song
+      const [videosResponse, statsResponse] = await Promise.all([
+        apiGetMyWatches(page, size),
+        apiGetMyWatchStatistics()
+      ]);
+
+      if (videosResponse && videosResponse.data) {
+        setMyVideos(videosResponse.data.content);
+      }
+
+      if (statsResponse && statsResponse.data) {
+        setStatistics(statsResponse.data);
+      }
+    } catch (error) {
+      console.error('Error loading my videos:', error);
+      toast.error('Không thể tải danh sách video!');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const formatNumber = (num: number): string => {
+    if (num >= 1000000) {
+      return (num / 1000000).toFixed(1) + 'M';
+    } else if (num >= 1000) {
+      return (num / 1000).toFixed(1) + 'K';
+    }
+    return num.toString();
+  };
+
+  // Handle edit video
+  const handleEditVideo = (video: WatchResponse) => {
+    console.log('🎬 MyVideosPage - Opening edit modal with video:', {
+      watchId: video.watchId,
+      title: video.title,
+      description: video.description,
+      thumbnailUrl: video.thumbnailUrl,
+      privacy: video.privacy
+    });
+    setSelectedVideoForEdit(video);
+    setIsEditModalOpen(true);
+  };
+
+  const handleEditSuccess = (updatedVideo?: WatchResponse) => {
+    toast.success('Video đã được cập nhật thành công!');
+    
+    // Update local state instead of fetching from server
+    if (updatedVideo) {
+      setMyVideos(prevVideos => 
+        prevVideos.map(video => 
+          video.watchId === updatedVideo.watchId ? updatedVideo : video
+        )
+      );
+    }
+  };
+
+  // Handle delete video
+  const handleDeleteVideo = (video: WatchResponse) => {
+    setSelectedVideoForDelete(video);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!selectedVideoForDelete) return;
+
+    try {
+      setIsDeleting(true);
+      const deletedVideoId = selectedVideoForDelete.watchId;
+      
+      await apiDeleteWatch(deletedVideoId);
+      
+      toast.success('Video đã được xóa thành công!');
+      
+      // Update local state: remove deleted video
+      setMyVideos(prevVideos => prevVideos.filter(video => video.watchId !== deletedVideoId));
+      
+      // Update statistics: decrease total videos count
+      setStatistics(prevStats => ({
+        ...prevStats,
+        totalVideos: Math.max(0, prevStats.totalVideos - 1),
+        totalViews: Math.max(0, prevStats.totalViews - (selectedVideoForDelete.viewCount || 0)),
+        totalLikes: Math.max(0, prevStats.totalLikes - (selectedVideoForDelete.likeCount || 0)),
+        totalComments: Math.max(0, prevStats.totalComments - (selectedVideoForDelete.commentCount || 0)),
+      }));
+      
+      setIsDeleteModalOpen(false);
+      setSelectedVideoForDelete(null);
+    } catch (error) {
+      console.error('Error deleting video:', error);
+      toast.error('Không thể xóa video. Vui lòng thử lại!');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="flex flex-col items-center gap-4">
+            <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+            <p className="text-gray-600">Đang tải video...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -82,42 +167,6 @@ const MyVideosPage: React.FC = () => {
         <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Video của tôi</h1>
       </div>
 
-      {/* Filter Tabs */}
-      <div className="mb-6">
-        <div className="flex space-x-2 border-b border-gray-200 overflow-x-auto">
-          <button
-            onClick={() => setFilterStatus('all')}
-            className={`px-4 py-3 text-sm font-medium transition-colors cursor-pointer whitespace-nowrap ${
-              filterStatus === 'all'
-                ? 'text-blue-600 border-b-2 border-blue-600'
-                : 'text-gray-600 hover:text-gray-900'
-            }`}
-          >
-            Tất cả ({myVideos.length})
-          </button>
-          <button
-            onClick={() => setFilterStatus('published')}
-            className={`px-4 py-3 text-sm font-medium transition-colors cursor-pointer whitespace-nowrap ${
-              filterStatus === 'published'
-                ? 'text-blue-600 border-b-2 border-blue-600'
-                : 'text-gray-600 hover:text-gray-900'
-            }`}
-          >
-            Đã đăng ({myVideos.filter(v => v.status === 'published').length})
-          </button>
-          <button
-            onClick={() => setFilterStatus('draft')}
-            className={`px-4 py-3 text-sm font-medium transition-colors cursor-pointer whitespace-nowrap ${
-              filterStatus === 'draft'
-                ? 'text-blue-600 border-b-2 border-blue-600'
-                : 'text-gray-600 hover:text-gray-900'
-            }`}
-          >
-            Nháp ({myVideos.filter(v => v.status === 'draft').length})
-          </button>
-        </div>
-      </div>
-
       {/* Statistics */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-8">
         <div className="bg-white rounded-lg p-3 sm:p-4 shadow-sm">
@@ -127,7 +176,7 @@ const MyVideosPage: React.FC = () => {
             </div>
             <div>
               <p className="text-xs sm:text-sm text-gray-600">Tổng video</p>
-              <p className="text-xl sm:text-2xl font-bold text-gray-900">{myVideos.filter(v => v.status === 'published').length}</p>
+              <p className="text-xl sm:text-2xl font-bold text-gray-900">{statistics.totalVideos}</p>
             </div>
           </div>
         </div>
@@ -138,7 +187,7 @@ const MyVideosPage: React.FC = () => {
             </div>
             <div>
               <p className="text-xs sm:text-sm text-gray-600">Lượt xem</p>
-              <p className="text-xl sm:text-2xl font-bold text-gray-900">4.6K</p>
+              <p className="text-xl sm:text-2xl font-bold text-gray-900">{formatNumber(statistics.totalViews)}</p>
             </div>
           </div>
         </div>
@@ -149,7 +198,7 @@ const MyVideosPage: React.FC = () => {
             </div>
             <div>
               <p className="text-xs sm:text-sm text-gray-600">Lượt thích</p>
-              <p className="text-xl sm:text-2xl font-bold text-gray-900">879</p>
+              <p className="text-xl sm:text-2xl font-bold text-gray-900">{formatNumber(statistics.totalLikes)}</p>
             </div>
           </div>
         </div>
@@ -160,70 +209,105 @@ const MyVideosPage: React.FC = () => {
             </div>
             <div>
               <p className="text-xs sm:text-sm text-gray-600">Bình luận</p>
-              <p className="text-xl sm:text-2xl font-bold text-gray-900">104</p>
+              <p className="text-xl sm:text-2xl font-bold text-gray-900">{formatNumber(statistics.totalComments)}</p>
             </div>
           </div>
         </div>
       </div>
 
       {/* Videos Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredVideos.map((video) => (
-          <div key={video.id} className="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow">
-            <div className="aspect-video bg-gray-200 relative">
-              <img 
-                src={video.thumbnail} 
-                alt={video.title}
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30 hover:bg-opacity-40 transition-all cursor-pointer">
-                <Icon icon="fluent:play-circle-24-filled" className="h-16 w-16 text-white" />
-              </div>
-              <div className="absolute bottom-2 right-2 bg-black bg-opacity-80 text-white text-xs px-2 py-1 rounded">
-                {video.duration}
-              </div>
-              {video.status === 'draft' && (
-                <div className="absolute top-2 left-2 bg-yellow-500 text-white text-xs px-2 py-1 rounded">
-                  Nháp
-                </div>
-              )}
-            </div>
-            <div className="p-4">
-              <h3 className="font-medium text-gray-900 mb-2 line-clamp-2">{video.title}</h3>
-              <div className="flex items-center justify-between text-sm text-gray-500 mb-3">
-                <div className="flex items-center space-x-3">
-                  <span className="flex items-center space-x-1">
-                    <Icon icon="fluent:eye-24-regular" className="h-4 w-4" />
-                    <span>{video.views}</span>
-                  </span>
-                  <span className="flex items-center space-x-1">
-                    <Icon icon="fluent:heart-24-regular" className="h-4 w-4" />
-                    <span>{video.likes}</span>
-                  </span>
-                  <span className="flex items-center space-x-1">
-                    <Icon icon="fluent:comment-24-regular" className="h-4 w-4" />
-                    <span>{video.comments}</span>
-                  </span>
-                </div>
-              </div>
-              <div className="text-xs text-gray-500 mb-3">{video.uploadTime}</div>
-              <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-                <button className="flex-1 px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm flex items-center justify-center space-x-1 cursor-pointer">
-                  <Icon icon="fluent:edit-24-regular" className="h-4 w-4" />
-                  <span>Chỉnh sửa</span>
-                </button>
-                <button className="flex-1 px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm flex items-center justify-center space-x-1 cursor-pointer">
-                  <Icon icon="fluent:share-24-regular" className="h-4 w-4" />
-                  <span>Chia sẻ</span>
-                </button>
-                <button className="px-3 py-2 bg-gray-100 text-red-600 rounded-lg hover:bg-red-50 transition-colors cursor-pointer">
-                  <Icon icon="fluent:delete-24-regular" className="h-4 w-4" />
-                </button>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
+      {myVideos.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-12 text-center">
+          <Icon icon="fluent:video-off-24-regular" className="w-16 h-16 text-gray-400 mb-4" />
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">Chưa có video nào</h3>
+          <p className="text-gray-600 mb-4">Hãy tạo video đầu tiên của bạn!</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {myVideos.map((video) => (
+            <VideoThumbnailCard
+              key={video.watchId}
+              id={video.watchId}
+              title={video.title}
+              thumbnailUrl={video.thumbnailUrl || ''}
+              videoUrl={video.videoUrl}
+              author={video.user.userName}
+              views={video.viewCount}
+              time={new Date(video.createdAt).toLocaleDateString('vi-VN', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+              })}
+              duration={video.duration || 0}
+              likeCount={video.likeCount}
+              commentCount={video.commentCount}
+              showActions={true}
+              onClick={() => navigate(`/home/watch/${video.watchId}`)}
+              onEdit={() => handleEditVideo(video)}
+              onShare={() => console.log('Share video:', video.watchId)}
+              onDelete={() => handleDeleteVideo(video)}
+            />
+          ))}
+        </div>
+      )}
+
+      {/* Edit Modal */}
+      {selectedVideoForEdit && (
+        <WatchEditModal
+          isOpen={isEditModalOpen}
+          onClose={() => {
+            setIsEditModalOpen(false);
+            setSelectedVideoForEdit(null);
+          }}
+          onSuccess={handleEditSuccess}
+          watchData={{
+            watchId: selectedVideoForEdit.watchId,
+            title: selectedVideoForEdit.title,
+            description: selectedVideoForEdit.description || '',
+            videoUrl: selectedVideoForEdit.videoUrl,
+            thumbnailUrl: selectedVideoForEdit.thumbnailUrl,
+            location: selectedVideoForEdit.location,
+            privacy: selectedVideoForEdit.privacy,
+            category: 'travel', // You might want to add category to WatchResponse
+            tags: selectedVideoForEdit.tags
+          }}
+        />
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {selectedVideoForDelete && (
+        <ConfirmDeleteModal
+          isOpen={isDeleteModalOpen}
+          onClose={() => {
+            setIsDeleteModalOpen(false);
+            setSelectedVideoForDelete(null);
+          }}
+          onConfirm={handleConfirmDelete}
+          type="custom"
+          itemName={selectedVideoForDelete.title}
+          customTitle="Xóa video"
+          customWarning="Bạn có chắc chắn muốn xóa video này không? Hành động này không thể hoàn tác."
+          showStats={true}
+          stats={[
+            {
+              icon: 'fluent:eye-24-filled',
+              label: 'Lượt xem',
+              value: selectedVideoForDelete.viewCount || 0
+            },
+            {
+              icon: 'fluent:heart-24-filled',
+              label: 'Lượt thích',
+              value: selectedVideoForDelete.likeCount || 0
+            },
+            {
+              icon: 'fluent:comment-24-filled',
+              label: 'Bình luận',
+              value: selectedVideoForDelete.commentCount || 0
+            }
+          ]}
+          isDeleting={isDeleting}
+        />
+      )}
     </div>
   );
 };

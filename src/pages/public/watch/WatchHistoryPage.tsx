@@ -1,0 +1,164 @@
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { Icon } from '@iconify/react';
+import { useNavigate } from 'react-router-dom';
+import { message } from 'antd';
+import WatchModal from '../../../components/modal/watch/WatchModal';
+import type { WatchWithIdsResponse } from '../../../types/video.types';
+import { apiGetWatchHistory } from '../../../services/watchService';
+
+const WatchHistoryPage: React.FC = () => {
+  const navigate = useNavigate();
+  const [historyVideos, setHistoryVideos] = useState<WatchWithIdsResponse[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [page, setPage] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const observer = useRef<IntersectionObserver | null>(null);
+
+  const fetchHistoryVideos = useCallback(async (pageNum: number) => {
+    setLoading(true);
+    try {
+      const response = await apiGetWatchHistory(pageNum, 10);
+      const newVideos = response.data.content;
+
+      if (pageNum === 0) {
+        setHistoryVideos(newVideos);
+      } else {
+        setHistoryVideos(prev => [...prev, ...newVideos]);
+      }
+
+      setHasMore(newVideos.length > 0 && !response.data.last);
+    } catch (error) {
+      console.error('Error fetching history videos:', error);
+      message.error('Không thể tải lịch sử xem');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchHistoryVideos(0);
+  }, [fetchHistoryVideos]);
+
+  useEffect(() => {
+    if (page > 0) {
+      fetchHistoryVideos(page);
+    }
+  }, [page, fetchHistoryVideos]);
+
+  const lastVideoElementRef = useCallback(
+    (node: HTMLDivElement | null) => {
+      if (loading) return;
+      if (observer.current) observer.current.disconnect();
+
+      observer.current = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting && hasMore) {
+          setPage(prevPage => prevPage + 1);
+        }
+      });
+
+      if (node) observer.current.observe(node);
+    },
+    [loading, hasMore]
+  );
+
+  const handleRemoveFromHistory = useCallback((watchId: string) => {
+    setHistoryVideos(prev => prev.filter(video => video.watchId !== watchId));
+    message.success('Đã xóa khỏi lịch sử xem');
+  }, []);
+
+  return (
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      {/* Header */}
+      <div className="mb-6">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <Icon icon="fluent:history-24-filled" className="w-8 h-8 text-blue-600" />
+            <h1 className="text-2xl font-bold text-gray-900">Lịch sử xem</h1>
+          </div>
+          <button
+            onClick={() => navigate('/home/watch')}
+            className="flex cursor-pointer hover:bg-gray-100 items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg transition-colors"
+          >
+            <Icon icon="fluent:arrow-left-24-regular" className="w-4 h-4" />
+            Quay lại
+          </button>
+        </div>
+        <p className="text-gray-600 text-sm">
+          Danh sách các video bạn đã xem trong 3 ngày gần nhất (tự động xóa sau 3 ngày)
+        </p>
+      </div>
+
+      {/* Videos List */}
+      <div className="space-y-6">
+        {loading && page === 0 ? (
+          <div className="flex items-center justify-center py-12">
+            <div className="flex items-center space-x-2">
+              <div className="w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full animate-spin"></div>
+              <span className="text-gray-600">Đang tải...</span>
+            </div>
+          </div>
+        ) : historyVideos.length === 0 ? (
+          <div className="text-center py-12">
+            <Icon icon="fluent:history-dismiss-24-regular" className="w-16 h-16 mx-auto text-gray-400 mb-4" />
+            <p className="text-gray-600 text-lg mb-2">Chưa có lịch sử xem</p>
+            <p className="text-gray-500 text-sm mb-4">Các video bạn đã xem sẽ hiển thị ở đây</p>
+            <button
+              onClick={() => navigate('/home/watch')}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              Khám phá video
+            </button>
+          </div>
+        ) : (
+          <>
+            {historyVideos.map((video, index) => (
+              <div
+                key={video.watchId}
+                ref={historyVideos.length === index + 1 ? lastVideoElementRef : null}
+              >
+                <WatchModal
+                  videoId={video.watchId}
+                  userId={video.user.userId}
+                  avatar={video.user.avatarImg}
+                  userName={video.user.userName || video.user.fullName || 'Unknown User'}
+                  location={video.location}
+                  timeAgo={video.createdAt}
+                  content={video.description || ''}
+                  videoUrl={video.videoUrl}
+                  thumbnailUrl={video.thumbnailUrl}
+                  likeCount={video.likeCount}
+                  commentCount={video.commentCount}
+                  shareCount={video.shareCount}
+                  tags={video.tags}
+                  privacy={video.privacy}
+                  liked={video.liked}
+                  saved={video.saved}
+                  watchHistoryId={video.watchHistoryId}
+                  onShare={() => console.log('Share video', video.watchId)}
+                  onRemove={() => handleRemoveFromHistory(video.watchId)}
+                />
+              </div>
+            ))}
+
+            {loading && page > 0 && (
+              <div className="flex items-center justify-center py-6">
+                <div className="flex items-center space-x-2">
+                  <div className="w-6 h-6 border-4 border-purple-500 border-t-transparent rounded-full animate-spin"></div>
+                  <span className="text-gray-600 text-sm">Đang tải thêm...</span>
+                </div>
+              </div>
+            )}
+
+            {!hasMore && historyVideos.length > 0 && (
+              <div className="text-center py-6">
+                <p className="text-gray-500 text-sm">Đã hiển thị tất cả lịch sử xem</p>
+              </div>
+            )}
+          </>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default WatchHistoryPage;

@@ -1,20 +1,16 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useSelector } from 'react-redux';
 import { Icon } from '@iconify/react';
 import LocationDropdown from "../../common/inputs/LocationDropdown";
 import { PrivacyDropdown } from '../../common/dropdowns';
 import { TravelButton } from '../../ui/customize';
+import TiptapEditor from '../../ui/TiptapEditor';
 import avatardf from '../../../assets/images/avatar_default.png'
 import { toast } from 'react-toastify';
+import { apiUpdateWatch } from '../../../services/watchService';
 
 // Types
-interface VideoFile {
-  file: File;
-  preview: string;
-  duration: number;
-  size: number;
-}
-
 interface PrivacyOption {
   value: string;
   label: string;
@@ -22,10 +18,49 @@ interface PrivacyOption {
   description: string;
 }
 
-interface VideoCreateModalProps {
+interface WatchData {
+  watchId: string;
+  title: string;
+  description: string;
+  videoUrl: string;
+  thumbnailUrl?: string;
+  location?: string;
+  privacy: string;
+  category: string;
+  tags?: string[];
+}
+
+interface WatchEditModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSuccess?: () => void;
+  onSuccess?: (updatedVideo?: WatchResponse) => void;
+  watchData: WatchData;
+}
+
+interface WatchResponse {
+  watchId: string;
+  user: {
+    userId: string;
+    userName?: string;
+    fullName?: string;
+    avatarImg?: string;
+  };
+  title: string;
+  description?: string;
+  videoUrl: string;
+  thumbnailUrl?: string;
+  duration: number;
+  location?: string;
+  privacy: 'PUBLIC' | 'FRIEND' | 'PRIVATE';
+  likeCount: number;
+  commentCount: number;
+  shareCount: number;
+  viewCount: number;
+  createdAt: string;
+  updatedAt?: string;
+  tags: string[];
+  liked?: boolean;
+  watched?: boolean;
 }
 
 interface AuthState {
@@ -35,19 +70,18 @@ interface AuthState {
   lastName: string;
 }
 
-const VideoCreateModal: React.FC<VideoCreateModalProps> = ({
+const WatchEditModal: React.FC<WatchEditModalProps> = ({
   isOpen,
   onClose,
-  onSuccess
+  onSuccess,
+  watchData
 }) => {
   const { avatar, firstName, lastName } = useSelector((state: { auth: AuthState }) => state.auth);
 
   // Video metadata states
   const [videoTitle, setVideoTitle] = useState<string>("");
   const [videoDescription, setVideoDescription] = useState<string>("");
-  const [selectedVideo, setSelectedVideo] = useState<VideoFile | null>(null);
-  const [thumbnail, setThumbnail] = useState<string | null>(null);
-  const [isUploading, setIsUploading] = useState<boolean>(false);
+  const [isUpdating, setIsUpdating] = useState<boolean>(false);
   
   // Additional metadata
   const [selectedLocation, setSelectedLocation] = useState<string | null>(null);
@@ -59,12 +93,31 @@ const VideoCreateModal: React.FC<VideoCreateModalProps> = ({
   const [tagInput, setTagInput] = useState<string>("");
   const [showTagInput, setShowTagInput] = useState<boolean>(false);
 
-  // Thumbnail generation
+  // Thumbnail management
   const [customThumbnail, setCustomThumbnail] = useState<File | null>(null);
   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
-
-  const videoInputRef = useRef<HTMLInputElement>(null);
   const thumbnailInputRef = useRef<HTMLInputElement>(null);
+
+  // Initialize form with existing watch data
+  useEffect(() => {
+    if (watchData && isOpen) {
+      console.log('🔍 WatchEditModal - Initializing with data:', {
+        title: watchData.title,
+        description: watchData.description,
+        thumbnailUrl: watchData.thumbnailUrl,
+        category: watchData.category
+      });
+      
+      setVideoTitle(watchData.title || "");
+      setVideoDescription(watchData.description || "");
+      setSelectedLocation(watchData.location || null);
+      setPrivacy(watchData.privacy?.toLowerCase() || "public");
+      setCategory(watchData.category || "travel");
+      setTags(watchData.tags || []);
+      setThumbnailPreview(watchData.thumbnailUrl || null);
+      setCustomThumbnail(null);
+    }
+  }, [watchData, isOpen]);
 
   // Privacy options
   const privacyOptions: PrivacyOption[] = [
@@ -104,8 +157,6 @@ const VideoCreateModal: React.FC<VideoCreateModalProps> = ({
     // Reset all states
     setVideoTitle("");
     setVideoDescription("");
-    setSelectedVideo(null);
-    setThumbnail(null);
     setTags([]);
     setTagInput("");
     setShowTagInput(false);
@@ -115,106 +166,6 @@ const VideoCreateModal: React.FC<VideoCreateModalProps> = ({
     setCustomThumbnail(null);
     setThumbnailPreview(null);
     onClose();
-  };
-
-  // Generate thumbnail from video
-  const generateThumbnail = (videoFile: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const video = document.createElement('video');
-      const canvas = document.createElement('canvas');
-      const context = canvas.getContext('2d');
-
-      video.preload = 'metadata';
-      video.src = URL.createObjectURL(videoFile);
-
-      video.onloadedmetadata = () => {
-        // Seek to 1 second or 10% of video duration
-        video.currentTime = Math.min(1, video.duration * 0.1);
-      };
-
-      video.onseeked = () => {
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        context?.drawImage(video, 0, 0, canvas.width, canvas.height);
-        
-        canvas.toBlob((blob) => {
-          if (blob) {
-            const thumbnailUrl = URL.createObjectURL(blob);
-            resolve(thumbnailUrl);
-          } else {
-            reject(new Error('Failed to generate thumbnail'));
-          }
-        }, 'image/jpeg', 0.8);
-      };
-
-      video.onerror = () => {
-        reject(new Error('Failed to load video'));
-      };
-    });
-  };
-
-  // Get video duration
-  const getVideoDuration = (videoFile: File): Promise<number> => {
-    return new Promise((resolve) => {
-      const video = document.createElement('video');
-      video.preload = 'metadata';
-      video.src = URL.createObjectURL(videoFile);
-
-      video.onloadedmetadata = () => {
-        resolve(video.duration);
-        URL.revokeObjectURL(video.src);
-      };
-    });
-  };
-
-  const handleVideoSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    // Validate file type
-    if (!file.type.startsWith('video/')) {
-      toast.error('Vui lòng chọn file video hợp lệ!');
-      return;
-    }
-
-    // Validate file size (500MB max)
-    const maxSize = 500 * 1024 * 1024; // 500MB
-    if (file.size > maxSize) {
-      toast.error('Video quá lớn! Vui lòng chọn video nhỏ hơn 500MB.');
-      return;
-    }
-
-    try {
-      // Get video duration
-      const duration = await getVideoDuration(file);
-      
-      // Validate duration (max 30 minutes)
-      if (duration > 1800) {
-        toast.error('Video quá dài! Vui lòng chọn video ngắn hơn 30 phút.');
-        return;
-      }
-
-      // Generate preview URL
-      const preview = URL.createObjectURL(file);
-      
-      // Generate thumbnail
-      const thumbnailUrl = await generateThumbnail(file);
-      
-      setSelectedVideo({
-        file,
-        preview,
-        duration,
-        size: file.size
-      });
-      
-      setThumbnail(thumbnailUrl);
-      setThumbnailPreview(thumbnailUrl);
-      
-      toast.success('Video đã được tải lên!');
-    } catch (error) {
-      console.error('Error processing video:', error);
-      toast.error('Không thể xử lý video. Vui lòng thử lại!');
-    }
   };
 
   const handleThumbnailSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -242,22 +193,6 @@ const VideoCreateModal: React.FC<VideoCreateModalProps> = ({
     reader.readAsDataURL(file);
   };
 
-  const removeVideo = () => {
-    if (selectedVideo) {
-      URL.revokeObjectURL(selectedVideo.preview);
-    }
-    if (thumbnail) {
-      URL.revokeObjectURL(thumbnail);
-    }
-    setSelectedVideo(null);
-    setThumbnail(null);
-    setThumbnailPreview(null);
-    setCustomThumbnail(null);
-    if (videoInputRef.current) {
-      videoInputRef.current.value = '';
-    }
-  };
-
   // Tag handling functions
   const handleTagInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setTagInput(e.target.value);
@@ -282,22 +217,6 @@ const VideoCreateModal: React.FC<VideoCreateModalProps> = ({
     setTags(tags.filter(tag => tag !== tagToRemove));
   };
 
-  // Format duration to MM:SS
-  const formatDuration = (seconds: number): string => {
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
-  };
-
-  // Format file size
-  const formatFileSize = (bytes: number): string => {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -307,73 +226,42 @@ const VideoCreateModal: React.FC<VideoCreateModalProps> = ({
       return;
     }
 
-    if (!selectedVideo) {
-      toast.error('Vui lòng chọn video để tải lên!');
-      return;
-    }
-
-    if (videoTitle.length < 10) {
-      toast.error('Tiêu đề phải có ít nhất 10 ký tự!');
-      return;
-    }
-
-    setIsUploading(true);
+    setIsUpdating(true);
 
     try {
-      const formData = new FormData();
-      
-      // Video file
-      formData.append('video', selectedVideo.file);
-      
-      // Metadata
-      formData.append('title', videoTitle);
-      formData.append('description', videoDescription);
-      formData.append('privacy', privacy);
-      formData.append('category', category);
-      formData.append('duration', selectedVideo.duration.toString());
-      
-      // Thumbnail
-      if (customThumbnail) {
-        formData.append('thumbnail', customThumbnail);
-      }
-      
-      // Location
-      if (selectedLocation) {
-        formData.append('location', selectedLocation);
-      }
-      
-      // Tags
-      if (tags.length > 0) {
-        formData.append('tags', JSON.stringify(tags));
-      }
-
-      // Call API to create video
-      console.log('Tạo video mới:', {
+      // Prepare data for API
+      const updateData = {
+        watchId: watchData.watchId,
         title: videoTitle,
         description: videoDescription,
-        privacy,
-        category,
-        location: selectedLocation,
-        tags,
-        duration: selectedVideo.duration,
-        size: selectedVideo.size
-      });
+        thumbnail: customThumbnail || undefined,
+        location: selectedLocation || undefined,
+        privacy: privacy.toUpperCase() as 'PUBLIC' | 'FRIEND' | 'PRIVATE',
+        category: category,
+        tags: tags.length > 0 ? tags : undefined
+      };
 
-      // Mock API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Call API to update watch
+      const response = await apiUpdateWatch(updateData);
       
-      toast.success('Video đã được tải lên thành công!');
-      handleClose();
-      onSuccess?.();
-      
-      // Navigate to video page or my videos page
-      // navigate('/watch/my-videos');
+      if (response && response.data) {
+        toast.success('Video đã được cập nhật thành công!');
+        handleClose();
+        // Pass updated data back to parent
+        onSuccess?.(response.data as WatchResponse);
+      }
 
-    } catch (error) {
-      console.error('Lỗi khi tải video:', error);
-      toast.error('Đã xảy ra lỗi khi tải video. Vui lòng thử lại!');
+    } catch (error: unknown) {
+      console.error('Lỗi khi cập nhật video:', error);
+      
+      let errorMessage = 'Đã xảy ra lỗi khi cập nhật video. Vui lòng thử lại!';
+      if (error && typeof error === 'object' && 'message' in error) {
+        errorMessage = (error as { message: string }).message;
+      }
+      
+      toast.error(errorMessage);
     } finally {
-      setIsUploading(false);
+      setIsUpdating(false);
     }
   };
 
@@ -381,10 +269,10 @@ const VideoCreateModal: React.FC<VideoCreateModalProps> = ({
 
   const currentPrivacy = privacyOptions.find(option => option.value === privacy);
 
-  return (
+  const modalContent = (
     <div
       className="fixed inset-0 h-[100vh] flex items-center justify-center transition-opacity duration-300 ease-in-out bg-black/50 px-4"
-      style={{ zIndex: 1000 }}
+      style={{ zIndex: 9999 }}
       onClick={handleClose}
     >
       <div
@@ -398,10 +286,10 @@ const VideoCreateModal: React.FC<VideoCreateModalProps> = ({
           <div className="flex items-center justify-between p-4 sm:p-5">
             <div className="flex flex-col items-start pr-8">
               <span className="flex items-center mb-1 text-base sm:text-lg font-bold text-blue-600">
-                <Icon icon="fluent:video-24-filled" className="text-blue-600 w-4 h-4 sm:w-6 sm:h-6 mr-2" />
+                <Icon icon="fluent:video-edit-24-filled" className="text-blue-600 w-4 h-4 sm:w-6 sm:h-6 mr-2" />
                 TravelNest Watch
               </span>
-              <h2 className="text-lg sm:text-xl font-bold text-gray-800">Tạo Video Mới</h2>
+              <h2 className="text-lg sm:text-xl font-bold text-gray-800">Chỉnh sửa Video</h2>
             </div>
             <button
               className="absolute flex items-center justify-center w-8 h-8 text-gray-600 rounded-full bg-gray-white right-4 sm:right-5 top-4 sm:top-5 hover:bg-gray-300 cursor-pointer"
@@ -450,7 +338,7 @@ const VideoCreateModal: React.FC<VideoCreateModalProps> = ({
                 <TravelButton
                   type="default"
                   onClick={() => setSelectedLocation(selectedLocation ? null : '')}
-                  className={`!h-8 !py-0 !px-2.5 !min-w-0 ${
+                  className={`!h-8 !py-0 !px-2.5 !min-w-0 hover:!bg-gray-100 transition-all duration-200 ${
                     selectedLocation 
                       ? '!border-blue-500 !bg-blue-50 !text-blue-600' 
                       : ''
@@ -466,7 +354,7 @@ const VideoCreateModal: React.FC<VideoCreateModalProps> = ({
                 <TravelButton
                   type="default"
                   onClick={() => setShowTagInput(!showTagInput)}
-                  className={`!h-8 !py-0 !px-2.5 !min-w-0 ${
+                  className={`!h-8 !py-0 !px-2.5 !min-w-0  hover:!bg-gray-100 transition-all duration-200 ${
                     showTagInput || tags.length > 0
                       ? '!border-purple-500 !bg-purple-50 !text-purple-600' 
                       : ''
@@ -480,6 +368,7 @@ const VideoCreateModal: React.FC<VideoCreateModalProps> = ({
               </div>
             </div>
           </div>
+
           {/* Location Section - Collapsible */}
           {selectedLocation !== null && (
             <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
@@ -576,138 +465,95 @@ const VideoCreateModal: React.FC<VideoCreateModalProps> = ({
               </div>
             </div>
           )}
+
           {/* Main Content Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-            {/* Left Column - Video Upload */}
+            {/* Left Column - Video Preview & Thumbnail */}
             <div className="space-y-4">
               <h3 className="text-sm font-semibold text-gray-700">Video</h3>
               
-              {!selectedVideo ? (
-                <div className="flex flex-col items-center">
-                  <label className="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer hover:border-blue-400 hover:bg-blue-50">
-                    <div className="flex flex-col items-center py-8">
-                      <Icon icon="fluent:video-add-24-filled" className="w-16 h-16 mb-4 text-gray-400" />
-                      <span className="mb-2 text-sm font-medium text-gray-600">Tải lên Video</span>
-                      <span className="text-xs text-center text-gray-500 px-4">
-                        Nhấp để duyệt hoặc kéo thả video<br />
-                        MP4, MOV, AVI • Tối đa 500MB • Tối đa 30 phút
-                      </span>
-                    </div>
-                    <input
-                      ref={videoInputRef}
-                      type="file"
-                      accept="video/*"
-                      className="hidden"
-                      onChange={handleVideoSelect}
-                    />
+              {/* Video Preview - Read Only */}
+              <div className="space-y-3">
+                <div className="relative border border-gray-200 rounded-lg overflow-hidden bg-gray-50">
+                  <video
+                    src={watchData.videoUrl}
+                    className="w-full h-64 object-cover"
+                    controls
+                  />
+                  <div className="absolute top-2 left-2 bg-gray-800 bg-opacity-70 text-white text-xs px-2 py-1 rounded">
+                    Video gốc
+                  </div>
+                </div>
+
+                {/* Thumbnail Section */}
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-gray-700">
+                    Ảnh bìa <span className="text-xs text-gray-500">(Tùy chọn - Cập nhật ảnh bìa mới)</span>
                   </label>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {/* Video Preview */}
-                  <div className="relative border border-gray-200 rounded-lg overflow-hidden">
-                    <video
-                      src={selectedVideo.preview}
-                      className="w-full h-64 object-cover"
-                      controls
-                    />
-                    <button
-                      type="button"
-                      onClick={removeVideo}
-                      className="absolute flex items-center justify-center w-8 h-8 text-white bg-red-600 rounded-full top-2 right-2 hover:bg-red-700 cursor-pointer"
+                  
+                  <div className="grid grid-cols-2 gap-2">
+                    {/* Current Thumbnail */}
+                    <div
+                      className={`relative border-2 rounded-lg overflow-hidden ${
+                        !customThumbnail ? 'border-blue-500' : 'border-gray-200'
+                      }`}
                     >
-                      <Icon icon="fluent:delete-24-filled" className="w-4 h-4" />
-                    </button>
-                  </div>
-
-                  {/* Video Info */}
-                  <div className="p-3 bg-gray-50 rounded-lg space-y-2">
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-gray-600">Tên file:</span>
-                      <span className="font-medium text-gray-900 truncate ml-2 max-w-[200px]">
-                        {selectedVideo.file.name}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-gray-600">Thời lượng:</span>
-                      <span className="font-medium text-gray-900">
-                        {formatDuration(selectedVideo.duration)}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-gray-600">Kích thước:</span>
-                      <span className="font-medium text-gray-900">
-                        {formatFileSize(selectedVideo.size)}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Thumbnail Section */}
-                  <div className="space-y-2">
-                    <label className="block text-sm font-medium text-gray-700">
-                      Ảnh bìa <span className="text-xs text-gray-500">(Tùy chọn)</span>
-                    </label>
-                    
-                    <div className="grid grid-cols-2 gap-2">
-                      {/* Generated Thumbnail */}
-                      <div
-                        className={`relative border-2 rounded-lg overflow-hidden cursor-pointer ${
-                          !customThumbnail ? 'border-blue-500' : 'border-gray-200'
-                        }`}
-                        onClick={() => {
-                          setCustomThumbnail(null);
-                          setThumbnailPreview(thumbnail);
-                        }}
-                      >
-                        <img
-                          src={thumbnail || ''}
-                          alt="Generated thumbnail"
-                          className="w-full h-20 object-cover"
-                        />
-                        <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30">
+                      {thumbnailPreview ? (
+                        <>
+                          <img
+                            src={thumbnailPreview}
+                            alt="Current thumbnail"
+                            className="w-full h-20 object-cover"
+                          />
                           {!customThumbnail && (
-                            <Icon icon="fluent:checkmark-circle-24-filled" className="w-6 h-6 text-white" />
-                          )}
-                        </div>
-                        <span className="absolute bottom-1 left-1 text-xs text-white bg-black bg-opacity-60 px-1 rounded">
-                          Tự động
-                        </span>
-                      </div>
-
-                      {/* Custom Thumbnail Upload */}
-                      <label className="relative border-2 border-dashed border-gray-300 rounded-lg overflow-hidden cursor-pointer hover:border-blue-400">
-                        {customThumbnail && thumbnailPreview ? (
-                          <>
-                            <img
-                              src={thumbnailPreview}
-                              alt="Custom thumbnail"
-                              className="w-full h-20 object-cover"
-                            />
-                            <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30">
-                              <Icon icon="fluent:checkmark-circle-24-filled" className="w-6 h-6 text-white" />
+                            <div className="absolute top-1 right-1 bg-blue-500 rounded-full p-1">
+                              <Icon icon="fluent:checkmark-circle-24-filled" className="w-4 h-4 text-white" />
                             </div>
-                            <span className="absolute bottom-1 left-1 text-xs text-white bg-black bg-opacity-60 px-1 rounded">
-                              Tùy chỉnh
-                            </span>
-                          </>
-                        ) : (
-                          <div className="flex flex-col items-center justify-center h-20">
-                            <Icon icon="fluent:image-add-24-regular" className="w-6 h-6 text-gray-400 mb-1" />
-                            <span className="text-xs text-gray-500">Tải ảnh</span>
-                          </div>
-                        )}
-                        <input
-                          ref={thumbnailInputRef}
-                          type="file"
-                          accept="image/*"
-                          className="hidden"
-                          onChange={handleThumbnailSelect}
-                        />
-                      </label>
+                          )}
+                          <span className="absolute bottom-1 left-1 text-xs text-white bg-black bg-opacity-60 px-1.5 py-0.5 rounded">
+                            Hiện tại
+                          </span>
+                        </>
+                      ) : (
+                        <div className="flex items-center justify-center h-20 bg-gray-100">
+                          <span className="text-xs text-gray-400">Không có ảnh bìa</span>
+                        </div>
+                      )}
                     </div>
+
+                    {/* Custom Thumbnail Upload */}
+                    <label className="relative border-2 border-dashed border-gray-300 rounded-lg overflow-hidden cursor-pointer hover:border-blue-400">
+                      {customThumbnail ? (
+                        <>
+                          <img
+                            src={thumbnailPreview!}
+                            alt="New thumbnail"
+                            className="w-full h-20 object-cover"
+                          />
+                          <div className="absolute top-1 right-1 bg-green-500 rounded-full p-1">
+                            <Icon icon="fluent:checkmark-circle-24-filled" className="w-4 h-4 text-white" />
+                          </div>
+                          <span className="absolute bottom-1 left-1 text-xs text-white bg-black bg-opacity-60 px-1.5 py-0.5 rounded">
+                            Mới
+                          </span>
+                        </>
+                      ) : (
+                        <div className="flex flex-col items-center justify-center h-20 bg-gray-50">
+                          <Icon icon="fluent:image-add-24-regular" className="w-6 h-6 text-gray-400 mb-1" />
+                          <span className="text-xs text-gray-500">Tải ảnh mới</span>
+                        </div>
+                      )}
+                      <input
+                        ref={thumbnailInputRef}
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={handleThumbnailSelect}
+                      />
+                    </label>
                   </div>
                 </div>
-              )}
+              </div>
             </div>
 
             {/* Right Column - Video Details */}
@@ -727,8 +573,7 @@ const VideoCreateModal: React.FC<VideoCreateModalProps> = ({
                   className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   maxLength={100}
                 />
-                <div className="flex justify-between mt-1">
-                  <span className="text-xs text-gray-500">Tối thiểu 10 ký tự</span>
+                <div className="flex justify-end mt-1">
                   <span className="text-xs text-gray-500">{videoTitle.length}/100</span>
                 </div>
               </div>
@@ -738,14 +583,14 @@ const VideoCreateModal: React.FC<VideoCreateModalProps> = ({
                 <label className="block mb-2 text-sm font-medium text-gray-700">
                   Mô tả <span className="text-xs text-gray-500">(Tùy chọn)</span>
                 </label>
-                <textarea
-                  value={videoDescription}
-                  onChange={(e) => setVideoDescription(e.target.value)}
-                  placeholder="Mô tả video của bạn..."
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-                  rows={4}
-                  maxLength={500}
-                />
+                <div className="border border-gray-300 rounded-lg overflow-hidden hover:border-blue-400 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-200 transition-all">
+                  <TiptapEditor
+                    content={videoDescription}
+                    onChange={setVideoDescription}
+                    placeholder="Mô tả video của bạn..."
+                    maxLength={500}
+                  />
+                </div>
                 <div className="flex justify-end mt-1">
                   <span className="text-xs text-gray-500">{videoDescription.length}/500</span>
                 </div>
@@ -779,32 +624,31 @@ const VideoCreateModal: React.FC<VideoCreateModalProps> = ({
 
           {/* Submit Button */}
           <div className="pt-4 border-t border-gray-200">
-            <button
-              type="submit"
-              disabled={isUploading || !videoTitle.trim() || !selectedVideo || videoTitle.length < 10}
-              className={`w-full py-3 text-base font-semibold rounded-lg transition-all duration-200 ${
-                videoTitle.trim() && selectedVideo && videoTitle.length >= 10 && !isUploading
-                  ? "bg-blue-500 hover:bg-blue-600 text-white shadow-md hover:shadow-lg cursor-pointer"
-                  : "bg-gray-300 text-gray-500 cursor-not-allowed"
-              }`}
+            <TravelButton
+              type="primary"
+              htmlType="submit"
+              disabled={isUpdating || !videoTitle.trim()}
+              className="!w-full !py-3"
             >
-              {isUploading ? (
+              {isUpdating ? (
                 <div className="flex items-center justify-center gap-2">
                   <div className="w-5 h-5 border-2 border-white rounded-full border-t-transparent animate-spin"></div>
-                  Đang tải video lên...
+                  Đang cập nhật...
                 </div>
               ) : (
                 <div className="flex items-center justify-center gap-2">
-                  <Icon icon="fluent:video-add-24-filled" className="w-5 h-5" />
-                  Tạo Video
+                  <Icon icon="fluent:checkmark-circle-24-filled" className="w-5 h-5" />
+                  Lưu thay đổi
                 </div>
               )}
-            </button>
+            </TravelButton>
           </div>
         </form>
       </div>
     </div>
   );
+
+  return createPortal(modalContent, document.body);
 };
 
-export default VideoCreateModal;
+export default WatchEditModal;

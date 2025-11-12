@@ -3,26 +3,22 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Icon } from "@iconify/react";
 import { message } from "antd";
 import { useSelector } from "react-redux";
-import { TravelButton } from "../../components/ui/customize";
+import { TravelButton } from "../../../components/ui/customize";
 import {
   CommentCreateModal,
   NestedComment,
   CommentSortDropdown,
   type SortOption,
-} from "../../components/modal/comment";
-import { ExpandableContent } from "../../components/ui";
-import { LikeButton } from "../../components/common/buttons";
-import { Swiper, SwiperSlide } from "swiper/react";
-import { Navigation, Pagination } from "swiper/modules";
-import type { Swiper as SwiperType } from "swiper";
-import avatardf from "../../assets/images/avatar_default.png";
-import { apiGetAllCommentsByPost } from "../../services/commentService";
-import { apiGetPostById } from "../../services/postService";
-import type { PostResponse } from "../../types/post.types";
-import type { RootState } from "../../stores/types/storeTypes";
-import { formatTimeAgo, formatPrivacy } from "../../utilities/helper";
-import "../../styles/swiper-custom.css";
-import "../../styles/post-modal.css";
+} from "../../../components/modal/comment";
+import { ExpandableContent } from "../../../components/ui";
+import { LikeButton } from "../../../components/common/buttons";
+import avatardf from "../../../assets/images/avatar_default.png";
+import { apiGetCommentsByWatchId } from "../../../services/commentService";
+import { apiGetWatchById, apiAddToHistory } from "../../../services/watchService";
+import type { RootState } from "../../../stores/types/storeTypes";
+import { formatTimeAgo, formatPrivacy } from "../../../utilities/helper";
+import type { WatchResponse } from "../../../types/video.types";
+import "../../../styles/post-modal.css";
 
 interface Comment {
   id?: string;
@@ -38,15 +34,13 @@ interface Comment {
   parentCommentId?: string;
 }
 
-const MediaPostDetailPage: React.FC = () => {
-  const { postId, mediaId } = useParams<{ postId: string; mediaId: string }>();
+const MediaWatchDetailPage: React.FC = () => {
+  const { watchId } = useParams<{ watchId: string }>();
   const navigate = useNavigate();
   const auth = useSelector((state: RootState) => state.auth);
 
-  const [postData, setPostData] = useState<PostResponse | null>(null);
+  const [watchData, setWatchData] = useState<WatchResponse | null>(null);
   const [loading, setLoading] = useState(true);
-  const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
-  const swiperRef = useRef<SwiperType | null>(null);
 
   const [comments, setComments] = useState<Comment[]>([]);
   const [commentPage, setCommentPage] = useState<number>(0);
@@ -62,47 +56,108 @@ const MediaPostDetailPage: React.FC = () => {
   const [showComments, setShowComments] = useState<boolean>(false);
 
   const observer = useRef<IntersectionObserver | null>(null);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const hasTrackedView = useRef<boolean>(false);
+  const viewTrackingTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Track video view and add to history
+  useEffect(() => {
+    const trackView = async () => {
+      if (!watchId || hasTrackedView.current || !auth.isLoggedIn) return;
+      
+      try {
+        await apiAddToHistory(watchId);
+        hasTrackedView.current = true;
+        console.log("Video added to history");
+      } catch (error) {
+        console.error("Error adding to history:", error);
+      }
+    };
+
+    const handleVideoPlay = () => {
+      if (hasTrackedView.current || !videoRef.current) return;
+
+      const duration = videoRef.current.duration;
+      const THIRTY_MINUTES = 30 * 60; // 30 minutes in seconds
+
+      // Clear any existing timeout
+      if (viewTrackingTimeout.current) {
+        clearTimeout(viewTrackingTimeout.current);
+      }
+
+      if (duration > THIRTY_MINUTES) {
+        // Video > 30 minutes: track after 30 minutes of watch time
+        viewTrackingTimeout.current = setTimeout(() => {
+          trackView();
+        }, THIRTY_MINUTES * 1000);
+      }
+      // For videos <= 30 minutes, track on ended event
+    };
+
+    const handleVideoEnded = () => {
+      if (hasTrackedView.current || !videoRef.current) return;
+
+      const duration = videoRef.current.duration;
+      const THIRTY_MINUTES = 30 * 60;
+
+      // Only track on ended if video <= 30 minutes
+      if (duration <= THIRTY_MINUTES) {
+        trackView();
+      }
+    };
+
+    const videoElement = videoRef.current;
+    if (videoElement) {
+      videoElement.addEventListener('play', handleVideoPlay);
+      videoElement.addEventListener('ended', handleVideoEnded);
+    }
+
+    return () => {
+      if (videoElement) {
+        videoElement.removeEventListener('play', handleVideoPlay);
+        videoElement.removeEventListener('ended', handleVideoEnded);
+      }
+      if (viewTrackingTimeout.current) {
+        clearTimeout(viewTrackingTimeout.current);
+      }
+    };
+  }, [watchId, auth.isLoggedIn]);
 
   useEffect(() => {
-    const fetchPostByPostId = async () => {
-      if (!postId) return;
+    const fetchWatchByWatchId = async () => {
+      if (!watchId) return;
 
       setLoading(true);
       try {
-        // Fetch post by postId
-        const response = await apiGetPostById(postId);
-        const post = response.data;
+        // Fetch watch by watchId
+        const response = await apiGetWatchById(watchId);
+        const watch = response.data;
 
-        setPostData(post);
-        setIsLiked(post.liked);
-        setLikeCount(post.likeCount);
-        setCommentCount(post.commentCount);
-        setShareCount(post.shareCount);
-
-        // Find the index of the media to focus on
-        const mediaIndex = post.mediaList.findIndex(
-          (m) => m.mediaId === mediaId
-        );
-        setCurrentMediaIndex(mediaIndex >= 0 ? mediaIndex : 0);
+        setWatchData(watch);
+        setIsLiked(watch.liked || false);
+        setLikeCount(watch.likeCount);
+        setCommentCount(watch.commentCount);
+        setShareCount(watch.shareCount);
       } catch (error) {
-        console.error("Error fetching post:", error);
-        message.error("Không thể tải bài viết");
+        console.error("Error fetching watch:", error);
+        message.error("Không thể tải video");
       } finally {
         setLoading(false);
       }
     };
 
-    fetchPostByPostId();
-  }, [postId, mediaId]);
+    fetchWatchByWatchId();
+  }, [watchId]);
 
   const fetchComments = useCallback(
     async (pageNum: number) => {
-      if (!postData?.postId) return;
+      if (!watchData?.watchId) return;
 
       setLoadingComments(true);
       try {
-        const commentResponse = await apiGetAllCommentsByPost(
-          postData.postId,
+        // Fetch comments for watch using watch-specific endpoint
+        const commentResponse = await apiGetCommentsByWatchId(
+          watchData.watchId,
           pageNum,
           commentSort
         );
@@ -121,14 +176,14 @@ const MediaPostDetailPage: React.FC = () => {
         setLoadingComments(false);
       }
     },
-    [postData?.postId, commentSort]
+    [watchData?.watchId, commentSort]
   );
 
   useEffect(() => {
-    if (postData?.postId && hasMoreComments) {
+    if (watchData?.watchId && hasMoreComments) {
       fetchComments(commentPage);
     }
-  }, [commentPage, postData?.postId, hasMoreComments, fetchComments]);
+  }, [commentPage, watchData?.watchId, hasMoreComments, fetchComments]);
 
   useEffect(() => {
     if (newComment) {
@@ -156,10 +211,6 @@ const MediaPostDetailPage: React.FC = () => {
     [loadingComments, hasMoreComments]
   );
 
-  const handleSlideChange = (swiper: SwiperType) => {
-    setCurrentMediaIndex(swiper.activeIndex);
-  };
-
   const handleCommentCountChange = () => {
     setCommentCount((prev) => prev + 1);
   };
@@ -170,150 +221,6 @@ const MediaPostDetailPage: React.FC = () => {
 
   const handleShareClick = () => {
     message.info("Chức năng chia sẻ đang được phát triển");
-  };
-
-  // Render header text based on postType
-  const renderHeaderText = () => {
-    if (postData?.postType === "AVATAR_UPDATE") {
-      return <span className="text-xs text-gray-600">{postData.content}</span>;
-    }
-
-    if (postData?.postType === "COVER_UPDATE") {
-      return <span className="text-xs text-gray-600">{postData.content}</span>;
-    }
-
-    // NORMAL post with location
-    if (postData?.location) {
-      return (
-        <>
-          <span className="text-xs text-gray-600">
-            {" "}
-            đã chia sẻ khoảnh khắc tại{" "}
-          </span>
-          <span className="text-xs text-gray-500 truncate">
-            {postData.location}
-          </span>
-        </>
-      );
-    }
-
-    return null;
-  };
-
-  const renderSingleImage = (img: string, index: number) => (
-    <div
-      key={index}
-      className="w-full h-[calc(100vh-112px)] flex items-center justify-center bg-black"
-    >
-      <img
-        src={img}
-        alt="post media"
-        className="w-full h-full object-cover cursor-pointer"
-      />
-    </div>
-  );
-
-  const renderVideo = (videoUrl: string) => (
-    <div className="w-full h-[calc(100vh-112px)] flex items-center justify-center bg-black">
-      <video src={videoUrl} controls className="w-full h-full object-cover">
-        Trình duyệt của bạn không hỗ trợ video.
-      </video>
-    </div>
-  );
-
-  const renderImageSlider = () => {
-    if (!postData?.mediaList || postData.mediaList.length === 0) return null;
-
-    // Separate images and videos
-    const imageMedia = postData.mediaList.filter(
-      (media) => media.type === "IMAGE"
-    );
-    const videoMedia = postData.mediaList.filter(
-      (media) => media.type === "VIDEO"
-    );
-
-    // If only one image, render single image
-    if (imageMedia.length === 1 && videoMedia.length === 0) {
-      return renderSingleImage(imageMedia[0].url, 0);
-    }
-
-    // If only one video, render single video
-    if (videoMedia.length === 1 && imageMedia.length === 0) {
-      return renderVideo(videoMedia[0].url);
-    }
-
-    // Multiple media - use Swiper
-    return (
-      <div className="relative w-full h-[calc(100vh-112px)]">
-        <Swiper
-          onSwiper={(swiper) => {
-            swiperRef.current = swiper;
-          }}
-          modules={[Navigation, Pagination]}
-          navigation={false}
-          pagination={{
-            clickable: true,
-            dynamicBullets: true,
-          }}
-          spaceBetween={0}
-          slidesPerView={1}
-          loop={false}
-          initialSlide={currentMediaIndex}
-          onSlideChange={handleSlideChange}
-          className="post-swiper w-full h-full"
-        >
-          {postData.mediaList.map((media, index) => (
-            <SwiperSlide key={media.mediaId || index} className="w-full h-full">
-              <div className="w-full h-full flex items-center justify-center bg-black">
-                {media.type === "VIDEO" ? (
-                  <video
-                    src={media.url}
-                    controls
-                    className="w-full h-full object-cover"
-                  >
-                    Trình duyệt của bạn không hỗ trợ video.
-                  </video>
-                ) : (
-                  <img
-                    src={media.url}
-                    alt={`media-${index}`}
-                    className="w-full h-full object-cover cursor-pointer"
-                  />
-                )}
-              </div>
-            </SwiperSlide>
-          ))}
-        </Swiper>
-
-        {/* Custom Navigation Buttons */}
-        {currentMediaIndex > 0 && (
-          <button
-            onClick={() => swiperRef.current?.slidePrev()}
-            className="absolute p-2 text-white transition-all duration-200 transform -translate-y-1/2 bg-black bg-opacity-50 rounded-full left-2 top-1/2 hover:bg-opacity-70 hover:scale-110 cursor-pointer active:scale-95 z-10"
-          >
-            <Icon icon="fluent:chevron-left-20-filled" className="w-5 h-5" />
-          </button>
-        )}
-
-        {currentMediaIndex < postData.mediaList.length - 1 && (
-          <button
-            onClick={() => swiperRef.current?.slideNext()}
-            className="absolute p-2 text-white transition-all duration-200 transform -translate-y-1/2 bg-black bg-opacity-50 rounded-full right-2 top-1/2 hover:bg-opacity-70 hover:scale-110 cursor-pointer active:scale-95 z-10"
-          >
-            <Icon icon="fluent:chevron-right-24-filled" className="w-5 h-5" />
-          </button>
-        )}
-
-        {/* Image Counter */}
-        <div className="absolute px-2 py-1 text-sm text-white bg-black bg-opacity-50 rounded-full bottom-2 right-2 z-10">
-          {currentMediaIndex + 1} / {postData.mediaList.length}
-        </div>
-      </div>
-    );
-  };
-
-  const renderMedia = () => {
-    return renderImageSlider();
   };
 
   if (loading) {
@@ -327,7 +234,7 @@ const MediaPostDetailPage: React.FC = () => {
     );
   }
 
-  if (!postData) {
+  if (!watchData) {
     return (
       <div className="h-[calc(100vh-56px)] bg-black flex items-center justify-center">
         <div className="text-center">
@@ -335,7 +242,7 @@ const MediaPostDetailPage: React.FC = () => {
             icon="fluent:error-circle-24-regular"
             className="h-16 w-16 mx-auto text-gray-400 mb-4"
           />
-          <p className="text-gray-400 mb-4">Không tìm thấy bài viết</p>
+          <p className="text-gray-400 mb-4">Không tìm thấy video</p>
           <TravelButton type="primary" onClick={() => navigate(-1)}>
             Quay lại
           </TravelButton>
@@ -362,31 +269,31 @@ const MediaPostDetailPage: React.FC = () => {
               </button>
               <div className="flex items-center space-x-2">
                 <img
-                  src={postData.user?.avatarImg || avatardf}
-                  alt={postData.user?.fullName}
+                  src={watchData.user?.avatarImg || avatardf}
+                  alt={watchData.user?.fullName || watchData.user?.userName}
                   className="w-10 h-10 rounded-full object-cover cursor-pointer"
                   onClick={() =>
-                    navigate(`/home/user/${postData.user?.userId}`)
+                    navigate(`/home/user/${watchData.user?.userId}`)
                   }
                 />
                 <div>
                   <h2
                     className="font-semibold text-gray-900 hover:underline cursor-pointer text-sm"
                     onClick={() =>
-                      navigate(`/home/user/${postData.user?.userId}`)
+                      navigate(`/home/user/${watchData.user?.userId}`)
                     }
                   >
-                    {postData.user?.fullName}
+                    {watchData.user?.fullName || watchData.user?.userName}
                   </h2>
                   <div className="flex items-center gap-1 text-xs text-gray-500">
-                    <span>{formatTimeAgo(postData.createdAt)}</span>
+                    <span>{formatTimeAgo(watchData.createdAt)}</span>
                     <Icon
                       icon="fluent:globe-24-filled"
                       className="w-3 h-3 ml-1"
                     />
-                    {postData.privacy && (
+                    {watchData.privacy && (
                       <span className="ml-1">
-                        • {formatPrivacy(postData.privacy)}
+                        • {formatPrivacy(watchData.privacy)}
                       </span>
                     )}
                   </div>
@@ -432,9 +339,19 @@ const MediaPostDetailPage: React.FC = () => {
 
       {/* Main Content */}
       <div className="flex flex-1 overflow-hidden relative">
-        {/* Left: Media Display */}
+        {/* Left: Video Player */}
         <div className="flex-1 flex items-center justify-center bg-black relative overflow-hidden">
-          {renderMedia()}
+          <div className="w-full h-[calc(100vh-112px)] flex items-center justify-center bg-black">
+            <video
+              ref={videoRef}
+              src={watchData.videoUrl}
+              controls
+              autoPlay
+              className="w-full h-full object-contain"
+            >
+              Trình duyệt của bạn không hỗ trợ video.
+            </video>
+          </div>
         </div>
 
         {/* Right: Info & Comments Panel */}
@@ -464,21 +381,24 @@ const MediaPostDetailPage: React.FC = () => {
               />
             </button>
           </div>
-          {/* Post Content Section */}
+
+          {/* Video Info Section */}
           <div className="p-4">
-            <span className="flex items-center mb-2 text-xl font-bold text-blue-600">
+            <span className="flex items-center mb-3 text-xl font-bold text-blue-600">
               <Icon
-                icon="fluent:compass-northwest-24-regular"
-                className="text-blue-600 w-7 h-7"
+                icon="fluent:video-24-filled"
+                className="text-blue-600 w-7 h-7 mr-2"
               />
-              TravelNest
+              Watch
             </span>
+
+            {/* Author info */}
             <div className="flex items-start space-x-3 mb-3">
               <img
-                src={postData.user?.avatarImg || avatardf}
-                alt={postData.user?.fullName}
+                src={watchData.user?.avatarImg || avatardf}
+                alt={watchData.user?.fullName || watchData.user?.userName}
                 className="w-10 h-10 rounded-full object-cover cursor-pointer flex-shrink-0"
-                onClick={() => navigate(`/home/user/${postData.user?.userId}`)}
+                onClick={() => navigate(`/home/user/${watchData.user?.userId}`)}
               />
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 justify-between">
@@ -486,12 +406,22 @@ const MediaPostDetailPage: React.FC = () => {
                     <span
                       className="font-semibold text-gray-800 hover:underline cursor-pointer text-sm"
                       onClick={() =>
-                        navigate(`/home/user/${postData.user?.userId}`)
+                        navigate(`/home/user/${watchData.user?.userId}`)
                       }
                     >
-                      {postData.user?.fullName}
+                      {watchData.user?.fullName || watchData.user?.userName}
                     </span>
-                    {renderHeaderText()}
+                    {watchData.location && (
+                      <>
+                        <span className="text-xs text-gray-600">
+                          {" "}
+                          đã chia sẻ video tại{" "}
+                        </span>
+                        <span className="text-xs text-gray-500 truncate">
+                          {watchData.location}
+                        </span>
+                      </>
+                    )}
                   </div>
                   <button className="text-gray-400 hover:text-gray-600 p-1 rounded-full hover:bg-gray-100 transition-colors flex-shrink-0">
                     <svg
@@ -506,31 +436,45 @@ const MediaPostDetailPage: React.FC = () => {
                   </button>
                 </div>
                 <div className="flex items-center gap-1 text-xs text-gray-400">
-                  <span>{formatTimeAgo(postData.createdAt)}</span>
+                  <span>{formatTimeAgo(watchData.createdAt)}</span>
                   <Icon
                     icon="fluent:globe-24-filled"
                     className="w-3 h-3 ml-1"
                   />
-                  {postData.privacy && (
+                  {watchData.privacy && (
                     <span className="ml-1">
-                      • {formatPrivacy(postData.privacy)}
+                      • {formatPrivacy(watchData.privacy)}
                     </span>
                   )}
                 </div>
               </div>
             </div>
 
-            {/* Content - Only show for NORMAL posts */}
-            {postData.postType === "NORMAL" && (
-              <div className="text-sm text-gray-900 mb-2 whitespace-pre-wrap">
-                <ExpandableContent content={postData.content} maxLines={5} />
+            {/* Title */}
+            <h2 className="text-lg font-semibold text-gray-900 mb-2">
+              {watchData.title}
+            </h2>
+
+            {/* Description */}
+            <div className="!text-sm text-gray-700 mb-3 max-h-[200px] overflow-y-auto">
+              <ExpandableContent
+                content={watchData.description || ""}
+                maxLines={3}
+              />
+            </div>
+
+            {/* Stats */}
+            <div className="flex items-center gap-4 text-sm text-gray-600 mb-3">
+              <div className="flex items-center gap-1">
+                <Icon icon="fluent:eye-24-regular" className="w-4 h-4" />
+                <span>{watchData.viewCount.toLocaleString()} lượt xem</span>
               </div>
-            )}
+            </div>
 
             {/* Tags */}
-            {postData.tags && postData.tags.length > 0 && (
+            {watchData.tags && watchData.tags.length > 0 && (
               <div className="flex flex-wrap gap-1 mb-3">
-                {postData.tags.map((tag, index) => (
+                {watchData.tags.map((tag, index) => (
                   <span
                     key={index}
                     className="text-sm text-blue-600 hover:underline cursor-pointer font-medium"
@@ -542,9 +486,24 @@ const MediaPostDetailPage: React.FC = () => {
             )}
 
             {/* Action buttons */}
-            <div className="flex items-center gap-3 sm:gap-6 pt-3 text-xs sm:text-sm text-gray-500">
+            <div className="flex items-center gap-3 sm:gap-6 pt-3 text-[11px] sm:text-xs text-black">
+              <div className="flex items-center gap-1">
+                <svg
+                  className="w-3.5 h-3.5 sm:w-4 sm:h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M14 9l-2-2-2 2m0 6l2 2 2-2"
+                  />
+                </svg>
+              </div>
               <LikeButton
-                postId={postData.postId}
+                watchId={watchData.watchId}
                 isLiked={isLiked}
                 setIsLiked={setIsLiked}
                 likeCount={likeCount}
@@ -553,7 +512,7 @@ const MediaPostDetailPage: React.FC = () => {
               <div className="flex items-center gap-1 transition-colors cursor-pointer hover:text-blue-500">
                 <Icon
                   icon="fluent:chat-24-filled"
-                  className="w-4 h-4 sm:w-5 sm:h-5"
+                  className="w-3.5 h-3.5 sm:w-4 sm:h-4"
                 />
                 <span>Bình luận {commentCount > 0 && `(${commentCount})`}</span>
               </div>
@@ -563,31 +522,32 @@ const MediaPostDetailPage: React.FC = () => {
               >
                 <Icon
                   icon="fluent:arrow-reply-24-filled"
-                  className="w-4 h-4 sm:w-5 sm:h-5"
+                  className="w-3.5 h-3.5 sm:w-4 sm:h-4"
                 />
                 <span>Chia sẻ {shareCount > 0 && `(${shareCount})`}</span>
               </div>
             </div>
-          </div>{" "}
+          </div>
+
           {/* Comments Section */}
           <div className="flex-1 overflow-y-auto">
             <div className="p-4">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 mb-3">
                 <Icon
                   icon="fluent:comment-multiple-24-filled"
                   className="w-6 h-6 text-blue-600"
                 />
                 <h2 className="text-xl font-bold text-gray-800">
-                  Comments ({postData.commentCount})
+                  Bình luận ({commentCount})
                 </h2>
               </div>
+
               {/* Sort Options */}
               <div className="flex items-center justify-between mb-4">
                 <CommentSortDropdown
                   currentSort={commentSort}
                   onSortChange={(sort) => {
                     setCommentSort(sort);
-                    // Reset and refetch comments with new sort
                     setCommentPage(0);
                     setComments([]);
                     setHasMoreComments(true);
@@ -623,7 +583,7 @@ const MediaPostDetailPage: React.FC = () => {
                           comment={comment}
                           level={0}
                           maxLevel={2}
-                          postId={postData.postId}
+                          watchId={watchData.watchId}
                           onReply={(parentId, content) => {
                             console.log(
                               "Reply to:",
@@ -657,10 +617,11 @@ const MediaPostDetailPage: React.FC = () => {
               </div>
             </div>
           </div>
+
           {/* Comment Input */}
           <div className="p-3 bg-white sticky bottom-0">
             <CommentCreateModal
-              postId={postData.postId}
+              watchId={watchData.watchId}
               handleComment={() => {}}
               setNewComment={(comment: Comment) => setNewComment(comment)}
               currentUserAvatar={auth.avatar || avatardf}
@@ -673,4 +634,4 @@ const MediaPostDetailPage: React.FC = () => {
   );
 };
 
-export default MediaPostDetailPage;
+export default MediaWatchDetailPage;

@@ -1,5 +1,6 @@
 import React, { useState, useRef } from "react";
 import { Icon } from "@iconify/react";
+import { Skeleton } from "antd";
 import PostDetailModal from "./PostDetailModal";
 import SharePostModal from "./SharePostModal";
 import PostEditModal from "./PostEditModal";
@@ -59,6 +60,7 @@ interface PostModalProps {
   privacy?: string;
   group?: Group | null;
   postType?: "NORMAL" | "AVATAR_UPDATE" | "COVER_UPDATE";
+  loading?: boolean;
   onShare?: () => void;
   onImageClick?: (img: string, index: number) => void;
   liked?: boolean;
@@ -87,6 +89,7 @@ const PostModal: React.FC<PostModalProps> = ({
   privacy,
   group = null,
   postType = "NORMAL",
+  loading = false,
   onShare,
   onImageClick,
   liked = false,
@@ -531,6 +534,35 @@ const PostModal: React.FC<PostModalProps> = ({
     );
   };
 
+  // Skeleton Loading State
+  if (loading) {
+    return (
+      <div className="w-full p-3 sm:p-4 mb-4 sm:mb-6 bg-white shadow rounded-xl">
+        {/* User Header Skeleton */}
+        <div className="flex items-center gap-2 sm:gap-3 mb-3">
+          <Skeleton.Avatar active size={40} />
+          <div className="flex-1">
+            <Skeleton.Input active size="small" style={{ width: 150, marginBottom: 8 }} />
+            <Skeleton.Input active size="small" style={{ width: 100 }} />
+          </div>
+        </div>
+
+        {/* Content Skeleton */}
+        <Skeleton active paragraph={{ rows: 3 }} className="mb-3" />
+
+        {/* Image/Video Skeleton */}
+        <Skeleton.Image active style={{ width: '100%', height: 400 }} className="rounded-xl mb-3" />
+
+        {/* Action Buttons Skeleton */}
+        <div className="flex items-center gap-3 sm:gap-6 pt-3 border-t border-gray-200">
+          <Skeleton.Button active size="small" style={{ width: 80 }} />
+          <Skeleton.Button active size="small" style={{ width: 100 }} />
+          <Skeleton.Button active size="small" style={{ width: 80 }} />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <>
       <div className="w-full p-3 sm:p-4 mb-4 sm:mb-6 bg-white shadow rounded-xl">
@@ -653,7 +685,7 @@ const PostModal: React.FC<PostModalProps> = ({
         {!isShare && displayImages.length > 0 && renderImageSlider()}
 
         {/* Action buttons */}
-        <div className="flex items-center gap-3 sm:gap-6 pt-3 text-xs sm:text-sm text-gray-500">
+        <div className="flex items-center gap-3 sm:gap-6 pt-3 text-xs sm:text-sm text-black">
           <div className="flex items-center gap-1">
             <svg
               className="w-4 h-4 sm:w-5 sm:h-5"

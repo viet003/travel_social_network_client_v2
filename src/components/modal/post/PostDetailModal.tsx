@@ -11,7 +11,7 @@ import { LikeButton } from "../../common";
 import { useNavigate } from "react-router-dom";
 import { TravelImage, ExpandableContent } from "../../ui";
 import avatardf from "../../../assets/images/avatar_default.png";
-import { apiGetAllCommentsByPost } from "../../../services/commentService";
+import { apiGetCommentsByPostId } from "../../../services/commentService";
 import type { PostResponse as PostResponseType } from "../../../types/post.types";
 import SharedPostPreview from "./SharedPostPreview";
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -142,7 +142,7 @@ const PostDetailModal: React.FC<PostDetailModalProps> = ({
   const fetchPostComments = async (pageNum: number) => {
     setLoading(true);
     try {
-      const commentResponse = await apiGetAllCommentsByPost(
+      const commentResponse = await apiGetCommentsByPostId(
         postId,
         pageNum,
         commentSort

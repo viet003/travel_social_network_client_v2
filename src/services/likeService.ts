@@ -2,30 +2,29 @@ import axiosConfig from "../configurations/axiosConfig";
 import type { ApiResponse } from "../types/post.types";
 
 /**
- * Like/Unlike response type matching backend LikePostResponse
+ * Content like response type matching backend ContentLikeResponse
  */
-export interface LikePostResponse {
-  postId: string;
+export interface ContentLikeResponse {
+  contentId: string; // Can be postId or watchId
   likeCount: number;
   liked: boolean;
 }
 
 /**
- * Toggle like status for a post
- * Endpoint: PUT /like/{postId}
- * Description: Toggle like status for a specific post by its ID.
- * If the post is already liked by the authenticated user, this request will remove the like;
- * otherwise, it will add a new like.
+ * Toggle like on post
+ * Endpoint: PUT /like/post/{postId}
+ * Description: Like or unlike a specific post by its ID.
+ * If already liked, the like will be removed; otherwise, a new like will be added.
  * @param postId - Post UUID
- * @returns Like response with updated count and status
+ * @returns Content like response with updated count and status
  */
-export const apiToggleLikePost = async (
+export const apiToggleLikeOnPost = async (
   postId: string
-): Promise<ApiResponse<LikePostResponse>> => {
+): Promise<ApiResponse<ContentLikeResponse>> => {
   try {
     const response = await axiosConfig({
       method: 'PUT',
-      url: `/like/${postId}`
+      url: `/like/post/${postId}`
     });
     return response.data;
   } catch (error: unknown) {
@@ -36,5 +35,43 @@ export const apiToggleLikePost = async (
   }
 };
 
-// Legacy export for backward compatibility (deprecated)
-export const apiUpdateLikeOnPostService = apiToggleLikePost;
+/**
+ * Toggle like on watch
+ * Endpoint: PUT /like/watch/{watchId}
+ * Description: Like or unlike a specific watch/video by its ID.
+ * If already liked, the like will be removed; otherwise, a new like will be added.
+ * @param watchId - Watch UUID
+ * @returns Content like response with updated count and status
+ */
+export const apiToggleLikeOnWatch = async (
+  watchId: string
+): Promise<ApiResponse<ContentLikeResponse>> => {
+  try {
+    const response = await axiosConfig({
+      method: 'PUT',
+      url: `/like/watch/${watchId}`
+    });
+    return response.data;
+  } catch (error: unknown) {
+    if (error && typeof error === 'object' && 'response' in error) {
+      throw (error as { response: { data: unknown } }).response.data;
+    }
+    throw error;
+  }
+};
+
+/**
+ * Generic toggle like function that works for both posts and watches
+ * @param contentId - Content UUID (post or watch)
+ * @param contentType - Type of content ('post' or 'watch')
+ * @returns Content like response with updated count and status
+ */
+export const apiToggleLikeOnContent = async (
+  contentId: string,
+  contentType: 'post' | 'watch' = 'post'
+): Promise<ApiResponse<ContentLikeResponse>> => {
+  if (contentType === 'watch') {
+    return apiToggleLikeOnWatch(contentId);
+  }
+  return apiToggleLikeOnPost(contentId);
+};

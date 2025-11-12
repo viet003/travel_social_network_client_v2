@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Icon } from '@iconify/react';
-import { apiToggleLikePost } from '../../../services/likeService';
+import { apiToggleLikeOnPost, apiToggleLikeOnWatch } from '../../../services/likeService';
 import { message } from 'antd';
 
 interface LikeButtonProps {
@@ -9,7 +9,8 @@ interface LikeButtonProps {
   likeCount: number;
   setLikeCount: (count: number) => void;
   className?: string;
-  postId: string;
+  postId?: string;
+  watchId?: string;
 }
 
 const LikeButton: React.FC<LikeButtonProps> = ({ 
@@ -18,13 +19,19 @@ const LikeButton: React.FC<LikeButtonProps> = ({
   likeCount, 
   setLikeCount, 
   className = '', 
-  postId 
+  postId,
+  watchId
 }) => {
   const [isAnimating, setIsAnimating] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleLike = async () => {
     if (isLoading) return; // Prevent multiple clicks
+    
+    if (!postId && !watchId) {
+      message.error('Không xác định được nội dung để thích!');
+      return;
+    }
     
     try {
       setIsLoading(true);
@@ -47,8 +54,10 @@ const LikeButton: React.FC<LikeButtonProps> = ({
         setTimeout(() => setIsAnimating(false), 600);
       }
       
-      // Call API
-      const response = await apiToggleLikePost(postId);
+      // Call appropriate API based on content type
+      const response = postId 
+        ? await apiToggleLikeOnPost(postId)
+        : await apiToggleLikeOnWatch(watchId!);
       
       // Verify response and sync if needed
       if (response?.data) {
