@@ -163,8 +163,18 @@ const MyVideosPage: React.FC = () => {
       </div>
 
       {/* Page Title */}
-      <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Video của tôi</h1>
+      <div className="mb-6">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Icon icon="fluent:video-24-filled" className="w-10 h-10 text-gray-900" />
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">Video của tôi</h1>
+              <p className="text-gray-600 text-sm">
+                Quản lý và theo dõi các video đã tải lên
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Statistics */}

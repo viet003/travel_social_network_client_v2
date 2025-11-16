@@ -615,7 +615,7 @@ const UserProfilePage: React.FC = () => {
             {[
               { id: "posts", label: "Bài viết", icon: "lucide:camera", tooltip: "Xem bài viết" },
               { id: "photos", label: "Ảnh", icon: "lucide:image", tooltip: "Xem ảnh" },
-              { id: "videos", label: "Video", icon: "fluent:video-24-filled", tooltip: "Xem video" },
+              { id: "videos", label: "Video", icon: "lucide:video", tooltip: "Xem video" },
               {
                 id: "reviews",
                 label: "Đánh giá",

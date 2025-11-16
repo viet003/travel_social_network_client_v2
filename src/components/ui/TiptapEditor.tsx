@@ -1,23 +1,33 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Placeholder from '@tiptap/extension-placeholder';
 import Link from '@tiptap/extension-link';
+import Image from '@tiptap/extension-image';
 import { Icon } from '@iconify/react';
+import { toast } from 'react-toastify';
+import { apiUploadMedia } from '../../services/mediaService';
 
 interface TiptapEditorProps {
   content: string;
   onChange: (content: string) => void;
+  onMediaUpload?: (mediaId: string) => void;
   placeholder?: string;
   maxLength?: number;
+  className?: string;
 }
 
 const TiptapEditor: React.FC<TiptapEditorProps> = ({
   content,
   onChange,
+  onMediaUpload,
   placeholder = 'Bắt đầu viết...',
-  maxLength = 2000
+  maxLength = 2000,
+  className = ''
 }) => {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isUploading, setIsUploading] = useState(false);
+
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
@@ -33,6 +43,13 @@ const TiptapEditor: React.FC<TiptapEditorProps> = ({
         HTMLAttributes: {
           class: 'text-blue-600 underline hover:text-blue-800'
         }
+      }),
+      Image.configure({
+        inline: true,
+        allowBase64: true,
+        HTMLAttributes: {
+          class: 'max-w-full h-auto rounded-lg my-4'
+        }
       })
     ],
     content,
@@ -45,7 +62,7 @@ const TiptapEditor: React.FC<TiptapEditorProps> = ({
     },
     editorProps: {
       attributes: {
-        class: 'prose prose-sm sm:prose lg:prose-lg xl:prose-xl focus:outline-none min-h-[150px] max-w-none p-4'
+        class: `prose prose-sm sm:prose lg:prose-lg xl:prose-xl focus:outline-none min-h-[150px] max-w-none p-4 ${className}`
       }
     }
   });
@@ -74,6 +91,56 @@ const TiptapEditor: React.FC<TiptapEditorProps> = ({
   };
 
   const removeLink = () => editor?.chain().focus().unsetLink().run();
+
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast.error('Vui lòng chọn file hình ảnh!');
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Kích thước ảnh không được vượt quá 5MB!');
+      return;
+    }
+
+    // Upload to server
+    setIsUploading(true);
+    try {
+      const response = await apiUploadMedia(file, 'blog');
+      const { mediaId, url } = response.data;
+      
+      // Insert image with server URL
+      editor?.chain().focus().setImage({ src: url }).run();
+      
+      // Notify parent component about uploaded media
+      if (onMediaUpload) {
+        onMediaUpload(mediaId);
+      }
+      
+      toast.success('Tải ảnh lên thành công!');
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      toast.error('Không thể tải ảnh lên. Vui lòng thử lại!');
+    } finally {
+      setIsUploading(false);
+      // Reset input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
+  const addImageFromUrl = () => {
+    const url = window.prompt('Nhập URL hình ảnh:');
+    if (url) {
+      editor?.chain().focus().setImage({ src: url }).run();
+    }
+  };
 
   if (!editor) {
     return null;
@@ -172,6 +239,41 @@ const TiptapEditor: React.FC<TiptapEditorProps> = ({
             <Icon icon="fluent:link-24-filled" className="w-4 h-4" />
           </button>
         )}
+
+        <div className="w-px h-6 bg-gray-300 mx-1"></div>
+
+        <button
+          type="button"
+          onClick={() => fileInputRef.current?.click()}
+          disabled={isUploading}
+          className={`p-2 rounded hover:bg-gray-200 transition-colors ${
+            isUploading ? 'opacity-50 cursor-not-allowed' : 'text-gray-700'
+          }`}
+          title={isUploading ? "Đang tải ảnh lên..." : "Upload Image"}
+        >
+          {isUploading ? (
+            <Icon icon="fluent:spinner-ios-20-filled" className="w-4 h-4 animate-spin" />
+          ) : (
+            <Icon icon="fluent:image-add-24-filled" className="w-4 h-4" />
+          )}
+        </button>
+
+        <button
+          type="button"
+          onClick={addImageFromUrl}
+          className="p-2 rounded hover:bg-gray-200 transition-colors text-gray-700"
+          title="Insert Image URL"
+        >
+          <Icon icon="fluent:image-24-filled" className="w-4 h-4" />
+        </button>
+
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          onChange={handleImageUpload}
+          className="hidden"
+        />
       </div>
 
       {/* Editor Content */}

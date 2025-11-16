@@ -1,5 +1,7 @@
 import React, { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Icon } from '@iconify/react';
+import { path } from '../../../../utilities/path';
 
 interface CreateDropdownProps {
   onClose?: () => void;
@@ -13,55 +15,47 @@ interface CreateMenuItem {
 }
 
 const CreateDropdown: React.FC<CreateDropdownProps> = ({ onClose }) => {
-  // Menu items based on the image
+  const navigate = useNavigate();
+
+  // Navigation handler
+  const handleNavigate = (route: string) => {
+    navigate(route);
+    if (onClose) {
+      onClose();
+    }
+  };
+
+  // Menu items matching Header navigation
   const createMenuItems: CreateMenuItem[] = [
     {
-      id: 'post',
-      icon: <Icon icon="fluent:edit-24-filled" className="w-6 h-6 text-black" />,
-      title: 'Đăng',
-      onClick: () => console.log('Create post clicked')
+      id: 'home',
+      icon: <Icon icon="fluent:home-24-filled" className="w-6 h-6 text-black" />,
+      title: 'Trang chủ',
+      onClick: () => handleNavigate(path.HOME)
     },
     {
-      id: 'story',
-      icon: <Icon icon="fluent:book-24-filled" className="w-6 h-6 text-black" />,
-      title: 'Tin',
-      onClick: () => console.log('Create story clicked')
-    },
-    {
-      id: 'reel',
-      icon: <Icon icon="fluent:video-24-filled" className="w-6 h-6 text-black" />,
-      title: 'Thước phim',
-      onClick: () => console.log('Create reel clicked')
-    },
-    {
-      id: 'life_event',
-      icon: <Icon icon="fluent:star-24-filled" className="w-6 h-6 text-black" />,
-      title: 'Sự kiện trong đời',
-      onClick: () => console.log('Create life event clicked')
-    },
-    {
-      id: 'page',
-      icon: <Icon icon="fluent:flag-24-filled" className="w-6 h-6 text-black" />,
-      title: 'Trang',
-      onClick: () => console.log('Create page clicked')
-    },
-    {
-      id: 'ad',
-      icon: <Icon icon="fluent:megaphone-24-filled" className="w-6 h-6 text-black" />,
-      title: 'Quảng cáo',
-      onClick: () => console.log('Create ad clicked')
-    },
-    {
-      id: 'group',
+      id: 'friends',
       icon: <Icon icon="fluent:people-24-filled" className="w-6 h-6 text-black" />,
-      title: 'Nhóm',
-      onClick: () => console.log('Create group clicked')
+      title: 'Bạn bè',
+      onClick: () => handleNavigate(`${path.HOME}/${path.FRIENDS}`)
     },
     {
-      id: 'event',
-      icon: <Icon icon="fluent:calendar-24-filled" className="w-6 h-6 text-black" />,
-      title: 'Sự kiện',
-      onClick: () => console.log('Create event clicked')
+      id: 'watch',
+      icon: <Icon icon="fluent:play-24-filled" className="w-6 h-6 text-black" />,
+      title: 'Watch',
+      onClick: () => handleNavigate(`${path.HOME}/${path.WATCH}`)
+    },
+    {
+      id: 'groups',
+      icon: <Icon icon="fluent:people-community-24-filled" className="w-6 h-6 text-black" />,
+      title: 'Nhóm',
+      onClick: () => handleNavigate(`${path.HOME}/${path.GROUPS}`)
+    },
+    {
+      id: 'explore',
+      icon: <Icon icon="fluent:globe-search-24-filled" className="w-6 h-6 text-black" />,
+      title: 'Khám phá',
+      onClick: () => handleNavigate(`${path.HOME}/${path.EXPLORE}`)
     },
   ];
 

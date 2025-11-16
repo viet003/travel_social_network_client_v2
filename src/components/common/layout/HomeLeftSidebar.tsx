@@ -53,7 +53,7 @@ const LeftSidebar: React.FC<LeftSidebarProps> = () => {
       text: 'Tin nhắn',
       hasNotification: true,
       notificationCount: 12,
-      route: undefined // No route defined, will redirect to home
+      route: undefined 
     },
     {
       icon: <Icon icon="fluent:people-16-filled" className="w-7 h-7 text-green-500" />,
@@ -69,7 +69,7 @@ const LeftSidebar: React.FC<LeftSidebarProps> = () => {
     {
       icon: <Icon icon="fluent:person-24-filled" className="w-7 h-7 text-purple-500" />,
       text: 'Trang cá nhân',
-      route: userId ? `/home/user/${userId}` : path.HOME
+      route: userId ? `${path.HOME}/${path.USER}/${userId}` : path.HOME
     },
     {
       icon: <Icon icon="fluent:people-community-16-filled" className="w-7 h-7 text-indigo-500" />,
@@ -86,14 +86,9 @@ const LeftSidebar: React.FC<LeftSidebarProps> = () => {
       route: `${path.HOME}/${path.EXPLORE}`
     },
     {
-      icon: <Icon icon="fluent:bookmark-16-filled" className="w-7 h-7 text-yellow-500" />,
-      text: 'Đã lưu',
-      route: undefined // No route defined, will redirect to home
-    },
-    {
-      icon: <Icon icon="fluent:thumb-like-16-filled" className="w-7 h-7 text-pink-500" />,
-      text: 'Gợi ý',
-      route: undefined // No route defined, will redirect to home
+      icon: <Icon icon="fluent:play-circle-16-filled" className="w-7 h-7 text-red-500" />,
+      text: 'Watch',
+      route: `${path.HOME}/${path.WATCH}`
     },
   ];
 

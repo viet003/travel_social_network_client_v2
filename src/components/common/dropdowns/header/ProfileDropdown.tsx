@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { Icon } from '@iconify/react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { logout } from '../../../../stores/actions/authAction';
 import avatardf from '../../../../assets/images/avatar_default.png';
+import { path } from '../../../../utilities/path';
 
 interface AuthState {
   userId: string | null;
@@ -29,7 +30,6 @@ interface MenuItem {
 }
 
 const ProfileDropdown: React.FC<ProfileDropdownProps> = ({ onClose }) => {
-  const [showAllPages, setShowAllPages] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -71,6 +71,14 @@ const ProfileDropdown: React.FC<ProfileDropdownProps> = ({ onClose }) => {
     }
   ];
 
+  // Handle navigation and close
+  const handleNavigateAndClose = (route: string) => {
+    navigate(route);
+    if (onClose) {
+      onClose();
+    }
+  };
+
   // Menu items
   const menuItems: MenuItem[] = [
     {
@@ -78,21 +86,14 @@ const ProfileDropdown: React.FC<ProfileDropdownProps> = ({ onClose }) => {
       icon: <Icon icon="fluent:settings-24-filled" className="w-6 h-6 text-black" />,
       title: 'Cài đặt và quyền riêng tư',
       hasArrow: true,
-      onClick: () => console.log('Settings clicked')
+      onClick: () => handleNavigateAndClose(`${path.HOME}/${path.SETTINGS}`)
     },
     {
       id: 'help',
       icon: <Icon icon="fluent:question-circle-24-filled" className="w-6 h-6 text-black" />,
       title: 'Trợ giúp và hỗ trợ',
       hasArrow: true,
-      onClick: () => console.log('Help clicked')
-    },
-    {
-      id: 'display',
-      icon: <Icon icon="fluent:dark-theme-24-filled" className="w-6 h-6 text-black" />,
-      title: 'Màn hình và trợ năng',
-      hasArrow: true,
-      onClick: () => console.log('Display clicked')
+      onClick: () => handleNavigateAndClose(`${path.HOME}/${path.FEEDBACK}`)
     },
     {
       id: 'feedback',
@@ -100,7 +101,7 @@ const ProfileDropdown: React.FC<ProfileDropdownProps> = ({ onClose }) => {
       title: 'Đóng góp ý kiến',
       description: 'CTRL B',
       hasArrow: false,
-      onClick: () => console.log('Feedback clicked')
+      onClick: () => handleNavigateAndClose(`${path.HOME}/${path.FEEDBACK}`)
     },
     {
       id: 'logout',
@@ -179,10 +180,10 @@ const ProfileDropdown: React.FC<ProfileDropdownProps> = ({ onClose }) => {
         {/* Show All Pages Button */}
         <button 
           className="w-full flex items-center justify-center space-x-2 py-2 px-3 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors cursor-pointer"
-          onClick={() => setShowAllPages(!showAllPages)}
+          onClick={handleProfileClick}
         >
           <Icon icon="fluent:people-24-filled" className="w-6 h-6 text-black" />
-          <span className="text-sm">Xem tất cả trang cá nhân</span>
+          <span className="text-sm">Xem trang cá nhân</span>
         </button>
       </div>
       

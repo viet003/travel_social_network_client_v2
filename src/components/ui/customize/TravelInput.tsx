@@ -6,6 +6,7 @@ interface TravelInputProps {
   placeholder?: string;
   value?: string;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onKeyPress?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
   required?: boolean;
   maxLength?: number;
   minLength?: number;
@@ -18,6 +19,7 @@ const TravelInput: React.FC<TravelInputProps> = ({
   placeholder,
   value,
   onChange,
+  onKeyPress,
   required = false,
   maxLength,
   minLength,
@@ -66,6 +68,7 @@ const TravelInput: React.FC<TravelInputProps> = ({
         placeholder={placeholder}
         value={value}
         onChange={onChange}
+        onKeyPress={onKeyPress}
         required={required}
         maxLength={maxLength}
         minLength={minLength}

@@ -8,8 +8,8 @@
 
   /* Global scrollbar - chỉ áp dụng cho elements không có class scrollbar-hide */
   :not(.scrollbar-hide)::-webkit-scrollbar {
-    width: 4px;
-    height: 6px;
+    width: 8px;
+    height: 8px;
   }
 
   :not(.scrollbar-hide)::-webkit-scrollbar-track {
@@ -19,7 +19,6 @@
   :not(.scrollbar-hide)::-webkit-scrollbar-thumb {
     border-radius: 4px;
     background: #cbd5e0;
-    height: 6px;
   }
 
   .active {
