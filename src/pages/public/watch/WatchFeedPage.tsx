@@ -160,20 +160,36 @@ const WatchFeedPage: React.FC = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      {/* Action Buttons */}
-      <div className="mb-6 flex justify-end gap-3 flex-wrap">
-        <button
-          onClick={() => navigate('/home/watch/trending')}
-          className="flex items-center cursor-pointer gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-700 text-white font-semibold rounded-lg hover:from-orange-600 hover:to-red-600 transition-all shadow-md hover:shadow-lg"
-        >
-          <Icon icon="fluent:fire-24-filled" className="w-5 h-5" />
-          Video thịnh hành
-        </button>
+      {/* Header */}
+      <div className="mb-6">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Icon icon="fluent:play-circle-24-filled" className="w-10 h-10 text-gray-900" />
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">Video Feed</h1>
+              <p className="text-gray-600 text-sm">
+                Khám phá các video mới và thịnh hành
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={() => navigate('/home/watch/trending')}
+            className="flex items-center cursor-pointer gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors whitespace-nowrap flex-shrink-0"
+          >
+            <Icon icon="fluent:fire-24-filled" className="w-4 h-4" />
+            Video thịnh hành
+          </button>
+        </div>
       </div>
 
       {/* Featured Videos */}
       <div className="mb-8">
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">Video nổi bật</h2>
+        <div className="border-l-4 border-gray-900 pl-4 mb-4">
+          <h2 className="text-xl font-semibold text-gray-900">Video nổi bật</h2>
+          <p className="text-gray-600 text-sm">
+            Những video được chọn lọc và đề xuất đặc biệt
+          </p>
+        </div>
         <div className="relative">
           <Swiper
             onSwiper={(swiper) => {
@@ -257,7 +273,12 @@ const WatchFeedPage: React.FC = () => {
 
       {/* Recent Videos */}
       <div>
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">Video gần đây</h2>
+        <div className="border-l-4 border-gray-900 pl-4 mb-4">
+          <h2 className="text-xl font-semibold text-gray-900">Video gần đây</h2>
+          <p className="text-gray-600 text-sm">
+            Video mới được đăng tải từ cộng đồng
+          </p>
+        </div>
         <div className="space-y-6">
           {recentVideos.map((video) => (
             <WatchModal

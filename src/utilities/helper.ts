@@ -44,3 +44,17 @@ export const formatPrivacy = (privacy: string | null | undefined): string => {
   
   return privacyMap[privacy] || privacy;
 };
+
+export const formatDate = (dateString: string): string => {
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffInMs = now.getTime() - date.getTime();
+  const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
+  
+  if (diffInDays === 0) return "Hôm nay";
+  if (diffInDays === 1) return "1 ngày trước";
+  if (diffInDays < 7) return `${diffInDays} ngày trước`;
+  if (diffInDays < 30) return `${Math.floor(diffInDays / 7)} tuần trước`;
+  if (diffInDays < 365) return `${Math.floor(diffInDays / 30)} tháng trước`;
+  return `${Math.floor(diffInDays / 365)} năm trước`;
+};
