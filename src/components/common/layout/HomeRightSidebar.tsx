@@ -1,5 +1,6 @@
 import React from 'react';
 import { Icon } from '@iconify/react';
+import { SimpleCalendar } from '../cards';
 
 const RightSidebar: React.FC = () => {
   // Contact list
@@ -30,6 +31,20 @@ const RightSidebar: React.FC = () => {
 
   return (
     <div className="w-80 bg-white p-4 sticky top-0 h-[calc(100vh-60px)] overflow-y-auto">
+      {/* Calendar Section */}
+      <div className="mb-6">
+        <h3 className="font-semibold text-black mb-4">Lịch</h3>
+        <SimpleCalendar 
+          events={{
+            '2025-11-18': true,
+            '2025-11-20': true,
+            '2025-11-25': true,
+          }}
+          onDateClick={(date) => console.log(date.format('YYYY-MM-DD'))}
+          eventColor="#1890ff"
+        />
+      </div>
+
       {/* Contacts Section */}
       <div className="mb-6">
         <div className="flex items-center justify-between mb-4">

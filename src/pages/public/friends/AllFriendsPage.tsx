@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { useDispatch } from 'react-redux';
 import { Icon } from '@iconify/react';
 import FriendCard from '../../../components/common/cards/FriendCard';
 import { SearchFriendDropdown } from '../../../components/common/dropdowns';
 import type { UserResultItemProps } from '../../../components/common/items';
 import { apiGetMyFriends, apiUnfriend } from '../../../services/friendshipService';
+import { createOrGetPrivateConversation } from '../../../stores/actions/conversationAction';
 import type { UserResponse } from '../../../types/friendship.types';
 import { toast } from 'react-toastify';
 import { useLoading } from '../../../hooks/useLoading';
@@ -11,6 +13,7 @@ import ConfirmDeleteModal from '../../../components/modal/confirm/ConfirmDeleteM
 import avatardf from '../../../assets/images/avatar_default.png';
 
 const AllFriendsPage: React.FC = () => {
+  const dispatch = useDispatch();
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearchResults, setShowSearchResults] = useState(false);
   const [allFriends, setAllFriends] = useState<UserResponse[]>([]);
@@ -78,6 +81,17 @@ const AllFriendsPage: React.FC = () => {
     } finally {
       setShowConfirmDelete(false);
       setFriendToUnfriend(null);
+    }
+  };
+
+  // Handle message action - create/get conversation and open chat
+  const handleMessage = async (userId: string, friendName: string) => {
+    try {
+      await dispatch(createOrGetPrivateConversation(userId) as any);
+      toast.success(`Đang mở cuộc trò chuyện với ${friendName}`);
+    } catch (error) {
+      console.error('Error creating conversation:', error);
+      toast.error('Không thể mở cuộc trò chuyện');
     }
   };
 
@@ -171,7 +185,7 @@ const AllFriendsPage: React.FC = () => {
               primaryAction={{
                 label: 'Nhắn tin',
                 icon: 'fluent:chat-24-filled',
-                onClick: () => console.log('Message', friend.userId),
+                onClick: () => handleMessage(friend.userId || '', friend.userProfile.fullName || friend.userName),
                 variant: 'secondary'
               }}
               secondaryAction={{

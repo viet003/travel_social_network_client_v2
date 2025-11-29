@@ -11,6 +11,7 @@ import logo from '../../../assets/images/logo.png';
 import avatardf from '../../../assets/images/avatar_default.png';
 import { path } from '../../../utilities/path';
 import { SearchResultDropdown, ChatDropdown, NotificationsDropdown, ProfileDropdown, CreateDropdown } from '../dropdowns';
+import { useNotification } from '../../../hooks/useNotification';
 
 interface AuthState {
   userId: string | null;
@@ -61,6 +62,9 @@ const Header: React.FC = () => {
 
   const navigate = useNavigate();
   const location = useLocation();
+  
+  // Get unread notification count from hook
+  const { unreadCount } = useNotification();
 
   const isRouteActive = (routePath: string): boolean => {
     if (routePath === path.HOME) {
@@ -229,7 +233,11 @@ const Header: React.FC = () => {
               >
                 <Icon icon="fluent:alert-24-filled" className="h-5 w-5 text-black" />
                 {/* Notification badge */}
-                <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">5</span>
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
+                    {unreadCount}
+                  </span>
+                )}
               </button>
 
               {/* Notifications Dropdown */}
