@@ -2,4 +2,4 @@
 export * from './public';
 
 // System pages (if any)
-// export * from './system';
+export * from './system';

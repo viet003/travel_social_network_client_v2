@@ -27,6 +27,12 @@ export interface WatchResponse {
     liked?: boolean; // Client-side: if current user liked
     saved?: boolean; // Client-side: if current user saved
     watched?: boolean; // Client-side: if current user watched
+    contentModeration?: {
+        moderationId: string;
+        moderationReason: string;
+        moderatedAt: string;
+        moderatedByUserId: string;
+    } | null;
 }
 
 export interface WatchWithIdsResponse extends WatchResponse {

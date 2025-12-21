@@ -1,8 +1,4 @@
 import axiosConfig from "../configurations/axiosConfig";
-
-interface ApiResponse<T = any> {
-    data: T;
-    [key: string]: any;
-}
+import type { ApiResponse } from "../types/common.types";
 
 // Group Member Service - API calls for group member operations

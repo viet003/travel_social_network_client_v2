@@ -19,6 +19,12 @@ export interface Blog {
   createdAt: string;
   updatedAt: string;
   hasReviewed?: boolean; // True if current user has already reviewed this blog
+  contentModeration?: {
+    moderationId: string;
+    moderationReason: string;
+    moderatedAt: string;
+    moderatedByUserId: string;
+  } | null;
 }
 
 export interface UserSummary {

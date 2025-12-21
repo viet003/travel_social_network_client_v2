@@ -1,72 +1,7 @@
 import axiosConfig from "../configurations/axiosConfig";
-
-/**
- * Group Response Types
- */
-
-export interface FriendMember {
-  userId: string;
-  name: string;
-  avatar: string | null;
-}
-
-export interface GroupMemberResponse {
-  userId: string;
-  firstName: string;
-  lastName: string;
-  fullName: string;
-  avatar: string | null;
-  role: string; // OWNER, ADMIN, MODERATOR, MEMBER
-  status: string; // PENDING, APPROVED
-  isFriend: boolean;
-  postsCount: number;
-  joinedAt: string; // ISO date string
-}
-
-export interface PostMediaResponse {
-  mediaId: number;
-  postId: string;
-  url: string;
-  type: 'IMAGE' | 'VIDEO';
-}
-
-export interface GroupResponse {
-  groupId: string;
-  groupName: string;
-  groupDescription: string | null;
-  coverImageUrl: string | null;
-  memberCount: number;
-  privacy: boolean; // true = private, false = public
-  isMember: boolean;
-  currentUserRole: string | null; // OWNER, ADMIN, MODERATOR, MEMBER, null if not a member
-  createdAt: string | null; // ISO date string
-  lastActivityAt: string | null; // ISO date string
-  postsPerDay: number; // Average posts per day in last 30 days
-  postsToday: number; // Posts today
-  postsLastMonth: number; // Posts last month
-  newMembersThisWeek: number; // New members this week
-  tags: string | null; // Group tags
-  location: string | null; // Group location
-  friendMembers: FriendMember[]; // Friends who are members of this group
-  adminMembers: FriendMember[]; // Admin members
-  moderatorMembers: FriendMember[]; // Moderator members
-}
-
-export interface PageableResponse<T> {
-  content: T[];
-  totalPages: number;
-  totalElements: number;
-}
-
-export interface ApiResponse<T> {
-  success: boolean;
-  status?: string;
-  message: string;
-  data: T;
-  path: string;
-  timestamp: string;
-  errors: unknown;
-}
+import type { ApiResponse, PageableResponse } from "../types/common.types";
+import type { GroupResponse, GroupMemberResponse, FriendMember } from "../types/group.types";
+import type { PostMediaResponse } from "../types/media.types";
 
 /**
  * Get user's groups (my-groups)

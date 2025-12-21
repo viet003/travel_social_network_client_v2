@@ -1,11 +1,7 @@
 import axiosConfig from "../configurations/axiosConfig";
 import type { ChatMessage, GetMessagesParams, MessagesPageResponse } from "../types/chat.types";
+import type { ApiResponse } from "../types/common.types";
 import { transformMongoMessagesToChat } from "../utilities/messageTransformers";
-
-interface ApiResponse<T = any> {
-    data: T;
-    [key: string]: any;
-}
 
 // Conversation Message Service - MongoDB-based API calls for conversation message operations
 

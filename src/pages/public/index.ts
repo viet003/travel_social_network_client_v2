@@ -8,6 +8,7 @@ export { default as ExplorePage } from './explore/ExplorePage';
 export { default as VideoDetailPage } from './detail/MediaWatchDetailPage';
 export { default as MediaWatchDetailPage } from './detail/MediaWatchDetailPage';
 export { default as MediaPostDetailPage } from './detail/MediaPostDetailPage';
+export { default as TripDetailPage } from './trip/TripDetailPage';
 export { default as BlogCreateEditPage } from './blog/BlogCreateEditPage';
 export { 
   UserProfilePage,

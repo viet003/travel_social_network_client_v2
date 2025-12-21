@@ -1,17 +1,6 @@
 import axiosConfig from "../configurations/axiosConfig";
-
-interface ApiResponse<T = any> {
-  data: T;
-  status: string;
-  [key: string]: any;
-}
-
-interface CreateCommentPayload {
-  postId?: string;
-  watchId?: string;
-  content: string;
-  parentCommentId?: string;
-}
+import type { ApiResponse } from "../types/common.types";
+import type { CreateCommentPayload, CommentResponse } from "../types/comment.types";
 
 // ========== NEW APIs WITH MEANINGFUL NAMES ==========
 

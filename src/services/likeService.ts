@@ -1,14 +1,6 @@
 import axiosConfig from "../configurations/axiosConfig";
-import type { ApiResponse } from "../types/post.types";
-
-/**
- * Content like response type matching backend ContentLikeResponse
- */
-export interface ContentLikeResponse {
-  contentId: string; // Can be postId or watchId
-  likeCount: number;
-  liked: boolean;
-}
+import type { ApiResponse } from "../types/common.types";
+import type { ContentLikeResponse } from "../types/like.types";
 
 /**
  * Toggle like on post

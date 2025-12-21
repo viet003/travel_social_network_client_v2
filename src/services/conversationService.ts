@@ -1,44 +1,6 @@
 import axiosConfig from "../configurations/axiosConfig";
-
-interface ApiResponse<T = any> {
-    success: boolean;
-    path: string;
-    message: string;
-    data: T;
-    errors: any;
-    timestamp: string;
-}
-
-// Server response structure - match với ConversationResponse.java từ server
-export interface UserSummary {
-    userId: string;
-    userName: string;
-    email: string;
-    avatarImg: string | null;
-}
-
-export interface ConversationResponse {
-    conversationId: string;
-    conversationName: string | null;
-    conversationAvatar: string | null;
-    type: "PRIVATE" | "GROUP";
-    otherUserId: string | null;
-    lastMessage: string | null;
-    lastActiveAt: string | null;
-    
-    // New fields
-    groupOwner?: boolean | null;  // true nếu current user là chủ nhóm
-    members?: UserSummary[];  // Tối đa 3 thành viên
-    recentMedia?: string[];  // Tối đa 3 ảnh gần nhất
-}
-
-export interface PageableResponse<T> {
-    content: T[];
-    totalElements: number;
-    totalPages: number;
-    size: number;
-    number: number;
-}
+import type { ApiResponse, PageableResponse } from "../types/common.types";
+import type { ConversationResponse, UserSummary } from "../types/conversation.types";
 
 // Conversation Service - API calls for conversation operations
 
@@ -46,17 +8,23 @@ export interface PageableResponse<T> {
  * Lấy danh sách conversations của user hiện tại
  * @param page - Page number (default: 0)
  * @param size - Page size (default: 20)
+ * @param type - Filter by conversation type: 'PRIVATE' or 'GROUP' (optional)
  * @returns Pageable response containing user's conversations
  */
 export const apiGetUserConversations = async (
     page: number = 0,
-    size: number = 20
+    size: number = 20,
+    type?: 'PRIVATE' | 'GROUP'
 ): Promise<ApiResponse<PageableResponse<ConversationResponse>>> => {
     try {
+        const params: any = { page, size };
+        if (type) {
+            params.type = type;
+        }
         const response = await axiosConfig({
             method: 'GET',
             url: '/conversations/my',
-            params: { page, size }
+            params
         });
         return response.data;
     } catch (error: unknown) {

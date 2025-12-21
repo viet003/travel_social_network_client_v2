@@ -148,7 +148,8 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ onClose }) => {
     };
 
     loadMessages();
-  }, [activeConversationId, currentUserId]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeConversationId]);
 
   // Subscribe to WebSocket for real-time messages
   useEffect(() => {
@@ -283,7 +284,8 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ onClose }) => {
       unsubscribeTyping();
       unsubscribeReceipts();
     };
-  }, [activeConversationId, currentUserId, scrollToBottom]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeConversationId, currentUserId]);
 
   // Mark messages as read when they become visible
   useEffect(() => {

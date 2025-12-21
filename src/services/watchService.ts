@@ -1,33 +1,11 @@
 import axiosConfig from "../configurations/axiosConfig";
+import type { ApiResponse, PageableResponse } from "../types/common.types";
 import type { 
   WatchResponse,
   WatchWithIdsResponse,
-  PageableResponse,
-  ApiResponse
-} from "../types/video.types";
-
-export interface CreateWatchDto {
-  video: File;
-  title: string;
-  description?: string;
-  thumbnail?: File;
-  duration: number;
-  location?: string;
-  privacy: 'PUBLIC' | 'FRIEND' | 'PRIVATE';
-  category?: string;
-  tags?: string[];
-}
-
-export interface UpdateWatchDto {
-  watchId: string;
-  title?: string;
-  description?: string;
-  thumbnail?: File;
-  location?: string;
-  privacy?: 'PUBLIC' | 'FRIEND' | 'PRIVATE';
-  category?: string;
-  tags?: string[];
-}
+  CreateWatchDto,
+  UpdateWatchDto
+} from "../types/watch.types";
 
 /**
  * Create a new watch video

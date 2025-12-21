@@ -8,6 +8,7 @@ import {
   FAQPage,
   WatchPage,
   ExplorePage,
+  TripDetailPage,
   VideoDetailPage,
   MediaPostDetailPage,
   MediaWatchDetailPage,
@@ -17,13 +18,19 @@ import {
   UserProfileVideosPage,
   UserProfileReviewsPage,
   UserProfileFriendsPage,
+  AdminDashboardPage,
+  AdminUserManagementPage,
+  AdminBlogManagementPage,
+  AdminGroupManagementPage,
 } from "./pages";
+import SearchResultPage from "./pages/SearchResultPage";
 import {
   MainLayout,
   LandingLayout,
   FriendsLayout,
   GroupLayout,
   ExploreLayout,
+  AdminLayout,
 } from "./layout";
 import {
   FriendsHomePage,
@@ -169,6 +176,8 @@ function App() {
               element={<SeasonalTravelGuidePage />}
             />
           </Route>
+          <Route path={path.SEARCH} element={<SearchResultPage />} />
+          <Route path={path.TRIP_DETAIL} element={<TripDetailPage />} />
           <Route path={path.VIDEO_DETAIL} element={<VideoDetailPage />} />
           <Route
             path={path.MEDIA_WATCH_DETAIL}
@@ -204,6 +213,18 @@ function App() {
           <Route path={path.SETTINGS} element={<PrivacyPage />} />
           <Route path={path.FEEDBACK} element={<FAQPage />} />
         </Route>
+
+        {/* Admin Routes */}
+        <Route path={path.ADMIN} element={<AdminLayout />}>
+          <Route index element={<Navigate to={path.ADMIN_DASHBOARD} replace />} />
+          <Route path={path.ADMIN_DASHBOARD} element={<AdminDashboardPage />} />
+          <Route path={path.ADMIN_USERS} element={<AdminUserManagementPage />} />
+          <Route path={path.ADMIN_BLOGS} element={<AdminBlogManagementPage />} />
+          <Route path={path.ADMIN_GROUPS} element={<AdminGroupManagementPage />} />
+          <Route path={path.ADMIN_REPORTS} element={<div className="p-8 text-gray-500">Reports Management Module (Coming Soon)</div>} />
+          <Route path={path.ADMIN_SETTINGS} element={<div className="p-8 text-gray-500">System Settings Module (Coming Soon)</div>} />
+        </Route>
+
         <Route path={path.STAR} element={<Navigate to="/" replace />} />
       </Routes>
       <ToastContainer />

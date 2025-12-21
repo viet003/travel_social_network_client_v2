@@ -1,18 +1,6 @@
 import axiosConfig from "../configurations/axiosConfig";
-
-export interface MediaUploadResponse {
-  mediaId: string;
-  url: string;
-  type: 'IMAGE' | 'VIDEO';
-  size: number;
-  uploadedAt: string;
-}
-
-export interface ApiResponse<T> {
-  status: string;
-  message: string;
-  data: T;
-}
+import type { ApiResponse } from "../types/common.types";
+import type { MediaUploadResponse } from "../types/media.types";
 
 /**
  * Upload single media file for blog content
