@@ -69,6 +69,9 @@ class WebSocketService {
           // Subscribe to user's notification queue
           this.subscribeToNotifications(userId);
           
+          // Subscribe to user's unread messages queue
+          this.subscribeToUnreadMessages(userId);
+          
           resolve();
         },
 
@@ -126,6 +129,33 @@ class WebSocketService {
     });
 
     console.log(`✅ Subscribed to /user/${userId}/queue/notifications`);
+  }
+
+  /**
+   * Subscribe to user's unread messages queue
+   * @param userId - User ID
+   */
+  private subscribeToUnreadMessages(userId: string) {
+    if (!this.client?.connected) {
+      console.error('❌ Cannot subscribe: WebSocket not connected');
+      return;
+    }
+
+    // Subscribe to /user/{userId}/queue/unread-messages
+    this.client.subscribe(`/user/${userId}/queue/unread-messages`, (message: IMessage) => {
+      try {
+        const notification = JSON.parse(message.body);
+        console.log('🔴 Received unread message notification:', notification);
+        
+        // Trigger all registered handlers
+        const handlers = this.messageHandlers.get('unread-message') || [];
+        handlers.forEach(handler => handler(notification));
+      } catch (error) {
+        console.error('❌ Error parsing unread message notification:', error);
+      }
+    });
+
+    console.log(`✅ Subscribed to /user/${userId}/queue/unread-messages`);
   }
 
   /**
@@ -362,6 +392,28 @@ class WebSocketService {
     }
     
     const handlers = this.messageHandlers.get(key)!;
+    handlers.push(handler);
+
+    // Return unsubscribe function
+    return () => {
+      const index = handlers.indexOf(handler);
+      if (index > -1) {
+        handlers.splice(index, 1);
+      }
+    };
+  }
+
+  /**
+   * Register a message handler for unread message notifications
+   * @param handler - Callback function to handle unread message notification
+   * @returns Unsubscribe function
+   */
+  onUnreadMessage(handler: MessageHandler): () => void {
+    if (!this.messageHandlers.has('unread-message')) {
+      this.messageHandlers.set('unread-message', []);
+    }
+    
+    const handlers = this.messageHandlers.get('unread-message')!;
     handlers.push(handler);
 
     // Return unsubscribe function

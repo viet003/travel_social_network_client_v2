@@ -7,6 +7,7 @@ import { apiGetRepliesByCommentId, apiCreateCommentForContent, apiToggleLikeOnCo
 import { TravelInput } from '../../ui/customize';
 import { ExpandableContent } from '../../ui';
 import { message } from 'antd';
+import type { CommentResponse } from '../../../types/comment.types';
 
 // Types
 interface AuthState {
@@ -22,31 +23,14 @@ interface AuthState {
   msg: string;
 }
 
-interface Comment {
-  id?: string;
-  commentId?: string; // Backend uses commentId
-  userId?: string; // ID of the user who created the comment
-  avatarImg?: string;
-  firstName?: string;
-  lastName?: string;
-  fullName?: string; // Backend uses fullName
-  content: string;
-  createdAt: string;
-  replyCount?: number;
-  likeCount?: number; // Number of likes on comment
-  liked?: boolean; // Whether current user has liked
-  level?: number;
-  parentCommentId?: string;
-}
-
 interface NestedCommentProps {
-  comment: Comment;
+  comment: CommentResponse;
   level?: number;
   maxLevel?: number;
   postId?: string;
   watchId?: string;
   onReply?: (parentId: string, content: string) => void;
-  customFetchReplies?: (commentId: string, page: number) => Promise<{ data: { content: Comment[] } }>;
+  customFetchReplies?: (commentId: string, page: number) => Promise<{ data: { content: CommentResponse[] } }>;
   onCommentCreated?: () => void; // Callback to increment comment count
   onCommentDeleted?: (commentId: string) => void; // Callback when comment is deleted
 }
@@ -64,7 +48,7 @@ const NestedComment: React.FC<NestedCommentProps> = ({
 }) => {
   const [showReplyInput, setShowReplyInput] = useState(false);
   const [replyText, setReplyText] = useState('');
-  const [replies, setReplies] = useState<Comment[]>([]);
+  const [replies, setReplies] = useState<CommentResponse[]>([]);
   const [showReplies, setShowReplies] = useState(false);
   const [loadingReplies, setLoadingReplies] = useState(false);
   const [replyPage, setReplyPage] = useState(0);
@@ -94,7 +78,7 @@ const NestedComment: React.FC<NestedCommentProps> = ({
   
   const canReply = level < maxLevel;
   const hasReplies = (comment.replyCount ?? 0) > 0;
-  const commentId = comment.id || comment.commentId; // Support both field names
+  const commentId = comment.commentId;
   const isOwner = comment.userId === currentUserId;
 
   // Fetch replies when user clicks "View replies"
@@ -157,17 +141,17 @@ const NestedComment: React.FC<NestedCommentProps> = ({
       
       if (response.success && response.data) {
         // Add new reply from API response to local state
-        const newReply: Comment = {
-          id: response.data.commentId,
+        const newReply: CommentResponse = {
           commentId: response.data.commentId,
           userId: response.data.userId,
-          avatarImg: response.data.avatarImg,
           fullName: response.data.fullName,
+          avatarImg: response.data.avatarImg,
           content: response.data.content,
-          createdAt: response.data.createdAt,
-          level: level + 1,
+          likeCount: response.data.likeCount || 0,
+          replyCount: response.data.replyCount || 0,
           parentCommentId: response.data.parentCommentId,
-          replyCount: response.data.replyCount || 0
+          liked: response.data.liked || false,
+          createdAt: response.data.createdAt
         };
         
         setReplies(prev => [newReply, ...prev]);
@@ -347,7 +331,7 @@ const NestedComment: React.FC<NestedCommentProps> = ({
   const marginLeft = level > 0 ? `${level * 40}px` : '0px';
   
   // Get display name
-  const displayName = comment.fullName || `${comment.firstName || ''} ${comment.lastName || ''}`.trim();
+  const displayName = comment.fullName || 'Anonymous';
 
   return (
     <div style={{ marginLeft }}>
@@ -559,7 +543,7 @@ const NestedComment: React.FC<NestedCommentProps> = ({
           ) : (
             replies.map((reply, idx) => (
               <NestedComment
-                key={reply.id || reply.commentId || idx}
+                key={reply.commentId || idx}
                 comment={reply}
                 level={level + 1}
                 maxLevel={maxLevel}
@@ -570,7 +554,7 @@ const NestedComment: React.FC<NestedCommentProps> = ({
                 onCommentCreated={onCommentCreated}
                 onCommentDeleted={(deletedId) => {
                   // Remove deleted reply from local state
-                  setReplies(prev => prev.filter(r => (r.id || r.commentId) !== deletedId));
+                  setReplies(prev => prev.filter(r => r.commentId !== deletedId));
                   // Notify parent
                   onCommentDeleted?.(deletedId);
                 }}

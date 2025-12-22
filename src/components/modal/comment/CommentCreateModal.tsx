@@ -4,25 +4,13 @@ import { TravelInput } from '../../ui/customize';
 import avatardf from '../../../assets/images/avatar_default.png';
 import { apiCreateCommentForContent } from '../../../services/commentService';
 import { message } from 'antd';
-
-// Types
-interface Comment {
-  commentId?: string;
-  avatarImg?: string;
-  firstName?: string;
-  lastName?: string;
-  fullName?: string;
-  content: string;
-  createdAt: string;
-  replyCount?: number;
-  parentCommentId?: string;
-}
+import type { CommentResponse } from '../../../types/comment.types';
 
 interface CommentCreateModalProps {
   postId?: string;
   watchId?: string;
-  handleComment?: (comment: Comment) => void;
-  setNewComment: (comment: Comment) => void;
+  handleComment?: (comment: CommentResponse) => void;
+  setNewComment: (comment: CommentResponse) => void;
   currentUserAvatar?: string;
   setLoading?: (loading: boolean) => void;
 }
@@ -64,14 +52,17 @@ const CommentCreateModal: React.FC<CommentCreateModalProps> = ({
 
       if (response.success && response.data) {
         // Create comment object from API response
-        const newComment: Comment = {
+        const newComment: CommentResponse = {
           commentId: response.data.commentId,
-          avatarImg: response.data.avatarImg,
+          userId: response.data.userId,
           fullName: response.data.fullName,
+          avatarImg: response.data.avatarImg,
           content: response.data.content,
-          createdAt: response.data.createdAt,
+          likeCount: response.data.likeCount || 0,
           replyCount: response.data.replyCount || 0,
-          parentCommentId: response.data.parentCommentId
+          parentCommentId: response.data.parentCommentId,
+          liked: response.data.liked || false,
+          createdAt: response.data.createdAt
         };
 
         setNewComment(newComment);

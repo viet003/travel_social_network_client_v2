@@ -9,6 +9,7 @@ import ChatBody from "./ChatBody";
 import avatardf from "../../../assets/images/avatar_default.png";
 import webSocketService from "../../../services/webSocketService";
 import { apiGetConversationMessages } from "../../../services/conversationMessageService";
+import { apiUploadMedia } from "../../../services/mediaService";
 import type {
   ChatMessage,
   TypingNotification,
@@ -39,6 +40,10 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ onClose }) => {
     new Map()
   );
   const [replyingTo, setReplyingTo] = useState<ChatMessage | null>(null);
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<number | null>(null);
   const messageContainerRef = useRef<HTMLDivElement>(null);
@@ -169,6 +174,10 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ onClose }) => {
       activeConversationId,
       (newMessage: ChatMessage) => {
         console.log("💬 Received new message:", newMessage);
+        
+        // Note: Server automatically sends notification to user's notification queue
+        // No need to manually notify here - useUnreadMessages hook handles it
+        
         setMessages((prev) => {
           // Check if this is our own message echoed back (replace optimistic message)
           if (newMessage.senderId === currentUserId) {
@@ -386,6 +395,13 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ onClose }) => {
   // Handle send message with error handling and retry
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // If there's an image, upload it first
+    if (selectedImage) {
+      await handleSendImageMessage();
+      return;
+    }
+    
     if (!messageText.trim() || !activeConversationId) return;
 
     const content = messageText.trim();

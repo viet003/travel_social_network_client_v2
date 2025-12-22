@@ -8,6 +8,8 @@ export interface Blog {
   thumbnailUrl?: string;
   location?: string;
   viewCount: number;
+  likeCount: number;
+  reviewCount: number;
   averageRating: number;
   totalRatings: number;
   status: BlogStatus;

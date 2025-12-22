@@ -7,7 +7,7 @@ import { PostModal, PostCreateModal } from "../../../components/modal/post";
 import avatardf from "../../../assets/images/avatar_default.png";
 import { path } from "../../../utilities/path";
 import { apiGetPostsByUser } from "../../../services/postService";
-import { apiGetMyFriends } from "../../../services/friendshipService";
+import { apiGetUserFriendshipLists } from "../../../services/friendshipService";
 import { apiGetUserPhotos } from "../../../services/userService";
 import type { PostResponse, PageableResponse } from "../../../types/post.types";
 import type { UserResponse, UserPhotosResponse, UserMediaResponse } from "../../../types/user.types";
@@ -115,9 +115,9 @@ const UserProfilePostsPage: React.FC<UserProfilePostsPageProps> = ({
     setLoading(true);
     try {
       // Gọi song song các API: Posts, Friends, Photos
-      const [postsResponse, friendsResponse, photosResponse] = await Promise.all([
+      const [postsResponse, friendshipResponse, photosResponse] = await Promise.all([
         apiGetPostsByUser(userId, 0, 5),
-        apiGetMyFriends().catch(() => ({ data: [] })), // Catch error if not authorized
+        apiGetUserFriendshipLists(userId).catch(() => ({ data: { friends: [], pendingRequests: [], blockedUsers: [] } })), // Get target user's friends
         apiGetUserPhotos(userId).catch(() => ({ data: { avatars: [], coverImages: [], postPhotos: [] } })),
       ]);
 
@@ -154,10 +154,11 @@ const UserProfilePostsPage: React.FC<UserProfilePostsPageProps> = ({
         onPostsLoaded?.(postsData.totalElements);
       }
 
-      // Process friends
-      if (friendsResponse.data && Array.isArray(friendsResponse.data)) {
-        const friendsList = friendsResponse.data as UserResponse[];
-        setFriends(friendsList.slice(0, 9)); // Only show first 9 friends
+      // Process friends - extract from friendship lists response
+      if (friendshipResponse.data?.friends && Array.isArray(friendshipResponse.data.friends)) {
+        const friendsList = friendshipResponse.data.friends;
+        // Type assertion since friendship UserResponse is compatible with user UserResponse
+        setFriends(friendsList.slice(0, 9) as UserResponse[]); // Only show first 9 friends
         setTotalFriends(friendsList.length);
       }
 

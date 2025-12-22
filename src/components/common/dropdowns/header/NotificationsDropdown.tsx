@@ -3,6 +3,7 @@ import { Icon } from '@iconify/react';
 import { useNavigate } from 'react-router-dom';
 import { useNotification } from '../../../../hooks/useNotification';
 import type { NotificationResponse, NotificationTypeEnum } from '../../../../types/notification.types';
+import { path } from '../../../../utilities/path';
 import '../../../../styles/main-header.css';
 import { formatTimeAgo } from '../../../../utilities/helper';
 
@@ -73,7 +74,7 @@ const NotificationsDropdown: React.FC<NotificationsDropdownProps> = ({ onClose }
       case 'POST_SHARE':
         // Navigate to the post detail
         if (notification.relatedId) {
-          navigate(`/home/post/${notification.relatedId}`);
+          navigate(`${path.HOME}/post/${notification.relatedId}`);
         }
         break;
         
@@ -82,46 +83,44 @@ const NotificationsDropdown: React.FC<NotificationsDropdownProps> = ({ onClose }
         if (notification.relatedId) {
           // If content mentions "video", navigate to watch detail
           if (notification.content.includes('video')) {
-            navigate(`/home/watch/${notification.relatedId}`, { state: { scrollToComments: true } });
+            navigate(`${path.HOME}/watch/${notification.relatedId}`, { state: { scrollToComments: true } });
           } else {
             // Otherwise navigate to post detail
-            navigate(`/home/post/${notification.relatedId}`, { state: { scrollToComments: true } });
+            navigate(`${path.HOME}/post/${notification.relatedId}`, { state: { scrollToComments: true } });
           }
         }
         break;
         
       case 'FRIEND_REQUEST':
-        // Navigate to friend requests page
-        navigate('/home/friends/requests');
+        // Navigate to friend requests page: /home/friends/requests
+        navigate(`${path.HOME}/${path.FRIENDS}/${path.FRIENDS_REQUESTS}`);
         break;
         
       case 'FRIEND_ACCEPTED':
-        // Navigate to sender's profile
+        // Navigate to sender's profile: /home/user/{userId}
         if (notification.sender?.userId) {
-          navigate(`/home/profile/${notification.sender.userId}`);
+          navigate(`${path.HOME}/user/${notification.sender.userId}`);
         }
         break;
         
       case 'GROUP_INVITE':
       case 'GROUP_JOIN_REQUEST':
       case 'GROUP_JOIN_ACCEPTED':
-        // Navigate to group detail
+        // Navigate to group detail: /home/groups/{groupId}
         if (notification.relatedId) {
-          navigate(`/home/group/${notification.relatedId}`);
+          navigate(`${path.HOME}/${path.GROUPS}/${notification.relatedId}`);
         }
         break;
         
       case 'CHAT_MESSAGE':
-        // Navigate to messages/chat
-        if (notification.relatedId) {
-          navigate(`/home/messages/${notification.relatedId}`);
-        }
+        // For chat messages, just open the home page (chat dropdown will be available in header)
+        navigate(path.HOME);
         break;
         
       case 'MENTION':
         // Navigate to the post where user was mentioned
         if (notification.relatedId) {
-          navigate(`/home/post/${notification.relatedId}`);
+          navigate(`${path.HOME}/post/${notification.relatedId}`);
         }
         break;
         
@@ -132,7 +131,7 @@ const NotificationsDropdown: React.FC<NotificationsDropdownProps> = ({ onClose }
       default:
         // Default behavior: navigate to sender's profile if available
         if (notification.sender?.userId) {
-          navigate(`/home/profile/${notification.sender.userId}`);
+          navigate(`${path.HOME}/user/${notification.sender.userId}`);
         }
         break;
     }

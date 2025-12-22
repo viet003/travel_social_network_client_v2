@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Icon } from '@iconify/react';
-import { apiGlobalSearch, apiSearchUsers, apiSearchGroups, apiSearchPosts } from '../services/searchService';
+import { apiGlobalSearch } from '../services/searchService';
 import type { UserResponse } from '../types/user.types';
 import type { GroupResponse } from '../types/group.types';
 import type { PostResponse } from '../types/post.types';
@@ -29,27 +29,27 @@ const SearchResultPage: React.FC = () => {
     const [userResults, setUserResults] = useState<UserResultItemProps[]>([]);
     const [groupResults, setGroupResults] = useState<GroupResultItemProps[]>([]);
     const [postResults, setPostResults] = useState<PostResultItemProps[]>([]);
-    
-    const [isLoadingInitial, setIsLoadingInitial] = useState(false);
-    const [isLoadingUsers, setIsLoadingUsers] = useState(false);
-    const [isLoadingGroups, setIsLoadingGroups] = useState(false);
-    const [isLoadingPosts, setIsLoadingPosts] = useState(false);
-    
+    const [isLoading, setIsLoading] = useState(false);
     const [userPage, setUserPage] = useState(0);
     const [groupPage, setGroupPage] = useState(0);
     const [postPage, setPostPage] = useState(0);
-    
     const [hasMoreUsers, setHasMoreUsers] = useState(true);
     const [hasMoreGroups, setHasMoreGroups] = useState(true);
     const [hasMorePosts, setHasMorePosts] = useState(true);
 
-    // Fetch initial results (5 items mỗi loại)
-    const fetchInitialResults = async () => {
+    const fetchSearchResults = async (loadMore = false) => {
         if (!query.trim()) return;
 
-        setIsLoadingInitial(true);
+        setIsLoading(true);
         try {
-            const response = await apiGlobalSearch(query, 5);
+            const currentUserPage = loadMore && activeTab === 'users' ? userPage + 1 : 0;
+            const currentGroupPage = loadMore && activeTab === 'groups' ? groupPage + 1 : 0;
+
+            const response = await apiGlobalSearch(
+                query,
+                activeTab === 'users' ? currentUserPage : currentGroupPage,
+                10
+            );
 
             // Map users
             const users: UserResultItemProps[] = response.data.users.content.map((user: UserResponse) => ({
@@ -78,110 +78,45 @@ const SearchResultPage: React.FC = () => {
                 mediaCount: post.mediaList?.length || 0
             }));
 
-            setUserResults(users);
-            setGroupResults(groups);
-            setPostResults(posts);
-            
-            setHasMoreUsers(!response.data.users.last);
-            setHasMoreGroups(!response.data.groups.last);
-            setHasMorePosts(response.data.posts?.last === false);
-            
-            setUserPage(0);
-            setGroupPage(0);
-            setPostPage(0);
+            if (loadMore) {
+                if (activeTab === 'users') {
+                    setUserResults(prev => [...prev, ...users]);
+                    setUserPage(currentUserPage);
+                } else if (activeTab === 'groups') {
+                    setGroupResults(prev => [...prev, ...groups]);
+                    setGroupPage(currentGroupPage);
+                } else if (activeTab === 'posts') {
+                    setPostResults(prev => [...prev, ...posts]);
+                    setPostPage(postPage + 1);
+                }
+            } else {
+                setUserResults(users);
+                setGroupResults(groups);
+                setPostResults(posts);
+                setUserPage(0);
+                setGroupPage(0);
+                setPostPage(0);
+            }
+
+            setHasMoreUsers(response.data.users.totalPages > currentUserPage + 1);
+            setHasMoreGroups(response.data.groups.totalPages > currentGroupPage + 1);
+            setHasMorePosts(response.data.posts?.totalPages ? response.data.posts.totalPages > (loadMore && activeTab === 'posts' ? postPage + 1 : 0) : false);
         } catch (error) {
             console.error('Error fetching search results:', error);
         } finally {
-            setIsLoadingInitial(false);
+            setIsLoading(false);
         }
     };
 
     useEffect(() => {
         if (query.trim()) {
-            fetchInitialResults();
+            fetchSearchResults();
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [query]);
 
-    // Load more users
-    const loadMoreUsers = async () => {
-        if (!hasMoreUsers || isLoadingUsers) return;
-
-        setIsLoadingUsers(true);
-        try {
-            const nextPage = userPage + 1;
-            const response = await apiSearchUsers(query, nextPage, 10);
-
-            const newUsers: UserResultItemProps[] = response.data.content.map((user: UserResponse) => ({
-                id: user.userId || '',
-                name: user.userProfile?.fullName || user.userName,
-                avatar: user.avatarImg || avatarDefault,
-                description: user.friendshipStatus ? 'Bạn bè' : 'Bạn chung'
-            }));
-
-            setUserResults(prev => [...prev, ...newUsers]);
-            setUserPage(nextPage);
-            setHasMoreUsers(!response.data.last);
-        } catch (error) {
-            console.error('Error loading more users:', error);
-        } finally {
-            setIsLoadingUsers(false);
-        }
-    };
-
-    // Load more groups
-    const loadMoreGroups = async () => {
-        if (!hasMoreGroups || isLoadingGroups) return;
-
-        setIsLoadingGroups(true);
-        try {
-            const nextPage = groupPage + 1;
-            const response = await apiSearchGroups(query, nextPage, 10);
-
-            const newGroups: GroupResultItemProps[] = response.data.content.map((group: GroupResponse) => ({
-                id: group.groupId,
-                name: group.groupName,
-                avatar: group.coverImageUrl || avatarDefault,
-                description: group.privacy ? 'Nhóm riêng tư' : 'Nhóm công khai',
-                memberCount: group.memberCount
-            }));
-
-            setGroupResults(prev => [...prev, ...newGroups]);
-            setGroupPage(nextPage);
-            setHasMoreGroups(!response.data.last);
-        } catch (error) {
-            console.error('Error loading more groups:', error);
-        } finally {
-            setIsLoadingGroups(false);
-        }
-    };
-
-    // Load more posts
-    const loadMorePosts = async () => {
-        if (!hasMorePosts || isLoadingPosts) return;
-
-        setIsLoadingPosts(true);
-        try {
-            const nextPage = postPage + 1;
-            const response = await apiSearchPosts(query, nextPage, 10);
-
-            const newPosts: PostResultItemProps[] = response.data.content.map((post: PostResponse) => ({
-                id: post.postId,
-                content: post.content,
-                authorName: post.user?.fullName || 'Unknown',
-                authorAvatar: post.user?.avatarImg || avatarDefault,
-                createdAt: post.createdAt,
-                mediaCount: post.mediaList?.length || 0
-            }));
-
-            setPostResults(prev => [...prev, ...newPosts]);
-            setPostPage(nextPage);
-            setHasMorePosts(!response.data.last);
-        } catch (error) {
-            console.error('Error loading more posts:', error);
-        } finally {
-            setIsLoadingPosts(false);
-        }
+    const handleLoadMore = () => {
+        fetchSearchResults(true);
     };
 
     const filteredResults = () => {
@@ -200,7 +135,7 @@ const SearchResultPage: React.FC = () => {
         : activeTab === 'groups' ? groupResults.length 
         : postResults.length;
 
-    // Component nhỏ cho Tab Button
+    // Component nhỏ cho Tab Button để code gọn hơn
     const TabButton = ({ id, label, icon, count }: { id: typeof activeTab, label: string, icon: string, count: number }) => (
         <button
             onClick={() => setActiveTab(id)}
@@ -256,7 +191,7 @@ const SearchResultPage: React.FC = () => {
 
             {/* Main Content Area */}
             <div className="max-w-4xl mx-auto px-4 py-8">
-                {isLoadingInitial ? (
+                {isLoading && !userResults.length && !groupResults.length ? (
                     <div className="flex flex-col items-center justify-center py-24">
                         <div className="w-10 h-10 border-4 border-blue-600/20 border-t-blue-600 rounded-full animate-spin"></div>
                     </div>
@@ -279,27 +214,12 @@ const SearchResultPage: React.FC = () => {
                                             className="bg-white p-2 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:border-blue-100 transition-all duration-200 cursor-pointer"
                                             onClick={() => navigate(`${path.HOME}/${path.USER.replace(':userId', user.id)}`)}
                                         >
+                                            {/* Giả sử UserResultItem được styling tốt bên trong, 
+                                                hoặc bọc nó để đảm bảo layout */}
                                             <UserResultItem {...user} /> 
                                         </div>
                                     ))}
                                 </div>
-                                
-                                {/* Load More Button for Users */}
-                                {(activeTab === 'all' || activeTab === 'users') && hasMoreUsers && (
-                                    <div className="flex justify-center mt-4">
-                                        <button
-                                            onClick={loadMoreUsers}
-                                            disabled={isLoadingUsers}
-                                            className="px-6 py-2.5 bg-white border border-gray-200 text-gray-700 text-sm font-medium rounded-full hover:bg-gray-50 hover:border-gray-300 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm cursor-pointer"
-                                        >
-                                            {isLoadingUsers ? (
-                                                <span className="flex items-center gap-2">
-                                                    <Icon icon="eos-icons:loading" className="w-4 h-4" /> Đang tải...
-                                                </span>
-                                            ) : 'Xem thêm mọi người'}
-                                        </button>
-                                    </div>
-                                )}
                             </section>
                         )}
 
@@ -323,23 +243,6 @@ const SearchResultPage: React.FC = () => {
                                         </div>
                                     ))}
                                 </div>
-                                
-                                {/* Load More Button for Groups */}
-                                {(activeTab === 'all' || activeTab === 'groups') && hasMoreGroups && (
-                                    <div className="flex justify-center mt-4">
-                                        <button
-                                            onClick={loadMoreGroups}
-                                            disabled={isLoadingGroups}
-                                            className="px-6 py-2.5 bg-white border border-gray-200 text-gray-700 text-sm font-medium rounded-full hover:bg-gray-50 hover:border-gray-300 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm cursor-pointer"
-                                        >
-                                            {isLoadingGroups ? (
-                                                <span className="flex items-center gap-2">
-                                                    <Icon icon="eos-icons:loading" className="w-4 h-4" /> Đang tải...
-                                                </span>
-                                            ) : 'Xem thêm nhóm'}
-                                        </button>
-                                    </div>
-                                )}
                             </section>
                         )}
 
@@ -388,28 +291,11 @@ const SearchResultPage: React.FC = () => {
                                         </div>
                                     ))}
                                 </div>
-                                
-                                {/* Load More Button for Posts */}
-                                {(activeTab === 'all' || activeTab === 'posts') && hasMorePosts && (
-                                    <div className="flex justify-center mt-4">
-                                        <button
-                                            onClick={loadMorePosts}
-                                            disabled={isLoadingPosts}
-                                            className="px-6 py-2.5 bg-white border border-gray-200 text-gray-700 text-sm font-medium rounded-full hover:bg-gray-50 hover:border-gray-300 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm cursor-pointer"
-                                        >
-                                            {isLoadingPosts ? (
-                                                <span className="flex items-center gap-2">
-                                                    <Icon icon="eos-icons:loading" className="w-4 h-4" /> Đang tải...
-                                                </span>
-                                            ) : 'Xem thêm bài viết'}
-                                        </button>
-                                    </div>
-                                )}
                             </section>
                         )}
 
                         {/* Empty State */}
-                        {!isLoadingInitial && totalResults === 0 && (
+                        {!isLoading && totalResults === 0 && (
                             <div className="text-center py-16 px-4">
                                 <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
                                     <Icon icon="fluent:search-24-regular" className="w-10 h-10 text-gray-400" />
@@ -418,6 +304,26 @@ const SearchResultPage: React.FC = () => {
                                 <p className="text-gray-500 max-w-sm mx-auto">
                                     Chúng tôi không tìm thấy kết quả phù hợp cho "<span className="text-gray-900 font-medium">{query}</span>". Hãy thử kiểm tra lỗi chính tả hoặc dùng từ khóa khác.
                                 </p>
+                            </div>
+                        )}
+
+                        {/* Load More Button */}
+                        {((activeTab === 'users' && hasMoreUsers) ||
+                          (activeTab === 'groups' && hasMoreGroups) ||
+                          (activeTab === 'posts' && hasMorePosts) ||
+                          (activeTab === 'all' && (hasMoreUsers || hasMoreGroups || hasMorePosts))) && (
+                            <div className="flex justify-center pt-4 pb-12">
+                                <button
+                                    onClick={handleLoadMore}
+                                    disabled={isLoading}
+                                    className="px-6 py-2.5 bg-white border border-gray-200 text-gray-700 text-sm font-medium rounded-full hover:bg-gray-50 hover:border-gray-300 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm cursor-pointer"
+                                >
+                                    {isLoading ? (
+                                        <span className="flex items-center gap-2">
+                                            <Icon icon="eos-icons:loading" className="w-4 h-4" /> Đang tải...
+                                        </span>
+                                    ) : 'Xem thêm kết quả'}
+                                </button>
                             </div>
                         )}
                     </div>

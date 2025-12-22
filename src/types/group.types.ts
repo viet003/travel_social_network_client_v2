@@ -25,7 +25,7 @@ export interface GroupResponse {
   groupDescription: string | null;
   coverImageUrl: string | null;
   memberCount: number;
-  privacy: string; // PUBLIC, PRIVATE
+  privacy: boolean; // true = private, false = public
   isMember: boolean;
   currentUserRole: string | null; // OWNER, ADMIN, MODERATOR, MEMBER, null if not a member
   createdAt: string | null; // ISO date string

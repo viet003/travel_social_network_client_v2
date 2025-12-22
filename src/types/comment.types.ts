@@ -10,13 +10,12 @@ export interface CreateCommentPayload {
 export interface CommentResponse {
   commentId: string;
   userId: string;
-  userName: string;
-  userAvatar: string | null;
+  fullName: string;
+  avatarImg: string | null;
   content: string;
   likeCount: number;
   replyCount: number;
   parentCommentId: string | null;
-  isLiked: boolean;
+  liked: boolean;
   createdAt: string;
-  updatedAt: string;
 }

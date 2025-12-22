@@ -6,7 +6,7 @@ import type {
 
 /**
  * Get personalized news feed
- * Endpoint: GET /search/newsfeed
+ * Endpoint: GET /suggestions/newsfeed
  * Description: Get personalized news feed based on user's search history and preferences with Redis caching
  * @param page - Page number (default: 1, 1-based pagination)
  * @param pageSize - Page size (default: 20)
@@ -19,7 +19,7 @@ export const apiGetNewsFeed = async (
   try {
     const response = await axiosConfig({
       method: 'GET',
-      url: '/search/newsfeed',
+      url: '/suggestions/newsfeed',
       params: { page, pageSize }
     });
     return response.data;
@@ -32,9 +32,9 @@ export const apiGetNewsFeed = async (
 };
 
 /**
- * Get search suggestions
- * Endpoint: GET /search/suggestions
- * Description: Search for users, groups, and posts based on keyword with pagination support
+ * Get AI-powered search suggestions
+ * Endpoint: GET /suggestions
+ * Description: Get intelligent search suggestions based on user behavior and preferences
  * @param keyword - Search keyword
  * @param page - Page number (default: 0, 0-based pagination)
  * @param pageSize - Page size (default: 10)
@@ -48,7 +48,7 @@ export const apiGetSearchSuggestions = async (
   try {
     const response = await axiosConfig({
       method: 'GET',
-      url: '/search/suggestions',
+      url: '/suggestions',
       params: { q: keyword, page, pageSize }
     });
     return response.data;

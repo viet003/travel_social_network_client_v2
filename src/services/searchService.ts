@@ -7,18 +7,76 @@ import type { SearchResult, SearchSuggestionsResult } from "../types/search.type
 /**
  * Global search across users and groups using fulltext search
  * @param keyword - Search keyword
- * @param page - Page number (default: 0)
- * @param size - Number of items per page (default: 5)
- * @returns Combined search results for users and groups
+ * @param limit - Number of items per category (default: 5)
+ * @returns Combined search results for users, groups, and posts
  */
 export const apiGlobalSearch = async (
     keyword: string, 
-    page: number = 0, 
-    size: number = 5
+    limit: number = 5
 ): Promise<ApiResponse<SearchResult>> => {
     const response = await axiosConfig({
         method: 'GET',
         url: '/search',
+        params: { q: keyword, limit }
+    });
+    return response.data;
+};
+
+/**
+ * Search users only with pagination
+ * @param keyword - Search keyword
+ * @param page - Page number
+ * @param size - Number of items per page
+ * @returns Paginated user search results
+ */
+export const apiSearchUsers = async (
+    keyword: string,
+    page: number = 0,
+    size: number = 10
+): Promise<ApiResponse<any>> => {
+    const response = await axiosConfig({
+        method: 'GET',
+        url: '/search/users',
+        params: { q: keyword, page, size }
+    });
+    return response.data;
+};
+
+/**
+ * Search groups only with pagination
+ * @param keyword - Search keyword
+ * @param page - Page number
+ * @param size - Number of items per page
+ * @returns Paginated group search results
+ */
+export const apiSearchGroups = async (
+    keyword: string,
+    page: number = 0,
+    size: number = 10
+): Promise<ApiResponse<any>> => {
+    const response = await axiosConfig({
+        method: 'GET',
+        url: '/search/groups',
+        params: { q: keyword, page, size }
+    });
+    return response.data;
+};
+
+/**
+ * Search posts only with pagination
+ * @param keyword - Search keyword
+ * @param page - Page number
+ * @param size - Number of items per page
+ * @returns Paginated post search results
+ */
+export const apiSearchPosts = async (
+    keyword: string,
+    page: number = 0,
+    size: number = 10
+): Promise<ApiResponse<any>> => {
+    const response = await axiosConfig({
+        method: 'GET',
+        url: '/search/posts',
         params: { q: keyword, page, size }
     });
     return response.data;

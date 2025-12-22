@@ -4,12 +4,9 @@ import { useDispatch } from 'react-redux';
 import { setActiveConversation, addConversation } from '../../../../stores/actions/conversationAction';
 import { apiGetUserConversations } from '../../../../services/conversationService';
 import type { ConversationResponse } from '../../../../types/conversation.types';
-import dayjs from 'dayjs';
-import relativeTime from 'dayjs/plugin/relativeTime';
-import 'dayjs/locale/vi';
-
-dayjs.extend(relativeTime);
-dayjs.locale('vi');
+import CreateConversationModal from '../../../modal/conversation/CreateConversationModal';
+import { avatarDefault } from '../../../../assets/images';
+import { formatChatTime } from '../../../../utilities/helper';
 
 interface ChatDropdownProps {
   onClose?: () => void;
@@ -35,6 +32,7 @@ const ChatDropdown: React.FC<ChatDropdownProps> = ({ onClose }) => {
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState(0);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const observerRef = useRef<IntersectionObserver | null>(null);
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
 
@@ -116,16 +114,14 @@ const ChatDropdown: React.FC<ChatDropdownProps> = ({ onClose }) => {
 
   // Convert ConversationResponse to ChatItem format
   const convertToChartItem = (conv: ConversationResponse): ChatItem => {
-    const timeAgo = conv.lastActiveAt 
-      ? dayjs(conv.lastActiveAt).fromNow()
-      : 'Không có hoạt động';
+    const timeAgo = formatChatTime(conv.lastActiveAt) || 'Không có hoạt động';
     
     return {
       id: conv.conversationId,
       name: conv.conversationName || 'Không có tên',
       lastMessage: conv.lastMessage || 'Chưa có tin nhắn',
       time: timeAgo,
-      avatar: conv.conversationAvatar || 'https://via.placeholder.com/56',
+      avatar: conv.conversationAvatar || avatarDefault,
       isUnread: false,
       isOnline: false
     };
@@ -151,6 +147,17 @@ const ChatDropdown: React.FC<ChatDropdownProps> = ({ onClose }) => {
     if (onClose) {
       onClose();
     }
+  };
+
+  // Handle conversation created
+  const handleConversationCreated = (conversationId: string) => {
+    // Refresh conversations list
+    setPage(0);
+    setConversations([]);
+    setHasMore(true);
+    fetchConversations(0, true);
+    // Open the newly created conversation
+    dispatch(setActiveConversation(conversationId));
   };
 
   // Handle click outside to close dropdown
@@ -193,7 +200,11 @@ const ChatDropdown: React.FC<ChatDropdownProps> = ({ onClose }) => {
           <button className="p-2 hover:bg-gray-100 rounded-full transition-colors cursor-pointer">
             <Icon icon="fluent:arrow-resize-24-filled" className="w-4 h-4 text-black" />
           </button>
-          <button className="p-2 hover:bg-gray-100 rounded-full transition-colors cursor-pointer">
+          <button 
+            onClick={() => setIsCreateModalOpen(true)}
+            className="p-2 hover:bg-gray-100 rounded-full transition-colors cursor-pointer"
+            title="Tạo cuộc trò chuyện mới"
+          >
             <Icon icon="fluent:add-24-filled" className="w-4 h-4 text-black" />
           </button>
         </div>
@@ -255,7 +266,7 @@ const ChatDropdown: React.FC<ChatDropdownProps> = ({ onClose }) => {
                     alt={chat.name}
                     className="w-14 h-14 rounded-full object-cover"
                     onError={(e) => {
-                      e.currentTarget.src = 'https://via.placeholder.com/56';
+                      e.currentTarget.src = avatarDefault;
                     }}
                   />
                   {/* Online indicator */}
@@ -300,6 +311,13 @@ const ChatDropdown: React.FC<ChatDropdownProps> = ({ onClose }) => {
           <Icon icon="fluent:chevron-down-24-filled" className="w-4 h-4 inline ml-1 text-black" />
         </button>
       </div>
+
+      {/* Create Conversation Modal */}
+      <CreateConversationModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        onConversationCreated={handleConversationCreated}
+      />
     </div>
   );
 };
