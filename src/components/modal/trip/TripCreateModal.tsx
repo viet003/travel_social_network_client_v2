@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useSelector } from 'react-redux';
 import { Icon } from '@iconify/react';
-import { TravelInput, TravelButton } from '../../ui/customize';
+import { TravelInput, TravelButton, TravelSelect, TravelDatePicker } from '../../ui/customize';
+import { ConversationSelectDropdown } from '../../common/dropdowns';
 import { toast } from 'react-toastify';
 import { apiCreateTrip, apiUpdateTrip } from '../../../services/tripService';
 import { apiGetUserConversations } from '../../../services/conversationService';
@@ -20,6 +22,7 @@ interface ConversationOption {
   conversationId: string;
   conversationName: string;
   conversationAvatar: string | null;
+  lastActive?: string | null;
 }
 
 const TripCreateModal: React.FC<TripCreateModalProps> = ({
@@ -28,7 +31,7 @@ const TripCreateModal: React.FC<TripCreateModalProps> = ({
   onSuccess,
   editTrip
 }) => {
-  const currentUser = useSelector((state: RootState) => state.auth.user);
+  const currentUserId = useSelector((state: RootState) => state.auth.userId);
   
   const [formData, setFormData] = useState<TripDto>({
     conversationId: '',
@@ -42,6 +45,8 @@ const TripCreateModal: React.FC<TripCreateModalProps> = ({
     status: 'PLANNING'
   });
 
+  const [coverImage, setCoverImage] = useState<File | null>(null);
+  const [coverImagePreview, setCoverImagePreview] = useState<string | null>(null);
   const [conversations, setConversations] = useState<ConversationOption[]>([]);
   const [loadingConversations, setLoadingConversations] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -49,16 +54,16 @@ const TripCreateModal: React.FC<TripCreateModalProps> = ({
 
   // Load conversations
   useEffect(() => {
-    if (isOpen && currentUser?.userId) {
+    if (isOpen && currentUserId) {
       loadConversations();
     }
-  }, [isOpen, currentUser?.userId]);
+  }, [isOpen, currentUserId]);
 
   // Load edit data
   useEffect(() => {
     if (editTrip) {
       setFormData({
-        conversationId: editTrip.conversationId,
+        conversationId: editTrip.conversation.conversationId,
         tripName: editTrip.tripName,
         tripDescription: editTrip.tripDescription || '',
         coverImageUrl: editTrip.coverImageUrl || '',
@@ -68,6 +73,11 @@ const TripCreateModal: React.FC<TripCreateModalProps> = ({
         budget: editTrip.budget || undefined,
         status: editTrip.status
       });
+      
+      // Set existing cover image preview if available
+      if (editTrip.coverImageUrl) {
+        setCoverImagePreview(editTrip.coverImageUrl);
+      }
     } else {
       resetForm();
     }
@@ -80,15 +90,16 @@ const TripCreateModal: React.FC<TripCreateModalProps> = ({
       
       if (response.success && response.data) {
         const options = response.data.content
-          .filter(conv => conv.type === 'GROUP') // Only show group conversations
+          .filter(conv => conv.type === 'GROUP') 
           .map(conv => ({
             conversationId: conv.conversationId,
             conversationName: conv.conversationName || 'Nhóm chat',
-            conversationAvatar: conv.conversationAvatar
+            conversationAvatar: conv.conversationAvatar,
+            lastActive: conv.lastActiveAt
           }));
         setConversations(options);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error loading conversations:', error);
       toast.error('Không thể tải danh sách nhóm chat');
     } finally {
@@ -108,6 +119,8 @@ const TripCreateModal: React.FC<TripCreateModalProps> = ({
       budget: undefined,
       status: 'PLANNING'
     });
+    setCoverImage(null);
+    setCoverImagePreview(null);
     setErrors({});
   };
 
@@ -154,11 +167,23 @@ const TripCreateModal: React.FC<TripCreateModalProps> = ({
     try {
       setIsSubmitting(true);
 
-      // Convert dates to ISO format
-      const submitData: TripDto = {
-        ...formData,
+      // Ensure conversationId exists
+      if (!formData.conversationId) {
+        throw new Error('Vui lòng chọn nhóm chat');
+      }
+
+      // Convert dates to ISO format and create properly typed object
+      const submitData: TripDto & { coverImage?: File } = {
+        conversationId: formData.conversationId,
+        tripName: formData.tripName,
+        tripDescription: formData.tripDescription || undefined,
+        destination: formData.destination || undefined,
         startDate: new Date(formData.startDate).toISOString(),
         endDate: new Date(formData.endDate).toISOString(),
+        budget: formData.budget,
+        status: formData.status,
+        coverImageUrl: formData.coverImageUrl,
+        coverImage: coverImage || undefined
       };
 
       let response;
@@ -174,9 +199,10 @@ const TripCreateModal: React.FC<TripCreateModalProps> = ({
         onSuccess?.(response.data);
         handleClose();
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error submitting trip:', error);
-      toast.error(error?.message || 'Có lỗi xảy ra, vui lòng thử lại');
+      const errorMessage = error instanceof Error ? error.message : 'Có lỗi xảy ra, vui lòng thử lại';
+      toast.error(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
@@ -198,23 +224,75 @@ const TripCreateModal: React.FC<TripCreateModalProps> = ({
     }
   };
 
+  const handleCoverImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast.error('Vui lòng chọn file hình ảnh!');
+      return;
+    }
+
+    // Validate file size (5MB max)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Hình ảnh quá lớn! Vui lòng chọn hình ảnh nhỏ hơn 5MB.');
+      return;
+    }
+
+    setCoverImage(file);
+    
+    // Create preview
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      setCoverImagePreview(e.target?.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const removeCoverImage = () => {
+    setCoverImage(null);
+    setCoverImagePreview(null);
+  };
+
   if (!isOpen) return null;
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+  const modalContent = (
+    <div 
+      className="fixed inset-0 h-[100vh] flex items-center justify-center bg-black/50 p-4"
+      style={{ zIndex: 9999 }}
+      onClick={handleClose}
+    >
+      <div 
+        className="relative w-full max-w-2xl bg-white rounded-2xl shadow-lg overflow-hidden max-h-[95vh] overflow-y-auto"
+        onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+      >
         {/* Header */}
-        <div className="sticky top-0 bg-white border-b border-gray-200 p-4 flex items-center justify-between rounded-t-2xl">
-          <h2 className="text-xl font-bold text-gray-900">
-            {editTrip ? 'Chỉnh sửa lịch trình' : 'Tạo lịch trình mới'}
-          </h2>
-          <button
-            onClick={handleClose}
-            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-            disabled={isSubmitting}
-          >
-            <Icon icon="fluent:dismiss-24-filled" className="w-6 h-6 text-gray-600" />
-          </button>
+        <div className="sticky top-0 z-10 bg-white border-b border-gray-200">
+          <div className="flex items-center justify-between p-4 sm:p-5">
+            <div className="flex flex-col items-start pr-8">
+              <span className="flex items-center mb-1 text-base sm:text-lg font-bold text-blue-600">
+                <Icon icon="fluent:calendar-ltr-24-filled" className="text-blue-600 w-4 h-4 sm:w-6 sm:h-6 mr-2" />
+                TravelNest Trip
+              </span>
+              <h2 className="text-lg sm:text-xl font-bold text-gray-800">
+                {editTrip ? 'Chỉnh sửa lịch trình' : 'Tạo lịch trình mới'}
+              </h2>
+              <p className="text-xs text-gray-500 hidden sm:block">
+                {editTrip ? 'Cập nhật thông tin cho chuyến đi của bạn' : 'Lên kế hoạch cho chuyến du lịch tiếp theo'}
+              </p>
+            </div>
+            <button
+              className="absolute flex items-center justify-center w-8 h-8 text-gray-600 rounded-full bg-gray-white right-4 sm:right-5 top-4 sm:top-5 hover:bg-gray-300 transition-colors cursor-pointer"
+              onClick={handleClose}
+              disabled={isSubmitting}
+              aria-label="Đóng"
+            >
+              <Icon icon="fluent:dismiss-24-filled" className="w-5 h-5" />
+            </button>
+          </div>
         </div>
 
         {/* Form */}
@@ -224,27 +302,15 @@ const TripCreateModal: React.FC<TripCreateModalProps> = ({
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Nhóm chat <span className="text-red-500">*</span>
             </label>
-            {loadingConversations ? (
-              <div className="flex items-center justify-center py-4">
-                <LoadingSpinner size="sm" />
-              </div>
-            ) : (
-              <select
-                value={formData.conversationId}
-                onChange={(e) => handleInputChange('conversationId', e.target.value)}
-                disabled={!!editTrip} // Can't change conversation when editing
-                className={`w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                  errors.conversationId ? 'border-red-500' : 'border-gray-300'
-                } ${editTrip ? 'bg-gray-100 cursor-not-allowed' : ''}`}
-              >
-                <option value="">Chọn nhóm chat</option>
-                {conversations.map(conv => (
-                  <option key={conv.conversationId} value={conv.conversationId}>
-                    {conv.conversationName}
-                  </option>
-                ))}
-              </select>
-            )}
+            <ConversationSelectDropdown
+              value={formData.conversationId}
+              onChange={(value) => handleInputChange('conversationId', value)}
+              options={conversations}
+              placeholder="Chọn nhóm chat"
+              disabled={!!editTrip}
+              error={!!errors.conversationId}
+              loading={loadingConversations}
+            />
             {errors.conversationId && (
               <p className="text-red-500 text-sm mt-1">{errors.conversationId}</p>
             )}
@@ -283,13 +349,13 @@ const TripCreateModal: React.FC<TripCreateModalProps> = ({
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Ngày bắt đầu <span className="text-red-500">*</span>
               </label>
-              <input
-                type="date"
+              <TravelDatePicker
                 value={formData.startDate}
-                onChange={(e) => handleInputChange('startDate', e.target.value)}
-                className={`w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                  errors.startDate ? 'border-red-500' : 'border-gray-300'
-                }`}
+                onChange={(date) => handleInputChange('startDate', date)}
+                placeholder="Chọn ngày bắt đầu"
+                format="DD/MM/YYYY"
+                getPopupContainer={(trigger) => trigger.parentElement || document.body}
+                className={errors.startDate ? 'border-red-500' : ''}
               />
               {errors.startDate && (
                 <p className="text-red-500 text-sm mt-1">{errors.startDate}</p>
@@ -300,13 +366,13 @@ const TripCreateModal: React.FC<TripCreateModalProps> = ({
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Ngày kết thúc <span className="text-red-500">*</span>
               </label>
-              <input
-                type="date"
+              <TravelDatePicker
                 value={formData.endDate}
-                onChange={(e) => handleInputChange('endDate', e.target.value)}
-                className={`w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                  errors.endDate ? 'border-red-500' : 'border-gray-300'
-                }`}
+                onChange={(date) => handleInputChange('endDate', date)}
+                placeholder="Chọn ngày kết thúc"
+                format="DD/MM/YYYY"
+                getPopupContainer={(trigger) => trigger.parentElement || document.body}
+                className={errors.endDate ? 'border-red-500' : ''}
               />
               {errors.endDate && (
                 <p className="text-red-500 text-sm mt-1">{errors.endDate}</p>
@@ -332,17 +398,19 @@ const TripCreateModal: React.FC<TripCreateModalProps> = ({
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Trạng thái
             </label>
-            <select
+            <TravelSelect
               value={formData.status}
-              onChange={(e) => handleInputChange('status', e.target.value as TripStatus)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="PLANNING">Đang lên kế hoạch</option>
-              <option value="CONFIRMED">Đã xác nhận</option>
-              <option value="ONGOING">Đang diễn ra</option>
-              <option value="COMPLETED">Đã hoàn thành</option>
-              <option value="CANCELLED">Đã hủy</option>
-            </select>
+              onChange={(value) => handleInputChange('status', value as TripStatus)}
+              placeholder="Chọn trạng thái"
+              options={[
+                { value: 'PLANNING', label: 'Đang lên kế hoạch' },
+                { value: 'CONFIRMED', label: 'Đã xác nhận' },
+                { value: 'ONGOING', label: 'Đang diễn ra' },
+                { value: 'COMPLETED', label: 'Đã hoàn thành' },
+                { value: 'CANCELLED', label: 'Đã hủy' }
+              ]}
+              getPopupContainer={(trigger) => trigger.parentElement || document.body}
+            />
           </div>
 
           {/* Description */}
@@ -359,39 +427,61 @@ const TripCreateModal: React.FC<TripCreateModalProps> = ({
             />
           </div>
 
-          {/* Cover Image URL */}
+          {/* Cover Image Upload */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              URL ảnh bìa
+              Ảnh bìa
             </label>
-            <TravelInput
-              type="url"
-              value={formData.coverImageUrl || ''}
-              onChange={(e) => handleInputChange('coverImageUrl', e.target.value)}
-              placeholder="https://example.com/image.jpg"
-            />
+            {!coverImagePreview ? (
+              <label className="flex flex-col items-center justify-center w-full h-40 border-2 border-gray-300 border-dashed rounded-xl cursor-pointer hover:border-blue-400 hover:bg-blue-50 transition-colors">
+                <div className="flex flex-col items-center py-4">
+                  <Icon icon="fluent:image-add-24-filled" className="w-12 h-12 mb-2 text-gray-400" />
+                  <span className="text-sm font-medium text-gray-600">Tải lên ảnh bìa</span>
+                  <span className="text-xs text-gray-500 mt-1">PNG, JPG, JPEG • Tối đa 5MB</span>
+                </div>
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleCoverImageChange}
+                />
+              </label>
+            ) : (
+              <div className="relative w-full h-40 border border-gray-200 rounded-xl overflow-hidden">
+                <img
+                  src={coverImagePreview}
+                  alt="Cover preview"
+                  className="w-full h-full object-cover"
+                />
+                <button
+                  type="button"
+                  onClick={removeCoverImage}
+                  className="absolute top-2 right-2 p-2 bg-red-600 text-white rounded-full hover:bg-red-700 transition-colors"
+                >
+                  <Icon icon="fluent:delete-24-filled" className="w-4 h-4" />
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Actions */}
-          <div className="flex gap-3 pt-4">
+          <div className="flex justify-end gap-3 pt-4">
             <TravelButton
-              type="button"
-              variant="secondary"
+              type="default"
+              htmlType="button"
               onClick={handleClose}
               disabled={isSubmitting}
-              className="flex-1"
             >
               Hủy
             </TravelButton>
             <TravelButton
-              type="submit"
-              variant="primary"
+              type="primary"
+              htmlType="submit"
               disabled={isSubmitting}
-              className="flex-1"
             >
               {isSubmitting ? (
                 <span className="flex items-center justify-center gap-2">
-                  <LoadingSpinner size="sm" />
+                  <LoadingSpinner />
                   {editTrip ? 'Đang cập nhật...' : 'Đang tạo...'}
                 </span>
               ) : (
@@ -403,6 +493,8 @@ const TripCreateModal: React.FC<TripCreateModalProps> = ({
       </div>
     </div>
   );
+
+  return createPortal(modalContent, document.body);
 };
 
 export default TripCreateModal;

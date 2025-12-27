@@ -15,18 +15,32 @@ import type {
 /**
  * Create a new trip
  * Endpoint: POST /trips
- * Description: Create a new trip for a conversation
+ * Description: Create a new trip for a conversation with optional cover image
  * @param tripDto - Trip data transfer object
  * @returns Created trip response
  */
 export const apiCreateTrip = async (
-  tripDto: TripDto
+  tripDto: TripDto & { coverImage?: File }
 ): Promise<ApiResponse<TripResponse>> => {
   try {
+    const formData = new FormData();
+    formData.append('conversationId', tripDto.conversationId);
+    formData.append('tripName', tripDto.tripName);
+    if (tripDto.tripDescription) formData.append('tripDescription', tripDto.tripDescription);
+    if (tripDto.coverImage) formData.append('coverImage', tripDto.coverImage);
+    if (tripDto.destination) formData.append('destination', tripDto.destination);
+    formData.append('startDate', tripDto.startDate);
+    formData.append('endDate', tripDto.endDate);
+    if (tripDto.budget) formData.append('budget', tripDto.budget.toString());
+    formData.append('status', tripDto.status || 'PLANNING');
+
     const response = await axiosConfig({
       method: 'POST',
       url: '/trips',
-      data: tripDto
+      data: formData,
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
     });
     return response.data;
   } catch (error: unknown) {
@@ -40,20 +54,34 @@ export const apiCreateTrip = async (
 /**
  * Update a trip
  * Endpoint: PUT /trips/{tripId}
- * Description: Update an existing trip
+ * Description: Update an existing trip with optional cover image
  * @param tripId - Trip UUID
  * @param tripDto - Trip data transfer object
  * @returns Updated trip response
  */
 export const apiUpdateTrip = async (
   tripId: string,
-  tripDto: TripDto
+  tripDto: TripDto & { coverImage?: File }
 ): Promise<ApiResponse<TripResponse>> => {
   try {
+    const formData = new FormData();
+    formData.append('conversationId', tripDto.conversationId);
+    formData.append('tripName', tripDto.tripName);
+    if (tripDto.tripDescription) formData.append('tripDescription', tripDto.tripDescription);
+    if (tripDto.coverImage) formData.append('coverImage', tripDto.coverImage);
+    if (tripDto.destination) formData.append('destination', tripDto.destination);
+    formData.append('startDate', tripDto.startDate);
+    formData.append('endDate', tripDto.endDate);
+    if (tripDto.budget) formData.append('budget', tripDto.budget.toString());
+    formData.append('status', tripDto.status || 'PLANNING');
+
     const response = await axiosConfig({
       method: 'PUT',
       url: `/trips/${tripId}`,
-      data: tripDto
+      data: formData,
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
     });
     return response.data;
   } catch (error: unknown) {

@@ -1,113 +1,18 @@
 import { Icon } from "@iconify/react";
 import { useEffect, useState } from "react";
-import { apiDeleteTrip } from "../../../services/tripService";
+import { useSelector } from "react-redux";
+import { apiDeleteTrip, apiGetTripsByUser } from "../../../services/tripService";
 import type { TripResponse, TripStatus } from "../../../types/trip.types";
+import type { RootState } from "../../../stores/types/storeTypes";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { TripCreateModal } from "../../../components/modal";
+import ConfirmDeleteModal from "../../../components/modal/confirm/ConfirmDeleteModal";
 import { path } from "../../../utilities/path";
-
-// Mock data for testing
-const mockTrips: TripResponse[] = [
-  {
-    tripId: "1",
-    tripName: "Khám phá Đà Lạt",
-    tripDescription: "Chuyến đi thư giãn đến thành phố ngàn hoa với khí hậu mát mẻ quanh năm",
-    startDate: "2025-12-15",
-    endDate: "2025-12-18",
-    destination: "Đà Lạt, Lâm Đồng",
-    budget: 5000000,
-    status: "PLANNING" as TripStatus,
-    coverImageUrl: "https://images.unsplash.com/photo-1528127269322-539801943592?w=400&h=300&fit=crop",
-    scheduleCount: 8,
-    conversationId: "conv1",
-    conversationName: "Chỉ có du lịch",
-    conversationImageUrl: "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=100&h=100&fit=crop",
-    createdBy: "user1",
-    createdByName: "Nguyễn Văn A",
-    createdAt: "2025-11-20",
-    updatedAt: "2025-11-25"
-  },
-  {
-    tripId: "2",
-    tripName: "Phú Quốc - Thiên đường biển đảo",
-    tripDescription: "Trải nghiệm biển xanh cát trắng và ẩm thực đặc sắc tại đảo ngọc Phú Quốc",
-    startDate: "2026-01-05",
-    endDate: "2026-01-10",
-    destination: "Phú Quốc, Kiên Giang",
-    budget: 12000000,
-    status: "CONFIRMED" as TripStatus,
-    coverImageUrl: "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=400&h=300&fit=crop",
-    scheduleCount: 12,
-    conversationId: "conv2",
-    conversationName: "Gia đình số 1",
-    conversationImageUrl: "https://images.unsplash.com/photo-1511895426328-dc8714191300?w=100&h=100&fit=crop",
-    createdBy: "user1",
-    createdByName: "Nguyễn Văn A",
-    createdAt: "2025-11-15",
-    updatedAt: "2025-11-28"
-  },
-  {
-    tripId: "3",
-    tripName: "Hà Nội - Thủ đô ngàn năm văn hiến",
-    tripDescription: "Khám phá văn hóa lịch sử và ẩm thực phố cổ Hà Nội",
-    startDate: "2025-12-01",
-    endDate: "2025-12-05",
-    destination: "Hà Nội",
-    budget: 8000000,
-    status: "ONGOING" as TripStatus,
-    coverImageUrl: "https://images.unsplash.com/photo-1509023464722-18d996393ca8?w=400&h=300&fit=crop",
-    scheduleCount: 15,
-    conversationId: "sdfsfs",
-    conversationName: null,
-    conversationImageUrl: null,
-    createdBy: "user1",
-    createdByName: "Nguyễn Văn A",
-    createdAt: "2025-10-20",
-    updatedAt: "2025-11-30"
-  },
-  {
-    tripId: "4",
-    tripName: "Sapa - Vùng đất mù sương",
-    tripDescription: "Chinh phục Fansipan và trải nghiệm văn hóa vùng cao",
-    startDate: "2025-10-10",
-    endDate: "2025-10-14",
-    destination: "Sapa, Lào Cai",
-    budget: 7000000,
-    status: "COMPLETED" as TripStatus,
-    coverImageUrl: "https://images.unsplash.com/photo-1583417319070-4a69db38a482?w=400&h=300&fit=crop",
-    scheduleCount: 10,
-    conversationId: "conv3",
-    conversationName: "Nhóm Leo núi",
-    conversationImageUrl: "https://images.unsplash.com/photo-1551632811-561732d1e306?w=100&h=100&fit=crop",
-    createdBy: "user1",
-    createdByName: "Nguyễn Văn A",
-    createdAt: "2025-09-15",
-    updatedAt: "2025-10-15"
-  },
-  {
-    tripId: "5",
-    tripName: "Hội An - Phố cổ ngàn năm",
-    tripDescription: "Khám phá kiến trúc cổ và làng nghề truyền thống",
-    startDate: "2025-09-20",
-    endDate: "2025-09-23",
-    destination: "Hội An, Quảng Nam",
-    budget: 6000000,
-    status: "CANCELLED" as TripStatus,
-    coverImageUrl: "https://images.unsplash.com/photo-1583417319070-4a69db38a482?w=400&h=300&fit=crop",
-    scheduleCount: 6,
-    conversationId: "dsfs",
-    conversationName: null,
-    conversationImageUrl: null,
-    createdBy: "user1",
-    createdByName: "Nguyễn Văn A",
-    createdAt: "2025-08-10",
-    updatedAt: "2025-09-15"
-  }
-];
 
 const UserItinerariesPage = () => {
   const navigate = useNavigate();
+  const currentUserId = useSelector((state: RootState) => state.auth.userId);
   
   const [trips, setTrips] = useState<TripResponse[]>([]);
   const [loading, setLoading] = useState(true);
@@ -117,22 +22,39 @@ const UserItinerariesPage = () => {
   // Modal states
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingTrip, setEditingTrip] = useState<TripResponse | null>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [tripToDelete, setTripToDelete] = useState<TripResponse | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Fetch trips for current user
-  const fetchTrips = async (_pageNum: number = 0, append: boolean = false) => {
-    // Using mock data instead of API
+  const fetchTrips = async (pageNum: number = 0, append: boolean = false) => {
+    if (!currentUserId) {
+      console.error("User ID not found");
+      toast.error("Vui lòng đăng nhập để xem lịch trình");
+      setLoading(false);
+      return;
+    }
+
     try {
       setLoading(true);
       
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 500));
+      const response = await apiGetTripsByUser(currentUserId, pageNum, 10);
       
-      if (append) {
-        setTrips((prev) => [...prev, ...mockTrips]);
+      if (response.success && response.data) {
+        const newTrips = response.data.content;
+        
+        if (append) {
+          setTrips((prev) => [...prev, ...newTrips]);
+        } else {
+          setTrips(newTrips);
+        }
+        
+        // Check if there are more pages
+        setHasMore(response.data.totalPages > pageNum + 1);
       } else {
-        setTrips(mockTrips);
+        setTrips([]);
+        setHasMore(false);
       }
-      setHasMore(false);
     } catch (error) {
       console.error("Error fetching trips:", error);
       const errorMessage = error instanceof Error ? error.message : "Không thể tải danh sách lịch trình";
@@ -158,14 +80,19 @@ const UserItinerariesPage = () => {
     }
   };
 
-  // Delete trip
-  const handleDeleteTrip = async (tripId: string, tripName: string) => {
-    if (!window.confirm(`Bạn có chắc muốn xóa lịch trình "${tripName}"?`)) {
-      return;
-    }
+  // Delete trip - Open confirmation modal
+  const handleDeleteClick = (trip: TripResponse) => {
+    setTripToDelete(trip);
+    setShowDeleteConfirm(true);
+  };
 
+  // Confirm delete trip
+  const handleDeleteConfirm = async () => {
+    if (!tripToDelete) return;
+
+    setIsDeleting(true);
     try {
-      await apiDeleteTrip(tripId);
+      await apiDeleteTrip(tripToDelete.tripId);
       toast.success("Đã xóa lịch trình thành công");
       // Refresh list
       setPage(0);
@@ -174,6 +101,10 @@ const UserItinerariesPage = () => {
       console.error("Error deleting trip:", error);
       const errorMessage = error instanceof Error ? error.message : "Không thể xóa lịch trình";
       toast.error(errorMessage);
+    } finally {
+      setIsDeleting(false);
+      setShowDeleteConfirm(false);
+      setTripToDelete(null);
     }
   };
 
@@ -277,7 +208,7 @@ const UserItinerariesPage = () => {
   };
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-8 font-sans">
+    <div className="max-w-5xl mx-auto px-4 py-6 font-sans">
       {/* Trip Create/Edit Modal */}
       <TripCreateModal
         isOpen={isCreateModalOpen}
@@ -287,20 +218,25 @@ const UserItinerariesPage = () => {
       />
 
       {/* Page Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between mb-10 gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Lịch trình của bạn</h1>
-          <p className="text-gray-500 mt-2 text-base">
-            Quản lý và theo dõi các kế hoạch du lịch cá nhân
-          </p>
+      <div className="mb-6">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Icon icon="fluent:calendar-ltr-24-filled" className="w-10 h-10 text-gray-900" />
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">Lịch trình của bạn</h1>
+              <p className="text-gray-600 text-sm">
+                Quản lý và theo dõi các kế hoạch du lịch cá nhân
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={handleOpenCreateModal}
+            className="px-6 py-2.5 bg-gray-900 text-white rounded-full hover:bg-gray-800 transition-all shadow-sm hover:shadow-md flex items-center gap-2 font-medium cursor-pointer whitespace-nowrap flex-shrink-0"
+          >
+            <Icon icon="fluent:add-24-regular" className="h-5 w-5" />
+            <span>Tạo lịch trình mới</span>
+          </button>
         </div>
-        <button
-          onClick={handleOpenCreateModal}
-          className="px-6 py-2.5 bg-gray-900 text-white rounded-full hover:bg-gray-800 transition-all shadow-sm hover:shadow-md flex items-center gap-2 font-medium"
-        >
-          <Icon icon="fluent:add-24-regular" className="h-5 w-5" />
-          <span>Tạo lịch trình mới</span>
-        </button>
       </div>
 
       {/* Loading State */}
@@ -324,7 +260,7 @@ const UserItinerariesPage = () => {
           </p>
           <button
             onClick={handleOpenCreateModal}
-            className="px-6 py-3 bg-white border border-gray-200 text-gray-900 rounded-xl hover:bg-gray-50 transition-colors inline-flex items-center gap-2 font-medium shadow-sm"
+            className="px-6 py-3 bg-white border border-gray-200 text-gray-900 rounded-xl hover:bg-gray-50 transition-colors inline-flex items-center gap-2 font-medium shadow-sm cursor-pointer"
           >
             <Icon icon="fluent:add-24-regular" className="h-5 w-5" />
             <span>Tạo lịch trình đầu tiên</span>
@@ -343,10 +279,10 @@ const UserItinerariesPage = () => {
             <div
               key={trip.tripId}
               onClick={() => navigate(`${path.HOME}/${path.TRIP_DETAIL.replace(':tripId', trip.tripId)}`)}
-              className="group bg-white rounded-2xl border border-gray-100 overflow-hidden cursor-pointer hover:shadow-lg hover:border-gray-200 transition-all duration-300 flex flex-col md:flex-row"
+              className="group bg-white rounded-2xl border border-gray-100 overflow-hidden cursor-pointer hover:shadow-lg hover:border-gray-200 transition-all duration-300 flex flex-col md:flex-row max-h-[320px]"
             >
               {/* Image Section */}
-              <div className="md:w-72 h-56 md:h-auto relative overflow-hidden bg-gray-100">
+              <div className="md:w-72 h-56 md:h-auto relative overflow-hidden bg-gray-100 flex-shrink-0">
                 {trip.coverImageUrl ? (
                   <img
                     src={trip.coverImageUrl}
@@ -386,7 +322,7 @@ const UserItinerariesPage = () => {
                         e.stopPropagation();
                         handleOpenEditModal(trip);
                       }}
-                      className="p-2 hover:bg-gray-100 rounded-full text-gray-500 hover:text-gray-900 transition-colors"
+                      className="p-2 hover:bg-gray-100 rounded-full text-gray-500 hover:text-gray-900 transition-colors cursor-pointer"
                       title="Chỉnh sửa"
                     >
                       <Icon icon="fluent:edit-24-regular" className="h-5 w-5" />
@@ -394,9 +330,9 @@ const UserItinerariesPage = () => {
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleDeleteTrip(trip.tripId, trip.tripName);
+                        handleDeleteClick(trip);
                       }}
-                      className="p-2 hover:bg-red-50 rounded-full text-gray-400 hover:text-red-600 transition-colors"
+                      className="p-2 hover:bg-red-50 rounded-full text-gray-400 hover:text-red-600 transition-colors cursor-pointer"
                       title="Xóa"
                     >
                       <Icon icon="fluent:delete-24-regular" className="h-5 w-5" />
@@ -432,16 +368,16 @@ const UserItinerariesPage = () => {
                   )}
 
                   <div className="ml-auto flex items-center gap-2 text-xs text-gray-500">
-                    {trip.conversationImageUrl ? (
+                    {trip.conversation.conversationAvatar ? (
                       <img 
-                        src={trip.conversationImageUrl} 
-                        alt={trip.conversationName || "Group"} 
+                        src={trip.conversation.conversationAvatar} 
+                        alt={trip.conversation.conversationName || "Group"} 
                         className="w-5 h-5 rounded-full object-cover border border-gray-200"
                       />
                     ) : (
                       <Icon icon="fluent:people-24-regular" className="h-4 w-4" />
                     )}
-                    <span className="font-medium">{trip.conversationName || "Cá nhân"}</span>
+                    <span className="font-medium">{trip.conversation.conversationName || "Cá nhân"}</span>
                   </div>
                 </div>
               </div>
@@ -455,7 +391,7 @@ const UserItinerariesPage = () => {
         <div className="mt-12 text-center">
           <button
             onClick={handleLoadMore}
-            className="px-8 py-3 bg-white border border-gray-200 text-gray-600 rounded-full hover:bg-gray-50 hover:text-gray-900 transition-all shadow-sm hover:shadow inline-flex items-center gap-2 font-medium"
+            className="px-8 py-3 bg-white border border-gray-200 text-gray-600 rounded-full hover:bg-gray-50 hover:text-gray-900 transition-all shadow-sm hover:shadow inline-flex items-center gap-2 font-medium cursor-pointer"
           >
             <span>Xem thêm lịch trình</span>
             <Icon icon="fluent:chevron-down-24-regular" className="h-4 w-4" />
@@ -469,6 +405,21 @@ const UserItinerariesPage = () => {
           <div className="animate-spin rounded-full h-8 w-8 border-2 border-gray-200 border-t-gray-800"></div>
         </div>
       )}
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmDeleteModal
+        isOpen={showDeleteConfirm}
+        onClose={() => {
+          setShowDeleteConfirm(false);
+          setTripToDelete(null);
+        }}
+        onConfirm={handleDeleteConfirm}
+        type="custom"
+        itemName={tripToDelete?.tripName || ""}
+        customTitle="Xóa lịch trình"
+        customWarning="Hành động này sẽ xóa vĩnh viễn lịch trình và tất cả các hoạt động liên quan. Bạn không thể hoàn tác hành động này."
+        isDeleting={isDeleting}
+      />
     </div>
   );
 };

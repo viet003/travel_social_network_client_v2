@@ -1,10 +1,14 @@
 // Trip Types - matching server entities
 
-export interface TripResponse {
-  tripId: string;
+export interface ConversationInfo {
   conversationId: string;
   conversationName: string | null;
-  conversationImageUrl: string | null;
+  conversationAvatar: string | null;
+}
+
+export interface TripResponse {
+  tripId: string;
+  conversation: ConversationInfo;
   tripName: string;
   tripDescription: string | null;
   coverImageUrl: string | null;

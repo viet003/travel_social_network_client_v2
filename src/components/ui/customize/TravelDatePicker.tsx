@@ -9,6 +9,7 @@ interface TravelDatePickerProps {
   format?: string;
   className?: string;
   disabled?: boolean;
+  getPopupContainer?: (trigger: HTMLElement) => HTMLElement;
 }
 
 const TravelDatePicker: React.FC<TravelDatePickerProps> = ({
@@ -18,6 +19,7 @@ const TravelDatePicker: React.FC<TravelDatePickerProps> = ({
   format = 'DD/MM/YYYY',
   className = '',
   disabled = false,
+  getPopupContainer,
   ...props
 }) => {
   const handleChange = (date: any) => {
@@ -63,6 +65,7 @@ const TravelDatePicker: React.FC<TravelDatePickerProps> = ({
         onChange={handleChange}
         format={format}
         disabled={disabled}
+        getPopupContainer={getPopupContainer}
         className={`w-full ${className}`}
         style={{
           backgroundColor: '#f9fafb',
