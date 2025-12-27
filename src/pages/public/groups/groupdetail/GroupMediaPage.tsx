@@ -4,7 +4,8 @@ import { Icon } from '@iconify/react';
 import TravelButton from '../../../../components/ui/customize/TravelButton';
 import LoadingSpinner from '../../../../components/ui/loading/LoadingSpinner';
 import { apiGetGroupMedia } from '../../../../services/groupService';
-import type { PostMediaResponse, GroupResponse } from '../../../../services/groupService';
+import type { GroupResponse } from '../../../../types/group.types';
+import type { PostMediaResponse } from '../../../../types/media.types';
 
 interface OutletContext {
   groupData: GroupResponse | null;

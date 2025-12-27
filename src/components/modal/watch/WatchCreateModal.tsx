@@ -96,7 +96,7 @@ const WatchCreateModal: React.FC<VideoCreateModalProps> = ({
   const categoryOptions = [
     { value: "travel", label: "Du lịch", icon: "fluent:airplane-24-filled" },
     { value: "food", label: "Ẩm thực", icon: "fluent:food-24-filled" },
-    { value: "adventure", label: "Phiêu lưu", icon: "fluent:mountain-24-filled" },
+    { value: "adventure", label: "Phiêu lưu", icon: "fluent:rocket-24-filled" },
     { value: "culture", label: "Văn hóa", icon: "fluent:building-24-filled" },
     { value: "nature", label: "Thiên nhiên", icon: "fluent:leaf-24-filled" },
     { value: "city", label: "Thành phố", icon: "fluent:city-24-filled" },

@@ -23,7 +23,8 @@ import {
   AdminBlogManagementPage,
   AdminGroupManagementPage,
 } from "./pages";
-import SearchResultPage from "./pages/SearchResultPage";
+import SearchResultPage from "./pages/SearchGlobalPage";
+import SearchExplorePage from "./pages/SearchExplorePage";
 import {
   MainLayout,
   LandingLayout,
@@ -177,6 +178,7 @@ function App() {
             />
           </Route>
           <Route path={path.SEARCH} element={<SearchResultPage />} />
+          <Route path={path.EXPLORE_SEARCH} element={<SearchExplorePage />} />
           <Route path={path.TRIP_DETAIL} element={<TripDetailPage />} />
           <Route path={path.VIDEO_DETAIL} element={<VideoDetailPage />} />
           <Route

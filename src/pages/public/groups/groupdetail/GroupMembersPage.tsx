@@ -8,13 +8,11 @@ import {
   apiChangeMemberRole,
   apiApproveJoinRequest,
   apiRejectJoinRequest,
-  type GroupMemberResponse,
-  type GroupResponse
 } from '../../../../services/groupService';
 import { toast } from 'react-toastify';
 import avatardf from '../../../../assets/images/avatar_default.png';
 import { TravelButton } from '../../../../components/ui/customize';
-
+import type { GroupMemberResponse, GroupResponse } from '../../../../types/group.types';
 interface AuthState {
   userId: string | null;
   userName: string | null;

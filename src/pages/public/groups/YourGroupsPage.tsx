@@ -2,9 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Icon } from '@iconify/react';
 import { MyGroupCard } from '../../../components/common/cards';
-import { apiGetMyGroups, apiGetPendingGroups, apiLeaveGroup, type GroupResponse } from '../../../services/groupService';
+import { apiGetMyGroups, apiGetPendingGroups, apiLeaveGroup } from '../../../services/groupService';
 import { toast } from 'react-toastify';
 import { formatTimeAgo } from '../../../utilities/helper';
+import type { GroupResponse } from '../../../types/group.types';
 
 const YourGroupsPage: React.FC = () => {
   const navigate = useNavigate();

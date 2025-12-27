@@ -1,10 +1,30 @@
 import React from 'react';
-import { Outlet, NavLink } from 'react-router-dom';
+import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { Icon } from '@iconify/react';
 import { path } from '../utilities/path';
+import { SearchBlogDropdown } from '../components/common/dropdowns/search';
 
 const ExploreLayout: React.FC = () => {
+  const navigate = useNavigate();
   const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
+  const [searchQuery, setSearchQuery] = React.useState('');
+  const [showSearchDropdown, setShowSearchDropdown] = React.useState(false);
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      setShowSearchDropdown(false);
+      navigate(`${path.HOME}/${path.EXPLORE_SEARCH}?q=${encodeURIComponent(searchQuery)}`);
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && searchQuery.trim()) {
+      e.preventDefault();
+      setShowSearchDropdown(false);
+      navigate(`${path.HOME}/${path.EXPLORE_SEARCH}?q=${encodeURIComponent(searchQuery)}`);
+    }
+  };
   
   const categories = [
     {
@@ -72,17 +92,36 @@ const ExploreLayout: React.FC = () => {
 
             {/* Right Section - Search */}
             <div className="flex items-center">
-              <div className="relative">
+              <form onSubmit={handleSearch} className="relative">
                 <input
                   type="text"
-                  placeholder="Tìm kiếm điểm đến..."
+                  placeholder="Tìm kiếm bài viết..."
+                  value={searchQuery}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    setShowSearchDropdown(true);
+                  }}
+                  onKeyDown={handleKeyDown}
+                  onFocus={() => setShowSearchDropdown(true)}
+                  onBlur={() => setTimeout(() => setShowSearchDropdown(false), 200)}
                   className="w-40 sm:w-64 px-3 sm:px-4 py-2 pl-9 sm:pl-10 bg-gray-100 text-gray-900 placeholder-gray-500 rounded-xl focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all text-sm"
                 />
                 <Icon
                   icon="fluent:search-24-filled"
                   className="absolute left-3 top-2.5 h-4 w-4 sm:h-5 sm:w-5 text-gray-400"
                 />
-              </div>
+                
+                {/* Search Dropdown */}
+                {showSearchDropdown && searchQuery.trim() && (
+                  <SearchBlogDropdown
+                    searchQuery={searchQuery}
+                    onClose={() => {
+                      setShowSearchDropdown(false);
+                      setSearchQuery('');
+                    }}
+                  />
+                )}
+              </form>
             </div>
           </div>
         </div>
@@ -102,7 +141,7 @@ const ExploreLayout: React.FC = () => {
           {/* Sidebar - Categories */}
           <aside
             className={`
-            fixed lg:static inset-y-0 left-0 z-50 w-64 sm:w-72 lg:w-64 xl:w-72
+            fixed lg:static inset-y-0 left-0 z-10 w-64 sm:w-72 lg:w-64 xl:w-72
             transform transition-transform duration-300 ease-in-out lg:transform-none
             ${
               isSidebarOpen

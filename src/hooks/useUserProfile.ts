@@ -5,7 +5,7 @@ import {
   apiUpdateUserProfile, 
   apiUpdateUserAvatar 
 } from '../services/userService';
-import type { UserResponse, UpdateUserDto } from '../types/user.types';
+import type { UserResponse, UpdateUserDto, UpdateUserResponse } from '../types/user.types';
 
 interface UseUserProfileOptions {
   userId?: string;
@@ -61,8 +61,15 @@ export const useUserProfile = (
     try {
       const response = await apiUpdateUserProfile(data);
       if (response.data) {
-        // Update local state with new data
-        setUser(prev => prev ? { ...prev, ...response.data } : null);
+        // Update local state with new data from UpdateUserResponse
+        const updatedData: UpdateUserResponse = response.data;
+        setUser(prev => prev ? {
+          ...prev,
+          userName: updatedData.userName,
+          userProfile: updatedData.userProfile,
+          avatarImg: updatedData.avatarImg,
+          coverImg: updatedData.coverImg
+        } : null);
         message.success('Cập nhật thông tin thành công');
         return true;
       }
@@ -83,9 +90,14 @@ export const useUserProfile = (
 
     try {
       const response = await apiUpdateUserAvatar(file);
-      if (response.data && response.data.avatar) {
-        // Update local state with new avatar
-        setUser(prev => prev ? { ...prev, avatar: response.data.avatar } : null);
+      if (response.data) {
+        // Avatar update creates a post, need to refetch user to get updated avatar
+        if (userId) {
+          const userResponse = await apiGetUserProfile(userId);
+          if (userResponse.data) {
+            setUser(userResponse.data);
+          }
+        }
         message.success('Cập nhật ảnh đại diện thành công');
         return true;
       }
@@ -98,7 +110,7 @@ export const useUserProfile = (
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [userId]);
 
   const refreshUser = useCallback(async () => {
     await fetchUser();

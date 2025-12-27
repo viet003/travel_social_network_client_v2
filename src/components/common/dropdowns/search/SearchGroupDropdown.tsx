@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Icon } from '@iconify/react';
 import { GroupResultItem } from '../../items';
 import type { GroupResultItemProps } from '../../items/GroupResultItem';
-import { apiSearchGroups } from '../../../../services/groupService';
+import { apiSearchGroups } from '../../../../services/searchService';
 import type { GroupResponse } from '../../../../types/group.types';
 import { useNavigate } from 'react-router-dom';
 
@@ -25,19 +25,24 @@ const SearchGroupDropdown: React.FC<SearchGroupDropdownProps> = ({
       return;
     }
 
+    console.log('🔍 SearchGroupDropdown: Searching for:', query);
     setLoading(true);
     try {
       const response = await apiSearchGroups(query, 0, 5);
-      const groups = response.data.content.map((group: GroupResponse) => ({
-        id: group.groupId,
-        name: group.groupName,
-        avatar: group.coverImageUrl || undefined,
-        subtitle: `${group.memberCount} thành viên`,
-        type: 'group' as const
-      }));
-      setSearchResults(groups);
+      console.log('✅ SearchGroupDropdown: API Response:', response);
+      if (response.success && response.data) {
+        const groups = response.data.content.map((group: GroupResponse) => ({
+          id: group.groupId,
+          name: group.groupName,
+          avatar: group.coverImageUrl || undefined,
+          description: group.privacy ? 'Nhóm riêng tư' : 'Nhóm công khai',
+          memberCount: group.memberCount
+        }));
+        console.log('✅ SearchGroupDropdown: Mapped groups:', groups);
+        setSearchResults(groups);
+      }
     } catch (error) {
-      console.error('Search groups error:', error);
+      console.error('❌ SearchGroupDropdown: Error:', error);
       setSearchResults([]);
     } finally {
       setLoading(false);

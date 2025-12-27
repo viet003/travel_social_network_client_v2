@@ -4,7 +4,7 @@ import { useParams, useOutletContext } from "react-router-dom";
 import { PostCreateModal, PostModal } from "../../../../components/modal/post";
 import { apiGetPostsByGroup } from "../../../../services/postService";
 import type { PostResponse } from "../../../../types/post.types";
-import type { GroupResponse } from "../../../../services/groupService";
+import type { GroupResponse } from "../../../../types/group.types";
 import { toast } from "react-toastify";
 import { formatTimeAgo } from "../../../../utilities/helper";
 

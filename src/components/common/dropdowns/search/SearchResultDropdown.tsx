@@ -25,26 +25,21 @@ const SearchResultDropdown: React.FC<SearchResultDropdownProps> = ({ onClose, se
 
     // Sync local query with parent searchQuery prop
     useEffect(() => {
-        console.log('🔄 Syncing query with searchQuery prop:', searchQuery);
         setQuery(searchQuery);
     }, [searchQuery]);
 
     // Fetch search suggestions - removed debounce for direct API call
     const fetchSearchResults = useCallback(async (keyword: string) => {
-        console.log('🔍 fetchSearchResults called with keyword:', keyword);
         
         if (!keyword.trim()) {
-            console.log('⚠️ Keyword is empty, clearing results');
             setUserItems([]);
             setGroupItems([]);
             return;
         }
 
-        console.log('📡 Calling API with keyword:', keyword);
         setIsLoading(true);
         try {
             const response = await apiSearchSuggestions(keyword);
-            console.log('✅ API Response:', response);
             
             // Map users to UserResultItemProps
             const users: UserResultItemProps[] = response.data.users.map((user: UserResponse) => ({
@@ -63,11 +58,10 @@ const SearchResultDropdown: React.FC<SearchResultDropdownProps> = ({ onClose, se
                 memberCount: group.memberCount
             }));
 
-            console.log('📊 Setting users:', users.length, 'groups:', groups.length);
             setUserItems(users);
             setGroupItems(groups);
         } catch (error) {
-            console.error('❌ Error fetching search results:', error);
+            console.error('Error fetching search results:', error);
             setUserItems([]);
             setGroupItems([]);
         } finally {
@@ -77,7 +71,6 @@ const SearchResultDropdown: React.FC<SearchResultDropdownProps> = ({ onClose, se
 
     // Effect to fetch on query change - direct call without debounce
     useEffect(() => {
-        console.log('🎯 useEffect triggered with query:', query);
         fetchSearchResults(query);
     }, [query, fetchSearchResults]);
 

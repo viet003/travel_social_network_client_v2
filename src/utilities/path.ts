@@ -47,6 +47,7 @@ export const path = {
     TRIP_DETAIL: "trips/:tripId",
     EXPLORE_GUIDES: "guides",
     EXPLORE_SEASONAL: "seasonal",
+    EXPLORE_SEARCH: "explore-search",
     SEARCH: "search",
     POST_DETAIL: "post/:postId",
     VIDEO_DETAIL: "video/:videoId",

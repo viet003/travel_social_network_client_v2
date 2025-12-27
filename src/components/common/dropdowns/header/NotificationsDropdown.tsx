@@ -6,6 +6,7 @@ import type { NotificationResponse, NotificationTypeEnum } from '../../../../typ
 import { path } from '../../../../utilities/path';
 import '../../../../styles/main-header.css';
 import { formatTimeAgo } from '../../../../utilities/helper';
+import avatarDefault from '../../../../assets/images/avatar_default.png';
 
 interface NotificationsDropdownProps {
   onClose?: () => void;
@@ -251,7 +252,7 @@ const NotificationsDropdown: React.FC<NotificationsDropdownProps> = ({ onClose }
               >
                 <div className="flex-shrink-0 mr-3 relative">
                   <img
-                    src={notification.sender?.avatarImg || `https://ui-avatars.com/api/?name=${notification.sender?.userName || 'System'}&background=random`}
+                    src={notification.sender?.avatarImg || avatarDefault}
                     alt="Avatar"
                     className="w-14 h-14 rounded-full object-cover"
                   />

@@ -15,7 +15,6 @@ const GroupFeedsPage: React.FC = () => {
 
   useEffect(() => {
     fetchGroupPosts();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchGroupPosts = async () => {
@@ -70,7 +69,8 @@ const GroupFeedsPage: React.FC = () => {
 
       observer.current = new IntersectionObserver(
         (entries) => {
-          if (entries[0].isIntersecting && hasMore) {            fetchGroupPosts();
+          if (entries[0].isIntersecting && hasMore) {
+            fetchGroupPosts();
           }
         },
         {
@@ -84,9 +84,8 @@ const GroupFeedsPage: React.FC = () => {
     [isLoading, hasMore]
   );
 
-  const handleShare = () => {  };
-
-  const handleImageClick = (img: string, index: number) => {  };
+  const handleShare = () => {
+  };
 
   if (isLoading && posts.length === 0) {
     return (
@@ -136,7 +135,7 @@ const GroupFeedsPage: React.FC = () => {
                   coverImageUrl: post.group.coverImageUrl || ''
                 } : undefined}
                 onShare={handleShare}
-                onImageClick={handleImageClick}
+                onImageClick={() => {}}
                 liked={post.liked}
               />
             </div>
@@ -152,7 +151,7 @@ const GroupFeedsPage: React.FC = () => {
 
         {/* Empty State - hiển thị khi không có bài viết */}
         {posts.length === 0 && !isLoading && (
-          <div className="bg-white rounded-lg mt-[200px] text-center">
+          <div className="bg-white rounded-lg mt-[50px] text-center min-h-[400px] flex flex-col justify-center p-6">
             <Icon icon="mdi:inbox" className="w-16 h-16 mx-auto text-gray-400 mb-4" />
             <h3 className="text-lg font-semibold text-gray-900 mb-2">Chưa có bài viết nào</h3>
             <p className="text-gray-600">Các nhóm bạn tham gia chưa có bài viết nào.</p>

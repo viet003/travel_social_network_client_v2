@@ -83,6 +83,26 @@ export const apiSearchPosts = async (
 };
 
 /**
+ * Search blogs only with pagination
+ * @param keyword - Search keyword
+ * @param page - Page number
+ * @param size - Number of items per page
+ * @returns Paginated blog search results
+ */
+export const apiSearchBlogs = async (
+    keyword: string,
+    page: number = 0,
+    size: number = 10
+): Promise<ApiResponse<any>> => {
+    const response = await axiosConfig({
+        method: 'GET',
+        url: '/search/blogs',
+        params: { q: keyword, page, size }
+    });
+    return response.data;
+};
+
+/**
  * Get search suggestions for autocomplete (limited results)
  * @param keyword - Search keyword
  * @returns Quick suggestions with limited results (3 users, 3 groups)
