@@ -301,19 +301,6 @@ const PostCreateModal: React.FC<PostCreateModalProps> = ({
       };
 
       // Debug log
-      console.log("📤 Sending post data:", {
-        content: postContent,
-        privacy: postData.privacy,
-        location: postData.location,
-        tags: postData.tags,
-        mediaCount: postData.mediaFiles?.length || 0,
-        mediaFiles: postData.mediaFiles?.map((f) => ({
-          name: f.name,
-          size: f.size,
-          type: f.type,
-        })),
-      });
-
       // Call API to create post
       let response;
       if (groupId) {
@@ -323,24 +310,17 @@ const PostCreateModal: React.FC<PostCreateModalProps> = ({
         // Create post on user profile
         response = await apiCreatePost(postData);
       }
-
-      console.log("✅ Post created successfully:", response);
-
       if (response?.success && response?.data) {
-        // Reset form and close modal
         handleClose();
-        
-        // Show success message
+
         toast.success('Tạo bài viết thành công!');
 
-        // Check if we're on HomePage by checking the pathname
         const isHomePage = currentLocation.pathname === '/home' || currentLocation.pathname === '/';
         
         if (isHomePage) {
-          // If on HomePage, redirect to user profile page
+          
           navigate(`/home/user/${userId}`);
         } else {
-          // If on other pages (like UserProfile, GroupPage), trigger callback to add post to list
           if (setCreateSuccess) {
             setCreateSuccess(true, response.data);
           }
@@ -349,7 +329,7 @@ const PostCreateModal: React.FC<PostCreateModalProps> = ({
         throw new Error(response?.message || "Không thể tạo bài viết");
       }
     } catch (error: unknown) {
-      console.error("❌ Lỗi khi tạo bài viết:", error);
+      console.error("Lỗi khi tạo bài viết:", error);
       const errorMessage =
         error && typeof error === "object" && "message" in error
           ? (error as { message: string }).message

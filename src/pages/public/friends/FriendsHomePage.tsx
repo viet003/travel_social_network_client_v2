@@ -116,7 +116,7 @@ const FriendsHomePage: React.FC = () => {
                 label: 'Gỡ/Xóa',
                 onClick: () => handleRemoveSuggestion(friend.friendProfile.userId || '')
               }}
-              onCardClick={() => console.log('View profile', friend.friendProfile.userId)}
+              onCardClick={() => {}}
             />
           ))}
         </div>

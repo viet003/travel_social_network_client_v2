@@ -100,15 +100,7 @@ const WatchEditModal: React.FC<WatchEditModalProps> = ({
 
   // Initialize form with existing watch data
   useEffect(() => {
-    if (watchData && isOpen) {
-      console.log('🔍 WatchEditModal - Initializing with data:', {
-        title: watchData.title,
-        description: watchData.description,
-        thumbnailUrl: watchData.thumbnailUrl,
-        category: watchData.category
-      });
-      
-      setVideoTitle(watchData.title || "");
+    if (watchData && isOpen) {      setVideoTitle(watchData.title || "");
       setVideoDescription(watchData.description || "");
       setSelectedLocation(watchData.location || null);
       setPrivacy(watchData.privacy?.toLowerCase() || "public");

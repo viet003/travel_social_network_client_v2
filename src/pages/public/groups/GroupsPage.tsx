@@ -37,7 +37,6 @@ const GroupsPage: React.FC = () => {
   };
 
   const handleSearchItemClick = (item: GroupResultItemProps) => {
-    console.log('Navigate to group:', item.name);
     // TODO: Navigate to group detail page
   };
 

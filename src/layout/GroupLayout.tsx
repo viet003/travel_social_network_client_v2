@@ -104,9 +104,7 @@ const GroupLayout: React.FC = () => {
     setRecentSearches(recentSearches.filter(item => item.id !== id));
   };
 
-  const handleSearchItemClick = (item: GroupResultItemProps) => {
-    console.log('Navigate to group:', item.name);
-    // TODO: Navigate to group detail page
+  const handleSearchItemClick = (item: GroupResultItemProps) => {    // TODO: Navigate to group detail page
   };
 
   return (

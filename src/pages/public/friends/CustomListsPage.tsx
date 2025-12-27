@@ -46,9 +46,7 @@ const CustomListsPage: React.FC = () => {
 
   const handleCreateList = () => {
     if (newListName.trim()) {
-      // Handle create list logic here
-      console.log('Creating list:', newListName);
-      setNewListName('');
+      // Handle create list logic here      setNewListName('');
       setShowCreateModal(false);
     }
   };

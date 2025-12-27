@@ -132,9 +132,7 @@ const PostDetailModal: React.FC<PostDetailModalProps> = ({
         postId,
         pageNum,
         commentSort
-      );
-      console.log("User comments data:", commentResponse);
-      const comments = commentResponse?.data?.content || [];
+      );      const comments = commentResponse?.data?.content || [];
       if (pageNum === 0) {
         setComments(comments);
       } else {
@@ -629,9 +627,7 @@ const PostDetailModal: React.FC<PostDetailModalProps> = ({
                       level={0}
                       maxLevel={2}
                       postId={postId}
-                      onReply={(parentId, content) => {
-                        console.log("Reply to:", parentId, "Content:", content);
-                        // Handle reply logic here
+                      onReply={(parentId, content) => {                        // Handle reply logic here
                       }}
                       onCommentCreated={onCommentCountChange}
                       onCommentDeleted={(deletedId) => {

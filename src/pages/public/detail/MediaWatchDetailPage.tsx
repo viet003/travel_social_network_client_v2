@@ -67,9 +67,7 @@ const MediaWatchDetailPage: React.FC = () => {
       
       try {
         await apiAddToHistory(watchId);
-        hasTrackedView.current = true;
-        console.log("Video added to history");
-      } catch (error) {
+        hasTrackedView.current = true;      } catch (error) {
         console.error("Error adding to history:", error);
       }
     };
@@ -584,14 +582,7 @@ const MediaWatchDetailPage: React.FC = () => {
                           level={0}
                           maxLevel={2}
                           watchId={watchData.watchId}
-                          onReply={(parentId, content) => {
-                            console.log(
-                              "Reply to:",
-                              parentId,
-                              "Content:",
-                              content
-                            );
-                          }}
+                          onReply={(parentId, content) => {                          }}
                           onCommentCreated={handleCommentCountChange}
                           onCommentDeleted={(deletedId) => {
                             setComments((prev) =>

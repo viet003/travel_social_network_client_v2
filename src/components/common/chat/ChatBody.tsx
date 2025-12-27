@@ -14,7 +14,7 @@ interface ChatBodyProps {
   name: string;
   onScroll: () => void;
   onRetryMessage: (tempId: string) => void;
-  onEditMessage?: (messageId: string, newContent: string) => void;
+  onEditMessage?: (messageId: string) => void;
   onDeleteMessage?: (messageId: string) => void;
   onReplyMessage?: (message: ChatMessage) => void;
   getStatusIcon: (msg: ChatMessage) => React.ReactNode;
@@ -194,15 +194,21 @@ const ChatBody: React.FC<ChatBodyProps> = ({
                   <div className={msg.status === "sending" ? "opacity-40" : ""}>
                     {/* Message bubble */}
                     <div
-                      className={`rounded-2xl px-4 py-2.5 shadow-sm min-w-[100px] max-w-[80%] inline-block transition-all duration-200 cursor-pointer select-none ${
-                        isOwnMessage
-                          ? msg.status === "failed"
-                            ? "bg-red-100 text-red-800 border border-red-300 max-w-[300px]"
-                            : "text-white shadow-md hover:shadow-lg max-w-[300px]"
-                          : "bg-white text-gray-800 border border-gray-100 shadow-sm hover:shadow-md max-w-[300px]"
+                      className={`${
+                        msg.type === "image" && msg.mediaUrl
+                          ? "rounded-2xl inline-block transition-all duration-200 cursor-pointer select-none shadow-sm hover:shadow-lg max-w-[300px]"
+                          : `rounded-2xl px-4 py-2.5 shadow-sm min-w-[100px] max-w-[80%] inline-block transition-all duration-200 cursor-pointer select-none ${
+                              isOwnMessage
+                                ? msg.status === "failed"
+                                  ? "bg-red-100 text-red-800 border border-red-300 max-w-[300px]"
+                                  : "text-white shadow-md hover:shadow-lg max-w-[300px]"
+                                : "bg-white text-gray-800 border border-gray-100 shadow-sm hover:shadow-md max-w-[300px]"
+                            }`
                       }`}
                       style={
-                        isOwnMessage && msg.status !== "failed"
+                        msg.type === "image" && msg.mediaUrl
+                          ? undefined
+                          : isOwnMessage && msg.status !== "failed"
                           ? { backgroundColor: "#0866ff" }
                           : undefined
                       }
@@ -249,7 +255,17 @@ const ChatBody: React.FC<ChatBodyProps> = ({
                           );
                         })()}
 
-                      <p className="text-sm break-words">{msg.content}</p>
+                      {/* Message Content - Handle text and images */}
+                      {msg.type === "image" && msg.mediaUrl ? (
+                        <img
+                          src={msg.mediaUrl}
+                          alt="Sent image"
+                          className="rounded-lg max-w-full max-h-64 object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                          onClick={() => window.open(msg.mediaUrl, "_blank")}
+                        />
+                      ) : (
+                        <p className="text-sm break-words">{msg.content}</p>
+                      )}
 
                       {/* Retry button for failed messages */}
                       {isOwnMessage && msg.status === "failed" && (
@@ -317,13 +333,15 @@ const ChatBody: React.FC<ChatBodyProps> = ({
           y={contextMenu.y}
           onEdit={() => {
             if (onEditMessage) {
-              onEditMessage(contextMenu.messageId, "");
+              onEditMessage(contextMenu.messageId);
             }
+            setContextMenu(null);
           }}
           onDelete={() => {
             if (onDeleteMessage) {
               onDeleteMessage(contextMenu.messageId);
             }
+            setContextMenu(null);
           }}
           onClose={() => setContextMenu(null)}
         />

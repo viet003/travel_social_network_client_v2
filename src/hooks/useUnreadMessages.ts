@@ -21,14 +21,12 @@ const notifyUnreadStateChange = (hasUnread: boolean) => {
 export const notifyNewMessageReceived = (message: { senderId: string; [key: string]: unknown }, currentUserId: string) => {
   // Only set unread flag if message is from another user
   if (message.senderId !== currentUserId) {
-    console.log('🔴 New message from another user - showing red dot');
     notifyUnreadStateChange(true);
   }
 };
 
 // Global function to clear unread messages
 export const clearUnreadMessages = () => {
-  console.log('✅ Clearing unread messages - hiding red dot');
   notifyUnreadStateChange(false);
 };
 
@@ -50,14 +48,10 @@ export const useUnreadMessages = () => {
   const [hasUnreadMessages, setHasUnreadMessages] = useState(hasGlobalUnreadMessages);
   const { userId, isLoggedIn } = useSelector((state: { auth: AuthState }) => state.auth);
 
-  console.log('🎯 useUnreadMessages hook initialized - userId:', userId, 'isLoggedIn:', isLoggedIn, 'hasUnreadMessages:', hasUnreadMessages);
-  console.log('🔌 WebSocket connected status:', webSocketService.isConnected());
 
   // Subscribe to global unread state changes
   useEffect(() => {
-    console.log('📡 useUnreadMessages: Subscribing to global state changes');
     const unsubscribe = subscribeToUnreadState((hasUnread) => {
-      console.log('🔔 useUnreadMessages: Global state changed to:', hasUnread);
       setHasUnreadMessages(hasUnread);
     });
 
@@ -67,27 +61,18 @@ export const useUnreadMessages = () => {
   // Subscribe to WebSocket unread message notifications
   useEffect(() => {
     if (!isLoggedIn || !userId) {
-      console.log('⚠️ useUnreadMessages: Not logged in or no userId, skipping subscription');
       return;
     }
 
-    console.log('🔌 useUnreadMessages: Setting up WebSocket subscription for userId:', userId);
-
     // Listen for unread message notifications from dedicated endpoint
     const unsubscribeWs = webSocketService.onUnreadMessage((notification: any) => {
-      console.log('🔴 Unread message notification received:', notification);
-      
       // Server sends to /queue/unread-messages - always show red dot
-      console.log('🔴 New unread message - showing red dot');
       notifyUnreadStateChange(true);
     });
-
-    console.log('✅ useUnreadMessages: Subscribed to /queue/unread-messages');
 
     return () => {
       if (unsubscribeWs) {
         unsubscribeWs();
-        console.log('🔕 useUnreadMessages: Unsubscribed from unread messages');
       }
     };
   }, [isLoggedIn, userId]);

@@ -130,3 +130,130 @@ export const apiSearchConversations = async (
         throw error;
     }
 };
+
+/**
+ * Get conversation members
+ * @param conversationId - Conversation UUID
+ * @param page - Page number (default: 0)
+ * @param size - Page size (default: 50)
+ * @returns Pageable response containing members
+ */
+export const apiGetConversationMembers = async (
+    conversationId: string,
+    page: number = 0,
+    size: number = 50
+): Promise<ApiResponse<PageableResponse<any>>> => {
+    try {
+        const response = await axiosConfig({
+            method: 'GET',
+            url: `/conversations/${conversationId}/members`,
+            params: { page, size }
+        });
+        return response.data;
+    } catch (error: unknown) {
+        if (error && typeof error === 'object' && 'response' in error) {
+            throw (error as { response: { data: unknown } }).response.data;
+        }
+        throw error;
+    }
+};
+/**
+ * Update group conversation avatar
+ * @param conversationId - Conversation UUID
+ * @param avatarFile - Avatar image file
+ * @returns Updated conversation response
+ */
+export const apiUpdateGroupAvatar = async (
+    conversationId: string,
+    avatarFile: File
+): Promise<ApiResponse<ConversationResponse>> => {
+    try {
+        const formData = new FormData();
+        formData.append('avatar', avatarFile);
+        
+        const response = await axiosConfig({
+            method: 'PUT',
+            url: `/conversations/${conversationId}/avatar`,
+            data: formData,
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        });
+        return response.data;
+    } catch (error: unknown) {
+        if (error && typeof error === 'object' && 'response' in error) {
+            throw (error as { response: { data: unknown } }).response.data;
+        }
+        throw error;
+    }
+};
+/**
+ * Get conversation media (images/videos)
+ * @param conversationId - Conversation UUID
+ * @returns List of media items
+ */
+export const apiGetConversationMedia = async (
+    conversationId: string
+): Promise<ApiResponse<any[]>> => {
+    try {
+        const response = await axiosConfig({
+            method: 'GET',
+            url: `/conversations/${conversationId}/media`
+        });
+        return response.data;
+    } catch (error: unknown) {
+        if (error && typeof error === 'object' && 'response' in error) {
+            throw (error as { response: { data: unknown } }).response.data;
+        }
+        throw error;
+    }
+};
+/**
+ * Add members to group conversation
+ * @param conversationId - Conversation UUID
+ * @param userIds - Array of user IDs to add
+ * @returns Success response
+ */
+export const apiAddMembersToConversation = async (
+    conversationId: string,
+    userIds: string[]
+): Promise<ApiResponse<void>> => {
+    try {
+        const response = await axiosConfig({
+            method: 'POST',
+            url: `/conversations/${conversationId}/members`,
+            data: { userIds }
+        });
+        return response.data;
+    } catch (error: unknown) {
+        if (error && typeof error === 'object' && 'response' in error) {
+            throw (error as { response: { data: unknown } }).response.data;
+        }
+        throw error;
+    }
+};
+
+/**
+ * Remove members from group conversation (admin only)
+ * @param conversationId - Conversation UUID
+ * @param userIds - Array of user IDs to remove
+ * @returns Success response
+ */
+export const apiRemoveMembersFromConversation = async (
+    conversationId: string,
+    userIds: string[]
+): Promise<ApiResponse<void>> => {
+    try {
+        const response = await axiosConfig({
+            method: 'DELETE',
+            url: `/conversations/${conversationId}/members`,
+            data: { userIds }
+        });
+        return response.data;
+    } catch (error: unknown) {
+        if (error && typeof error === 'object' && 'response' in error) {
+            throw (error as { response: { data: unknown } }).response.data;
+        }
+        throw error;
+    }
+};

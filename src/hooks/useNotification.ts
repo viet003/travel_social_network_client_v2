@@ -28,15 +28,6 @@ interface UseNotificationReturn extends NotificationState {
   refreshUnreadCount: () => Promise<void>;
 }
 
-/**
- * Custom hook to manage notifications with WebSocket real-time updates
- * Features:
- * - Fetch notifications from API
- * - Real-time notification via WebSocket
- * - Mark as read functionality
- * - Unread count tracking
- * - Pagination support
- */
 export const useNotification = (): UseNotificationReturn => {
   const [state, setState] = useState<NotificationState>({
     notifications: [],
@@ -55,7 +46,6 @@ export const useNotification = (): UseNotificationReturn => {
 
   // Debug log
   useEffect(() => {
-    console.log('🔍 useNotification Debug:', { token: !!token, userId });
   }, [token, userId]);
 
   /**
@@ -151,8 +141,6 @@ export const useNotification = (): UseNotificationReturn => {
    * Handle real-time notification from WebSocket
    */
   const handleWebSocketNotification = useCallback((notification: NotificationResponse) => {
-    console.log('📩 Real-time notification received:', notification);
-
     // Add to top of notifications list
     setState(prev => ({
       ...prev,
@@ -181,14 +169,11 @@ export const useNotification = (): UseNotificationReturn => {
    * Note: Connection is established in MainLayout
    */
   useEffect(() => {
-    console.log('📩 useNotification: Registering notification handler');
-
     // Register notification handler
     const unsubscribe = webSocketService.onNotification(handleWebSocketNotification);
 
     // Cleanup on unmount
     return () => {
-      console.log('📩 useNotification: Unregistering notification handler');
       unsubscribe();
     };
   }, [handleWebSocketNotification]);

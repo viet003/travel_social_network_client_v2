@@ -4,11 +4,11 @@ import { Icon } from "@iconify/react";
 import { message as antdMessage } from "antd";
 import type { RootState } from "../../../stores/types/storeTypes";
 import { setActiveConversation } from "../../../stores/actions/conversationAction";
-import ConversationInfoModal from "./ConversationInfoModal";
+import ConversationInfoModal from "../../modal/conversation/ConversationInfoModal";
 import ChatBody from "./ChatBody";
 import avatardf from "../../../assets/images/avatar_default.png";
 import webSocketService from "../../../services/webSocketService";
-import { apiGetConversationMessages } from "../../../services/conversationMessageService";
+import { apiGetConversationMessages, apiUpdateMessage, apiDeleteMessage } from "../../../services/conversationMessageService";
 import { apiUploadMedia } from "../../../services/mediaService";
 import type {
   ChatMessage,
@@ -40,6 +40,7 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ onClose }) => {
     new Map()
   );
   const [replyingTo, setReplyingTo] = useState<ChatMessage | null>(null);
+  const [editingMessage, setEditingMessage] = useState<ChatMessage | null>(null);
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
@@ -60,14 +61,6 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ onClose }) => {
 
   // Debug logging
   useEffect(() => {
-    console.log("🔍 ChatWidget Debug:", {
-      activeConversationId,
-      conversationsCount: conversations.length,
-      conversations: conversations.map((c) => ({
-        id: c.conversationId,
-        name: c.conversationName,
-      })),
-    });
   }, [activeConversationId, conversations]);
 
   // Find active conversation
@@ -133,8 +126,6 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ onClose }) => {
           size: 50,
         });
         setMessages(response.content);
-        console.log("✅ Loaded messages:", response.content.length);
-
         // Mark messages as delivered when loaded
         response.content.forEach((msg) => {
           if (msg.senderId !== currentUserId && msg.mongoId) {
@@ -159,12 +150,6 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ onClose }) => {
   // Subscribe to WebSocket for real-time messages
   useEffect(() => {
     if (!activeConversationId) return;
-
-    console.log(
-      "🔔 Setting up WebSocket subscription for:",
-      activeConversationId
-    );
-
     // Subscribe to conversation
     const unsubscribeConversation =
       webSocketService.subscribeToConversation(activeConversationId);
@@ -173,8 +158,6 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ onClose }) => {
     const unsubscribeMessages = webSocketService.onChatMessage(
       activeConversationId,
       (newMessage: ChatMessage) => {
-        console.log("💬 Received new message:", newMessage);
-        
         // Note: Server automatically sends notification to user's notification queue
         // No need to manually notify here - useUnreadMessages hook handles it
         
@@ -198,7 +181,6 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ onClose }) => {
                 ...newMessage,
                 status: "sent", // Update status to sent
               };
-              console.log("🔄 Replaced optimistic message with server message");
               return updated;
             }
           }
@@ -212,7 +194,6 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ onClose }) => {
                 m.conversationMessageId === newMessage.conversationMessageId)
           );
           if (exists) {
-            console.log("⚠️ Message already exists, skipping duplicate");
             return prev;
           }
 
@@ -235,8 +216,6 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ onClose }) => {
     const unsubscribeTyping = webSocketService.onTypingNotification(
       activeConversationId,
       (notification: TypingNotification) => {
-        console.log("⌨️ Received typing notification:", notification);
-        
         // Ignore own typing
         if (notification.userId === currentUserId) return;
 
@@ -265,8 +244,6 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ onClose }) => {
     const unsubscribeReceipts = webSocketService.onDeliveryReceipt(
       activeConversationId,
       (receipt: MessageDeliveryReceipt) => {
-        console.log("📬 Received receipt:", receipt);
-
         // Update message status
         setMessageStatuses((prev) => {
           const newMap = new Map(prev);
@@ -287,7 +264,6 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ onClose }) => {
 
     // Cleanup on unmount or conversation change
     return () => {
-      console.log("🔕 Cleaning up WebSocket subscription");
       unsubscribeConversation();
       unsubscribeMessages();
       unsubscribeTyping();
@@ -331,10 +307,6 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ onClose }) => {
       }
 
       try {
-        console.log(
-          `🔄 Retrying message (attempt ${pending.retryCount + 1}):`,
-          pending.tempId
-        );
         webSocketService.sendMessage(activeConversationId, pending.content);
 
         // Remove from pending on success
@@ -358,7 +330,6 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ onClose }) => {
   // Auto-retry on reconnection
   useEffect(() => {
     if (webSocketService.isConnected() && pendingMessages.length > 0) {
-      console.log("🔄 WebSocket reconnected, retrying pending messages...");
       retryPendingMessages();
     }
   }, [pendingMessages, retryPendingMessages]);
@@ -392,9 +363,126 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ onClose }) => {
     }, 3000) as unknown as number;
   }, [activeConversationId]);
 
+  // Handle image selection
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      antdMessage.error('Vui lòng chọn file ảnh');
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      antdMessage.error('Kích thước ảnh không được vượt quá 5MB');
+      return;
+    }
+
+    setSelectedImage(file);
+    
+    // Create preview
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setImagePreview(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  // Handle send image message
+  const handleSendImageMessage = async () => {
+    if (!selectedImage || !activeConversationId) return;
+
+    const tempId = `temp-${Date.now()}`;
+    setIsUploadingImage(true);
+
+    try {
+      // Upload image to MinIO
+      antdMessage.loading({ content: 'Đang tải ảnh lên...', key: 'upload' });
+      const uploadResponse = await apiUploadMedia(selectedImage, 'chat', activeConversationId);
+      const imageUrl = uploadResponse.data.url;
+      
+      antdMessage.success({ content: 'Tải ảnh lên thành công!', key: 'upload', duration: 2 });
+
+      // Create optimistic message
+      const optimisticMessage: ChatMessage = {
+        messageId: tempId,
+        conversationId: activeConversationId,
+        groupChatId: activeConversationId,
+        senderId: currentUserId || "",
+        senderName: "You",
+        content: messageText.trim() || "Đã gửi một ảnh",
+        type: "image",
+        status: "sending",
+        mediaUrl: imageUrl,
+        createdAt: new Date().toISOString(),
+        replyToMessageId: replyingTo?.mongoId || replyingTo?.id,
+      };
+
+      setMessages((prev) => [...prev, optimisticMessage]);
+      
+      // Clear states
+      setSelectedImage(null);
+      setImagePreview(null);
+      setMessageText("");
+      setReplyingTo(null);
+
+      // Send message via WebSocket
+      const replyToId = replyingTo?.mongoId || replyingTo?.id;
+      webSocketService.sendMessage(
+        activeConversationId, 
+        messageText.trim() || "Đã gửi một ảnh", 
+        'image', 
+        imageUrl, 
+        replyToId
+      );
+    } catch (error) {
+      console.error("Failed to upload image:", error);
+    } finally {
+      setIsUploadingImage(false);
+    }
+  };
+
+  // Cancel image selection
+  const handleCancelImage = () => {
+    setSelectedImage(null);
+    setImagePreview(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
   // Handle send message with error handling and retry
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // If editing, update the message instead
+    if (editingMessage && editingMessage.mongoId) {
+      const newContent = messageText.trim();
+      if (!newContent) return;
+
+      try {
+        await apiUpdateMessage(editingMessage.mongoId, newContent);
+        
+        // Update message in local state
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.mongoId === editingMessage.mongoId
+              ? { ...m, content: newContent }
+              : m
+          )
+        );
+        
+        setMessageText("");
+        setEditingMessage(null);
+        antdMessage.success("Đã cập nhật tin nhắn");
+      } catch (error) {
+        console.error("Failed to update message:", error);
+        antdMessage.error("Không thể cập nhật tin nhắn");
+      }
+      return;
+    }
     
     // If there's an image, upload it first
     if (selectedImage) {
@@ -442,9 +530,6 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ onClose }) => {
       webSocketService.sendMessage(activeConversationId, content, 'text', undefined, replyToId);
 
       // Don't update status here - let the server broadcast handle it
-      console.log("✅ Message sent successfully, waiting for server confirmation", {
-        replyToMessageId: replyToId
-      });
     } catch (error) {
       console.error("❌ Failed to send message:", error);
 
@@ -470,6 +555,45 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ onClose }) => {
     }
 
     scrollToBottom(true);
+  };
+
+  // Handle edit message - enter edit mode
+  const handleEditMessage = (messageId: string) => {
+    const messageToEdit = messages.find(
+      (m) => m.messageId === messageId || m.mongoId === messageId
+    );
+    
+    if (!messageToEdit) return;
+    
+    setEditingMessage(messageToEdit);
+    setMessageText(messageToEdit.content);
+    setReplyingTo(null);
+  };
+
+  // Handle delete message
+  const handleDeleteMessage = async (messageId: string) => {
+    const messageToDelete = messages.find(
+      (m) => m.messageId === messageId || m.mongoId === messageId
+    );
+    
+    if (!messageToDelete || !messageToDelete.mongoId) {
+      antdMessage.error("Không thể xóa tin nhắn");
+      return;
+    }
+
+    try {
+      await apiDeleteMessage(messageToDelete.mongoId);
+      
+      // Remove message from local state
+      setMessages((prev) => prev.filter(
+        (m) => m.mongoId !== messageToDelete.mongoId && m.messageId !== messageId
+      ));
+      
+      antdMessage.success("Đã xóa tin nhắn");
+    } catch (error) {
+      console.error("Failed to delete message:", error);
+      antdMessage.error("Không thể xóa tin nhắn");
+    }
   };
 
   // Retry a specific failed message
@@ -517,13 +641,11 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ onClose }) => {
 
   // Don't render if no active conversation ID
   if (!activeConversationId) {
-    console.log("❌ ChatWidget: No activeConversationId");
     return null;
   }
 
   // If we have ID but no conversation data yet, show loading state
   if (!activeConversation) {
-    console.log("⏳ ChatWidget: Loading conversation...");
     return (
       <div className="fixed bottom-0 right-6 z-50 flex flex-col w-[400px] max-h-[600px] bg-white rounded-t-lg shadow-2xl border border-gray-200">
         <div className="flex items-center justify-between px-4 py-3 rounded-t-lg bg-pink-500">
@@ -547,12 +669,6 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ onClose }) => {
       </div>
     );
   }
-
-  console.log(
-    "✅ ChatWidget: Rendering with conversation:",
-    activeConversation.conversationId
-  );
-
   // Don't show ChatWidget if InfoModal is open
   if (showInfoModal) {
     return (
@@ -630,16 +746,8 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ onClose }) => {
             name={name}
             onScroll={checkIfNearBottom}
             onRetryMessage={handleRetryMessage}
-            onEditMessage={(messageId, newContent) => {
-              console.log("Edit message:", messageId, newContent);
-              // TODO: Implement edit message API
-              antdMessage.info("Tính năng sửa tin nhắn đang phát triển");
-            }}
-            onDeleteMessage={(messageId) => {
-              console.log("Delete message:", messageId);
-              // TODO: Implement delete message API
-              antdMessage.info("Tính năng xóa tin nhắn đang phát triển");
-            }}
+            onEditMessage={handleEditMessage}
+            onDeleteMessage={handleDeleteMessage}
             onReplyMessage={(message) => {
               setReplyingTo(message);
             }}
@@ -659,8 +767,35 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ onClose }) => {
             </div>
           )}
 
+          {/* Edit Mode Preview */}
+          {editingMessage && (
+            <div className="px-3 py-2 bg-blue-50 border-t border-blue-200 flex items-center justify-between">
+              <div className="flex items-center gap-2 flex-1 min-w-0">
+                <Icon icon="lucide:edit-3" className="w-3 h-3 text-blue-600 flex-shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-medium text-blue-700 truncate">
+                    Chỉnh sửa tin nhắn
+                  </p>
+                  <p className="text-xs text-blue-600 truncate">
+                    {editingMessage.content}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => {
+                  setEditingMessage(null);
+                  setMessageText("");
+                }}
+                className="p-1 hover:bg-blue-200 rounded-full transition-colors ml-2 flex-shrink-0"
+                type="button"
+              >
+                <Icon icon="lucide:x" className="w-4 h-4 text-blue-600" />
+              </button>
+            </div>
+          )}
+
           {/* Reply Preview */}
-          {replyingTo && (
+          {replyingTo && !editingMessage && (
             <div className="px-3 py-2 bg-gray-50 border-t border-gray-200 flex items-center justify-between">
               <div className="flex items-center gap-2 flex-1 min-w-0">
                 <Icon icon="lucide:corner-up-left" className="w-3 h-3 text-gray-500 flex-shrink-0" />
@@ -690,17 +825,48 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ onClose }) => {
             </div>
           )}
 
+          {/* Image Preview */}
+          {imagePreview && (
+            <div className="px-3 py-2 bg-gray-50 border-t border-gray-200">
+              <div className="relative inline-block">
+                <img 
+                  src={imagePreview} 
+                  alt="Preview" 
+                  className="max-w-[200px] max-h-[200px] rounded-lg border border-gray-300"
+                />
+                <button
+                  onClick={handleCancelImage}
+                  className="absolute -top-2 -right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
+                  type="button"
+                >
+                  <Icon icon="lucide:x" className="w-4 h-4" />
+                </button>
+              </div>
+              {messageText && (
+                <p className="mt-2 text-sm text-gray-600">{messageText}</p>
+              )}
+            </div>
+          )}
+
           {/* Input Area */}
           <form
             onSubmit={handleSendMessage}
             className="flex items-center gap-2 p-3 bg-white border-t border-gray-200"
           >
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleImageSelect}
+              className="hidden"
+            />
             <button
               type="button"
+              onClick={() => fileInputRef.current?.click()}
               className="p-2 hover:bg-gray-100 rounded-full transition-colors cursor-pointer"
-              title="Thêm file"
+              title="Gửi ảnh"
             >
-              <Icon icon="lucide:paperclip" className="w-5 h-5 text-gray-500" />
+              <Icon icon="lucide:image" className="w-5 h-5 text-gray-500" />
             </button>
 
             <input
@@ -710,8 +876,8 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ onClose }) => {
                 setMessageText(e.target.value);
                 handleTyping();
               }}
-              placeholder="Aa"
-              className="flex-1 px-4 py-2 bg-gray-100 rounded-full text-sm focus:outline-none focus:ring-2" style={{ '--tw-ring-color': '#0866ff' } as React.CSSProperties}
+              placeholder={editingMessage ? "Chỉnh sửa tin nhắn..." : "Aa"}
+              className="flex-1 px-4 py-2 bg-gray-100 rounded-full text-sm focus:outline-none focus:ring-2" style={{ '--tw-ring-color': editingMessage ? '#3b82f6' : '#0866ff' } as React.CSSProperties}
             />
 
             <button
@@ -724,15 +890,26 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ onClose }) => {
 
             <button
               type="submit"
-              disabled={!messageText.trim()}
-              className="p-2 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer" style={{ backgroundColor: messageText.trim() ? '#0866ff' : 'transparent' }}
-              title="Gửi"
+              disabled={(!messageText.trim() && !selectedImage) || isUploadingImage}
+              className="p-2 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer" 
+              style={{ backgroundColor: (messageText.trim() || selectedImage) && !isUploadingImage ? (editingMessage ? '#3b82f6' : '#0866ff') : 'transparent' }}
+              title={editingMessage ? "Cập nhật" : "Gửi"}
             >
-              <Icon
-                icon="lucide:send"
-                className="w-5 h-5"
-                style={{ color: messageText.trim() ? 'white' : '#6b7280' }}
-              />
+              {isUploadingImage ? (
+                <Icon icon="eos-icons:loading" className="w-5 h-5 text-blue-600" />
+              ) : editingMessage ? (
+                <Icon
+                  icon="lucide:check"
+                  className="w-5 h-5"
+                  style={{ color: messageText.trim() ? 'white' : '#6b7280' }}
+                />
+              ) : (
+                <Icon
+                  icon="lucide:send"
+                  className="w-5 h-5"
+                  style={{ color: (messageText.trim() || selectedImage) ? 'white' : '#6b7280' }}
+                />
+              )}
             </button>
           </form>
         </>

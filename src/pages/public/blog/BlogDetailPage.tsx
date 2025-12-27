@@ -156,9 +156,7 @@ const BlogDetailPage = () => {
     
     // If deleted comment was a review, allow user to review again
     if (deletedComment && deletedComment.rating !== undefined && deletedComment.rating > 0) {
-      setHasReviewedLocal(false);
-      console.log('Review deleted, modal should reappear');
-    }
+      setHasReviewedLocal(false);    }
     
     if (blog && deletedComment?.rating !== undefined && deletedComment.rating > 0) {
       // Recalculate average rating after deletion

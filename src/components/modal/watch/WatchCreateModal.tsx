@@ -345,14 +345,6 @@ const WatchCreateModal: React.FC<VideoCreateModalProps> = ({
       // Prepare data for API
       // Use custom thumbnail if uploaded, otherwise use generated thumbnail
       const thumbnailToSend = customThumbnail || generatedThumbnailFile;
-      
-      console.log('📤 Sending watch data:', {
-        hasVideo: !!selectedVideo.file,
-        hasThumbnail: !!thumbnailToSend,
-        thumbnailType: thumbnailToSend ? (customThumbnail ? 'custom' : 'generated') : 'none',
-        thumbnailSize: thumbnailToSend?.size
-      });
-      
       const watchData = {
         video: selectedVideo.file,
         title: videoTitle,

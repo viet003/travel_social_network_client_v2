@@ -1,18 +1,23 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Icon } from "@iconify/react";
 import { SimpleCalendar } from "../cards";
 import { apiGetUserConversations } from "../../../services/conversationService";
+import { apiGetMyGroups } from "../../../services/groupService";
 import type { ConversationResponse } from "../../../types/conversation.types";
+import type { GroupResponse } from "../../../types/group.types";
 import { avatarDefault } from "../../../assets/images";
 import { useDispatch } from "react-redux";
 import { setActiveConversation, addConversation } from "../../../stores/actions/conversationAction";
 import { formatChatTime } from "../../../utilities/helper";
+import { path } from "../../../utilities/path";
 
 const RightSidebar: React.FC = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const [conversations, setConversations] = useState<ConversationResponse[]>([]);
   const [isLoadingConversations, setIsLoadingConversations] = useState(false);
-  const [groups, setGroups] = useState<ConversationResponse[]>([]);
+  const [groups, setGroups] = useState<GroupResponse[]>([]);
   const [isLoadingGroups, setIsLoadingGroups] = useState(false);
 
   // Fetch conversations
@@ -38,16 +43,16 @@ const RightSidebar: React.FC = () => {
     fetchConversations();
   }, []);
 
-  // Fetch groups
+  // Fetch social groups
   useEffect(() => {
     const fetchGroups = async () => {
       try {
         setIsLoadingGroups(true);
-        const response = await apiGetUserConversations(0, 8, 'GROUP');
-        // Sort by lastActiveAt descending
+        const response = await apiGetMyGroups(0, 8);
+        // Sort by lastActivityAt descending
         const sortedGroups = response.data.content.sort((a, b) => {
-          const dateA = a.lastActiveAt ? new Date(a.lastActiveAt).getTime() : 0;
-          const dateB = b.lastActiveAt ? new Date(b.lastActiveAt).getTime() : 0;
+          const dateA = a.lastActivityAt ? new Date(a.lastActivityAt).getTime() : 0;
+          const dateB = b.lastActivityAt ? new Date(b.lastActivityAt).getTime() : 0;
           return dateB - dateA;
         });
         setGroups(sortedGroups);
@@ -169,16 +174,15 @@ const RightSidebar: React.FC = () => {
           <div className="space-y-1 max-h-[250px] overflow-y-auto">
             {groups.length > 0 ? (
               groups.map((group) => {
-                const displayName = group.conversationName || 'Nhóm';
-                const displayAvatar = group.conversationAvatar || avatarDefault;
-                const memberCount = group.members?.length || 0;
-                const timeText = formatChatTime(group.lastActiveAt);
+                const displayName = group.groupName || 'Nhóm';
+                const displayAvatar = group.coverImageUrl || avatarDefault;
+                const memberCount = group.memberCount || 0;
 
                 return (
                   <div
-                    key={group.conversationId}
+                    key={group.groupId}
                     className="flex items-center p-2 hover:bg-gray-100 rounded-lg cursor-pointer"
-                    onClick={() => handleConversationClick(group)}
+                    onClick={() => navigate(`${path.HOME}/${path.GROUPS}/${group.groupId}`)}
                   >
                     <div className="w-10 h-10 rounded-lg overflow-hidden mr-3">
                       <img
@@ -195,10 +199,8 @@ const RightSidebar: React.FC = () => {
                         <span className="text-sm font-semibold text-black truncate">
                           {displayName}
                         </span>
-                        {timeText && (
-                          <span className="text-xs text-gray-500 ml-2">
-                            {timeText}
-                          </span>
+                        {group.privacy && (
+                          <Icon icon="mdi:lock" className="w-3 h-3 text-gray-400 ml-1" />
                         )}
                       </div>
                       <span className="text-xs text-gray-500">

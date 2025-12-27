@@ -192,7 +192,7 @@ const AllFriendsPage: React.FC = () => {
                 label: 'Hủy kết bạn',
                 onClick: () => handleUnfriend(friend.userId || '', friend.userProfile.fullName || friend.userName)
               }}
-              onCardClick={() => console.log('View profile', friend.userId)}
+              onCardClick={() => {}}
             />
           ))}
         </div>

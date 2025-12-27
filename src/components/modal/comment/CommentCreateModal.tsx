@@ -46,11 +46,7 @@ const CommentCreateModal: React.FC<CommentCreateModalProps> = ({
         payload.watchId = watchId;
       }
       
-      const response = await apiCreateCommentForContent(payload);
-
-      console.log('Comment created:', response);
-
-      if (response.success && response.data) {
+      const response = await apiCreateCommentForContent(payload);      if (response.success && response.data) {
         // Create comment object from API response
         const newComment: CommentResponse = {
           commentId: response.data.commentId,

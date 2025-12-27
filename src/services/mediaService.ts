@@ -7,17 +7,34 @@ import type { MediaUploadResponse } from "../types/media.types";
  * Endpoint: POST /media/upload
  * @param file File to upload
  * @param type Type of media (default: 'blog')
+ * @param conversationId Optional conversation ID for chat media (will use /upload/chat endpoint)
  * @returns Media upload response with mediaId and URL
  */
 export const apiUploadMedia = async (
   file: File,
-  type: string = 'blog'
+  type: string = 'blog',
+  conversationId?: string
 ): Promise<ApiResponse<MediaUploadResponse>> => {
   try {
     const formData = new FormData();
     formData.append('file', file);
+    
+    // Use different endpoint for chat media
+    if (type === 'chat' && conversationId) {
+      formData.append('conversationId', conversationId);
+      const response = await axiosConfig({
+        method: 'POST',
+        url: '/media/upload/chat',
+        data: formData,
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+      return response.data;
+    }
+    
+    // Original endpoint for blog/post media
     formData.append('type', type);
-
     const response = await axiosConfig({
       method: 'POST',
       url: '/media/upload',

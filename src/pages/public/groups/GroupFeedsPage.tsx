@@ -70,9 +70,7 @@ const GroupFeedsPage: React.FC = () => {
 
       observer.current = new IntersectionObserver(
         (entries) => {
-          if (entries[0].isIntersecting && hasMore) {
-            console.log('Reached end of posts, loading more...');
-            fetchGroupPosts();
+          if (entries[0].isIntersecting && hasMore) {            fetchGroupPosts();
           }
         },
         {
@@ -86,13 +84,9 @@ const GroupFeedsPage: React.FC = () => {
     [isLoading, hasMore]
   );
 
-  const handleShare = () => {
-    console.log('Share clicked');
-  };
+  const handleShare = () => {  };
 
-  const handleImageClick = (img: string, index: number) => {
-    console.log('Image clicked:', img, index);
-  };
+  const handleImageClick = (img: string, index: number) => {  };
 
   if (isLoading && posts.length === 0) {
     return (

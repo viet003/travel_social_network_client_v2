@@ -38,15 +38,9 @@ const HomePage: React.FC = () => {
     
     try {
       setLoading(true);
-      setError(null);
-      console.log(`Fetching news feed page ${pageNum}...`);
+      setError(null);      const response = await apiGetNewsFeed(pageNum, 10);
       
-      const response = await apiGetNewsFeed(pageNum, 10);
-      
-      if (response.success && response.data) {
-        console.log(`Loaded ${response.data.length} posts for page ${pageNum}`);
-        
-        if (pageNum === 0) {
+      if (response.success && response.data) {        if (pageNum === 0) {
           // Initial load
           setPosts(response.data);
         } else {
@@ -81,9 +75,7 @@ const HomePage: React.FC = () => {
       
       observer.current = new IntersectionObserver(
         (entries) => {
-          if (entries[0].isIntersecting && hasMore) {
-            console.log('Reached end of feed, loading more...');
-            setPage((prevPage) => prevPage + 1);
+          if (entries[0].isIntersecting && hasMore) {            setPage((prevPage) => prevPage + 1);
           }
         },
         { 
@@ -112,9 +104,7 @@ const HomePage: React.FC = () => {
 
   // Reload feed after creating a post
   const handlePostCreated = (success: boolean, newPost?: PostResponse) => {
-    if (success && newPost) {
-      console.log('Post created successfully! Adding to top of feed...', newPost);
-      // Add new post to the beginning of the array
+    if (success && newPost) {      // Add new post to the beginning of the array
       setPosts(prev => [newPost, ...prev]);
     }
   };

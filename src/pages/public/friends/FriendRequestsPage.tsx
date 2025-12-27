@@ -154,7 +154,6 @@ const FriendRequestsPage: React.FC = () => {
                 label: 'Xóa',
                 onClick: () => handleRejectRequest(request.friendshipId)
               }}
-              onCardClick={() => console.log('View profile', request.friendProfile.userId)}
             />
           ))}
         </div>

@@ -36,26 +36,15 @@ const MainLayout: React.FC<MainLayoutProps> = ({
   }, [showLoading, loadingDuration]);
 
   // Initialize WebSocket connection when user is authenticated
-  useEffect(() => {
-    console.log('🔌 MainLayout WebSocket check:', { token: !!token, userId, wsConnected: wsConnectedRef.current });
-    
-    if (!token || !userId) {
-      console.log('⚠️ MainLayout: Missing token or userId, skipping WebSocket connection');
-      return;
+  useEffect(() => {    if (!token || !userId) {      return;
     }
     
-    if (wsConnectedRef.current) {
-      console.log('⚠️ MainLayout: WebSocket already connected');
-      return;
+    if (wsConnectedRef.current) {      return;
     }
 
     const connectWebSocket = async () => {
-      try {
-        console.log('🔌 MainLayout: Attempting WebSocket connection...');
-        await webSocketService.connect(token, userId);
-        wsConnectedRef.current = true;
-        console.log('✅ MainLayout: WebSocket connected successfully');
-      } catch (error) {
+      try {        await webSocketService.connect(token, userId);
+        wsConnectedRef.current = true;      } catch (error) {
         console.error('❌ MainLayout: WebSocket connection failed:', error);
         wsConnectedRef.current = false;
       }
@@ -65,9 +54,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
 
     // Cleanup on unmount or when auth changes
     return () => {
-      if (wsConnectedRef.current) {
-        console.log('🔌 MainLayout: Cleaning up WebSocket connection');
-        webSocketService.disconnect();
+      if (wsConnectedRef.current) {        webSocketService.disconnect();
         wsConnectedRef.current = false;
       }
     };

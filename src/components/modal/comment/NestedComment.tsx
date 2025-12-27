@@ -135,11 +135,7 @@ const NestedComment: React.FC<NestedCommentProps> = ({
         payload.watchId = watchId;
       }
       
-      const response = await apiCreateCommentForContent(payload);
-      
-      console.log('Reply created:', response);
-      
-      if (response.success && response.data) {
+      const response = await apiCreateCommentForContent(payload);      if (response.success && response.data) {
         // Add new reply from API response to local state
         const newReply: CommentResponse = {
           commentId: response.data.commentId,
