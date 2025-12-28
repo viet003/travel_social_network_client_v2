@@ -22,7 +22,7 @@ interface ConversationOption {
   conversationId: string;
   conversationName: string;
   conversationAvatar: string | null;
-  lastActive?: string | null;
+  lastActive?: string;
 }
 
 const TripCreateModal: React.FC<TripCreateModalProps> = ({
@@ -95,7 +95,7 @@ const TripCreateModal: React.FC<TripCreateModalProps> = ({
             conversationId: conv.conversationId,
             conversationName: conv.conversationName || 'Nhóm chat',
             conversationAvatar: conv.conversationAvatar,
-            lastActive: conv.lastActiveAt
+            lastActive: conv.lastActiveAt || undefined
           }));
         setConversations(options);
       }

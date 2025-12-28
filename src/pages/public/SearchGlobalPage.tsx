@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Icon } from '@iconify/react';
-import { apiGlobalSearch, apiSearchUsers, apiSearchGroups, apiSearchPosts } from '../services/searchService';
-import type { UserResponse } from '../types/user.types';
-import type { GroupResponse } from '../types/group.types';
-import type { PostResponse } from '../types/post.types';
-import { UserResultItem, GroupResultItem } from '../components/common/items';
-import type { UserResultItemProps } from '../components/common/items/UserResultItem';
-import type { GroupResultItemProps } from '../components/common/items/GroupResultItem';
-import { avatarDefault } from '../assets/images';
-import { path } from '../utilities/path';
+import { apiGlobalSearch, apiSearchUsers, apiSearchGroups, apiSearchPosts } from '../../services/searchService';
+import type { UserResponse } from '../../types/user.types';
+import type { GroupResponse } from '../../types/group.types';
+import type { PostResponse } from '../../types/post.types';
+import { UserResultItem, GroupResultItem } from '../../components/common/items';
+import type { UserResultItemProps } from '../../components/common/items/UserResultItem';
+import type { GroupResultItemProps } from '../../components/common/items/GroupResultItem';
+import { avatarDefault } from '../../assets/images';
+import { path } from '../../utilities/path';
 
 interface PostResultItemProps {
     id: string;

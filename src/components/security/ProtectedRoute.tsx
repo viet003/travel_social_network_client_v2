@@ -10,12 +10,18 @@ interface ProtectedRouteProps {
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, isPublic = false }) => {
   const authState = useSelector((state: any) => state.auth);
-  const { token } = authState;
+  const { token, role } = authState;
 
-  if (isPublic && token) {    return <Navigate to={path.HOME} replace />;
+  if (isPublic && token) {
+    // If logged in and trying to access public page, redirect based on role
+    if (role === 'ADMIN') {
+      return <Navigate to="/admin/dashboard" replace />;
+    }
+    return <Navigate to={path.HOME} replace />;
   }
 
-  if (!isPublic && !token) {    return <Navigate to={path.LANDING} replace />;
+  if (!isPublic && !token) {
+    return <Navigate to={path.LANDING} replace />;
   }
 
   return <>{children}</>;

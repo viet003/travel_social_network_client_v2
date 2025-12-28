@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Icon } from '@iconify/react';
-import { apiSearchBlogs } from '../services/searchService';
-import type { Blog } from '../types/blog.types';
-import { path } from '../utilities/path';
+import { apiSearchBlogs } from '../../services/searchService';
+import type { Blog } from '../../types/blog.types';
+import { path } from '../../utilities/path';
 
 interface BlogResultItemProps {
     id: string;

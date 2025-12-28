@@ -173,7 +173,7 @@ const NotificationsDropdown: React.FC<NotificationsDropdownProps> = ({ onClose }
 
   return (
     <div 
-      className="fixed top-[55px] px-2 right-[13px] w-[360px] bg-white border border-gray-200 rounded-2xl shadow-xl z-50 max-h-[calc(100vh-80px)] flex flex-col"
+      className="fixed top-full px-2 right-[13px] w-[360px] bg-white border border-gray-200 rounded-2xl shadow-xl z-50 max-h-[calc(100vh-80px)] flex flex-col"
       data-notification-container
     >
       {/* Notifications Header */}

@@ -58,7 +58,7 @@ const BlogCreateEditPage: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  // Status options
+  // Status options - Users can only choose DRAFT or PENDING
   const statusOptions: StatusOption[] = [
     {
       value: "DRAFT",
@@ -68,17 +68,10 @@ const BlogCreateEditPage: React.FC = () => {
       color: "text-gray-600",
     },
     {
-      value: "PUBLISHED",
-      label: "Xuất bản",
-      icon: "fluent:globe-24-filled",
-      description: "Hiển thị công khai",
-      color: "text-green-600",
-    },
-    {
       value: "PENDING",
-      label: "Chờ duyệt",
+      label: "Gửi duyệt",
       icon: "fluent:clock-24-filled",
-      description: "Đang chờ phê duyệt",
+      description: "Gửi cho admin xét duyệt để xuất bản",
       color: "text-yellow-600",
     },
   ];
@@ -354,7 +347,7 @@ const BlogCreateEditPage: React.FC = () => {
           </div>
 
           {/* Status */}
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3">
             <div className="flex items-center gap-2">
               <label className="text-sm font-medium text-gray-700 whitespace-nowrap">
                 Trạng thái:
@@ -373,6 +366,10 @@ const BlogCreateEditPage: React.FC = () => {
                   {currentStatus.description}
                 </span>
               )}
+            </div>
+            <div className="text-xs text-gray-500 bg-blue-50 border border-blue-200 rounded-lg px-3 py-2">
+              <Icon icon="fluent:info-24-regular" className="inline w-4 h-4 mr-1 text-blue-600" />
+              Blog cần được admin phê duyệt trước khi xuất bản công khai
             </div>
           </div>
         </div>

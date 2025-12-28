@@ -23,8 +23,8 @@ import {
   AdminBlogManagementPage,
   AdminGroupManagementPage,
 } from "./pages";
-import SearchResultPage from "./pages/SearchGlobalPage";
-import SearchExplorePage from "./pages/SearchExplorePage";
+import SearchResultPage from "./pages/public/SearchGlobalPage";
+import SearchExplorePage from "./pages/public/SearchExplorePage";
 import {
   MainLayout,
   LandingLayout,
@@ -76,7 +76,7 @@ import {
   ResetPasswordForm,
 } from "./components/auth";
 import { ToastContainer } from "react-toastify";
-import { ProtectedRoute, ProtectedResetRoute } from "./components/index";
+import { ProtectedRoute, ProtectedResetRoute, AdminProtectedRoute } from "./components/index";
 import "./index.css";
 
 function App() {
@@ -217,7 +217,11 @@ function App() {
         </Route>
 
         {/* Admin Routes */}
-        <Route path={path.ADMIN} element={<AdminLayout />}>
+        <Route path={path.ADMIN} element={
+          <AdminProtectedRoute>
+            <AdminLayout />
+          </AdminProtectedRoute>
+        }>
           <Route index element={<Navigate to={path.ADMIN_DASHBOARD} replace />} />
           <Route path={path.ADMIN_DASHBOARD} element={<AdminDashboardPage />} />
           <Route path={path.ADMIN_USERS} element={<AdminUserManagementPage />} />

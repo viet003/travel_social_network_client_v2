@@ -737,7 +737,7 @@ const UserProfilePage: React.FC = () => {
         onClose={() => setIsEditProfileOpen(false)}
         onSubmit={handleEditProfile}
         initialValues={{
-          userName: user?.userId || "",
+          userName: user?.userName || "",
           userProfile: {
             firstName: user?.firstName || "",
             lastName: user?.lastName || "",

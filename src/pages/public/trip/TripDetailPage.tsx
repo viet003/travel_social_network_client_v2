@@ -605,7 +605,7 @@ const TripDetailPage = () => {
               <iframe
                 title="Google Maps"
                 src={`https://maps.google.com/maps?q=${encodeURIComponent(
-                  trip.destination
+                  trip.destination || ''
                 )}&output=embed`}
                 className="w-full h-full border-0"
                 loading="lazy"

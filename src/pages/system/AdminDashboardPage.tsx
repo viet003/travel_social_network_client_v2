@@ -1,62 +1,181 @@
-import React from 'react';
+import { useEffect, useState } from 'react';
 import { Icon } from '@iconify/react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-
-// Mock Data
-const stats = [
-  { title: 'Tổng người dùng', value: '105', change: '+8%', icon: 'fluent:people-24-filled', color: 'bg-blue-500' },
-  { title: 'Chuyến đi mới', value: '89', change: '+5%', icon: 'fluent:airplane-24-filled', color: 'bg-emerald-500' },
-  { title: 'Bài viết', value: '456', change: '+23%', icon: 'fluent:news-24-filled', color: 'bg-amber-500' },
-  { title: 'Báo cáo vi phạm', value: '23', change: '-15%', icon: 'fluent:warning-24-filled', color: 'bg-red-500' },
-];
-
-const recentUsers = [
-  { id: 1, name: 'Minh Phương 🌸', email: 'minhphuong.travel@gmail.com', status: 'Active', date: '2025-12-01' },
-  { id: 2, name: 'Backpacker Sài Gòn', email: 'saigonwanderer@gmail.com', status: 'Active', date: '2025-12-02' },
-  { id: 3, name: 'Khôi Nguyên', email: 'khoinguyen.explorer@outlook.com', status: 'Inactive', date: '2025-11-28' },
-  { id: 4, name: 'Thanh Huyền | Du lịch bụi', email: 'thanhhuyen_traveler@yahoo.com', status: 'Active', date: '2025-12-03' },
-  { id: 5, name: 'Anh Tuấn Photography', email: 'tuanpham.photo@gmail.com', status: 'Banned', date: '2025-11-25' },
-];
-
-const trafficData = [
-  { name: 'Thứ 2', visits: 12 },
-  { name: 'Thứ 3', visits: 18 },
-  { name: 'Thứ 4', visits: 9 },
-  { name: 'Thứ 5', visits: 16 },
-  { name: 'Thứ 6', visits: 20 },
-  { name: 'Thứ 7', visits: 15 },
-  { name: 'Chủ Nhật', visits: 14 },
-];
-
-const recentActivities = [
-  { 
-    title: 'Người dùng mới đăng ký', 
-    description: 'Minh Phương 🌸 đã tạo tài khoản mới thông qua Google.', 
-    time: '2 phút trước' 
-  },
-  { 
-    title: 'Bài viết mới được đăng', 
-    description: 'Backpacker Sài Gòn vừa chia sẻ "Hành trình xuyên Việt 7 ngày".', 
-    time: '15 phút trước' 
-  },
-  { 
-    title: 'Báo cáo vi phạm', 
-    description: 'Có báo cáo mới về nội dung spam từ người dùng @travel_bot_2024.', 
-    time: '1 giờ trước' 
-  },
-  { 
-    title: 'Nhóm mới được tạo', 
-    description: 'Thanh Huyền | Du lịch bụi đã tạo nhóm "Phượt miền Tây 2025".', 
-    time: '3 giờ trước' 
-  },
-];
+import { ConfirmDeleteModal } from '../../components/modal';
+import { 
+  apiGetDashboardStats, 
+  apiGetTrafficData, 
+  apiGetRecentUsers, 
+  apiGetRecentActivities,
+  apiUpdateUserStatus,
+  apiDeleteUser,
+} from '../../services/adminDashboardService';
+import type { 
+  DashboardStats, 
+  TrafficData, 
+  RecentUser, 
+  RecentActivity 
+} from '../../types/adminDashboard.types';
+import { formatTimeAgo } from '../../utilities/helper';
+import avatarDefault from '../../assets/images/avatar_default.png';
+import EditUserModal from '../../components/admin/EditUserModal';
 
 const AdminDashboardPage = () => {
+  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [trafficData, setTrafficData] = useState<TrafficData[]>([]);
+  const [recentUsers, setRecentUsers] = useState<RecentUser[]>([]);
+  const [recentActivities, setRecentActivities] = useState<RecentActivity[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [editingUser, setEditingUser] = useState<RecentUser | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [deletingUser, setDeletingUser] = useState<RecentUser | null>(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        const [statsData, trafficDataResponse, usersData, activitiesData] = await Promise.all([
+          apiGetDashboardStats(),
+          apiGetTrafficData(7),
+          apiGetRecentUsers(5),
+          apiGetRecentActivities(10)
+        ]);
+
+        setStats(statsData);
+        setTrafficData(trafficDataResponse);
+        setRecentUsers(usersData);
+        setRecentActivities(activitiesData);
+      } catch (err) {
+        console.error('Error fetching dashboard data:', err);
+        setError('Không thể tải dữ liệu dashboard');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDashboardData();
+  }, []);
+
+  const handleEditUser = (userId: string) => {
+    const user = recentUsers.find(u => u.userId === userId);
+    if (user) {
+      setEditingUser(user);
+      setIsEditModalOpen(true);
+    }
+  };
+
+  const handleRefreshUsers = async () => {
+    try {
+      // Refresh user list
+      const usersData = await apiGetRecentUsers(5);
+      setRecentUsers(usersData);
+    } catch (err) {
+      console.error('Error refreshing users:', err);
+    }
+  };
+
+  const handleLockUser = async (userId: string, currentStatus: string) => {
+    try {
+      const newStatus = currentStatus === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
+      await apiUpdateUserStatus(userId, newStatus as 'ACTIVE' | 'INACTIVE' | 'BANNED');
+      
+      // Refresh data
+      const usersData = await apiGetRecentUsers(5);
+      setRecentUsers(usersData);
+    } catch (err) {
+      console.error('Error locking/unlocking user:', err);
+      alert('Không thể cập nhật trạng thái người dùng');
+    }
+  };
+
+  const handleDeleteUser = (userId: string) => {
+    const user = recentUsers.find(u => u.userId === userId);
+    if (user) {
+      setDeletingUser(user);
+      setIsDeleteModalOpen(true);
+    }
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deletingUser) return;
+
+    try {
+      setIsDeleting(true);
+      await apiDeleteUser(deletingUser.userId);
+      
+      // Refresh data
+      const usersData = await apiGetRecentUsers(5);
+      setRecentUsers(usersData);
+      setIsDeleteModalOpen(false);
+      setDeletingUser(null);
+    } catch (err) {
+      console.error('Error deleting user:', err);
+      alert('Không thể xóa người dùng');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="animate-spin w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-center">
+          <Icon icon="fluent:error-circle-24-filled" className="w-16 h-16 text-red-500 mx-auto mb-4" />
+          <p className="text-gray-700 text-lg">{error}</p>
+        </div>
+      </div>
+    );
+  }
+
+  const statsDisplay = [
+    { 
+      title: 'Tổng người dùng', 
+      value: stats?.totalUsers?.toString() || '0', 
+      change: `${(stats?.userGrowthRate ?? 0) >= 0 ? '+' : ''}${stats?.userGrowthRate ?? 0}%`, 
+      icon: 'fluent:people-24-filled', 
+      color: 'bg-blue-500' 
+    },
+    { 
+      title: 'Chuyến đi mới', 
+      value: stats?.totalTrips?.toString() || '0', 
+      change: `${(stats?.tripGrowthRate ?? 0) >= 0 ? '+' : ''}${stats?.tripGrowthRate ?? 0}%`, 
+      icon: 'fluent:airplane-24-filled', 
+      color: 'bg-emerald-500' 
+    },
+    { 
+      title: 'Bài viết', 
+      value: stats?.totalPosts?.toString() || '0', 
+      change: `${(stats?.postGrowthRate ?? 0) >= 0 ? '+' : ''}${stats?.postGrowthRate ?? 0}%`, 
+      icon: 'fluent:news-24-filled', 
+      color: 'bg-amber-500' 
+    },
+    { 
+      title: 'Báo cáo vi phạm', 
+      value: stats?.totalReports?.toString() || '0', 
+      change: `${(stats?.reportGrowthRate ?? 0) >= 0 ? '+' : ''}${stats?.reportGrowthRate ?? 0}%`, 
+      icon: 'fluent:warning-24-filled', 
+      color: 'bg-red-500' 
+    },
+  ];
+
   return (
     <div className="space-y-8">
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {stats.map((stat, index) => (
+        {statsDisplay.map((stat, index) => (
           <div key={index} className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
             <div className="flex items-start justify-between mb-4">
               <div className={`p-3 rounded-xl ${stat.color} bg-opacity-10 text-${stat.color.replace('bg-', '')}`}>
@@ -67,7 +186,9 @@ const AdminDashboardPage = () => {
                     <Icon icon={stat.icon} className="w-6 h-6" />
                  </div>
               </div>
-              <span className={`text-sm font-medium px-2 py-1 rounded-full ${stat.change.startsWith('+') ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'}`}>
+              <span className={`text-sm font-medium px-2 py-1 rounded-full ${
+                parseFloat(stat.change) >= 0 ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'
+              }`}>
                 {stat.change}
               </span>
             </div>
@@ -108,18 +229,18 @@ const AdminDashboardPage = () => {
         <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
           <h3 className="text-lg font-bold text-gray-900 mb-6">Hoạt động gần đây</h3>
           <div className="space-y-6">
-            {recentActivities.map((activity, i) => (
+            {recentActivities.slice(0, 4).map((activity, i) => (
               <div key={i} className="flex gap-4">
                 <div className="w-2 h-2 mt-2 rounded-full bg-blue-500 flex-shrink-0"></div>
                 <div>
                   <p className="text-sm text-gray-800 font-medium">{activity.title}</p>
                   <p className="text-xs text-gray-500 mt-1">{activity.description}</p>
-                  <p className="text-xs text-gray-400 mt-2">{activity.time}</p>
+                  <p className="text-xs text-gray-400 mt-2">{formatTimeAgo(activity.timestamp)}</p>
                 </div>
               </div>
             ))}
           </div>
-          <button className="w-full mt-6 py-2 text-sm text-blue-600 font-medium hover:bg-blue-50 rounded-lg transition-colors">
+          <button className="w-full mt-6 py-2 text-sm text-blue-600 font-medium hover:bg-blue-50 rounded-lg transition-colors cursor-pointer">
             Xem tất cả
           </button>
         </div>
@@ -143,34 +264,64 @@ const AdminDashboardPage = () => {
             </thead>
             <tbody>
               {recentUsers.map((user) => (
-                <tr key={user.id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
+                <tr key={user.userId} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 font-bold">
-                        {user.name.charAt(0)}
-                      </div>
+                      <img 
+                        src={user.avatarImg || avatarDefault} 
+                        alt={user.userName}
+                        className="w-8 h-8 rounded-full object-cover"
+                      />
                       <div>
-                        <div className="font-medium text-gray-900">{user.name}</div>
+                        <div className="font-medium text-gray-900">{user.userName}</div>
                         <div className="text-xs text-gray-500">{user.email}</div>
                       </div>
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                    <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${
-                      user.status === 'Active' ? 'bg-green-50 text-green-600' :
-                      user.status === 'Inactive' ? 'bg-gray-100 text-gray-600' :
+                    <span className={`px-2.5 py-1 rounded-full text-xs font-medium flex items-center gap-1 w-fit ${
+                      user.status === 'ACTIVE' ? 'bg-emerald-50 text-emerald-600' :
+                      user.status === 'INACTIVE' ? 'bg-gray-100 text-gray-600' :
                       'bg-red-50 text-red-600'
                     }`}>
-                      {user.status}
+                      <span className={`w-1.5 h-1.5 rounded-full ${
+                        user.status === 'ACTIVE' ? 'bg-emerald-500' : 
+                        user.status === 'INACTIVE' ? 'bg-gray-500' : 
+                        'bg-red-500'
+                      }`}></span>
+                      {user.status === 'ACTIVE' ? 'Hoạt động' : user.status === 'INACTIVE' ? 'Không hoạt động' : 'Đã khóa'}
                     </span>
                   </td>
                   <td className="px-6 py-4 text-gray-500">
-                    {user.date}
+                    {new Date(user.createdAt).toLocaleDateString('vi-VN')}
                   </td>
-                  <td className="px-6 py-4 text-right">
-                    <button className="text-gray-400 hover:text-blue-600 transition-colors">
-                      <Icon icon="fluent:more-horizontal-24-regular" className="w-5 h-5" />
-                    </button>
+                  <td className="px-6 py-4">
+                    <div className="flex items-center justify-end gap-2">
+                      <button 
+                        onClick={() => handleEditUser(user.userId)}
+                        className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
+                        title="Chỉnh sửa"
+                      >
+                        <Icon icon="fluent:edit-24-regular" className="w-5 h-5" />
+                      </button>
+                      <button 
+                        onClick={() => handleLockUser(user.userId, user.status)}
+                        className="p-2 text-gray-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors cursor-pointer"
+                        title={user.status === 'ACTIVE' ? 'Khóa tài khoản' : 'Mở khóa tài khoản'}
+                      >
+                        <Icon 
+                          icon={user.status === 'ACTIVE' ? 'fluent:lock-closed-24-regular' : 'fluent:lock-open-24-regular'} 
+                          className="w-5 h-5" 
+                        />
+                      </button>
+                      <button 
+                        onClick={() => handleDeleteUser(user.userId)}
+                        className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
+                        title="Xóa tài khoản"
+                      >
+                        <Icon icon="fluent:delete-24-regular" className="w-5 h-5" />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -178,6 +329,52 @@ const AdminDashboardPage = () => {
           </table>
         </div>
       </div>
+
+      {/* Edit User Modal */}
+      <EditUserModal
+        open={isEditModalOpen}
+        user={editingUser}
+        onClose={() => {
+          setIsEditModalOpen(false);
+          setEditingUser(null);
+        }}
+        onSuccess={handleRefreshUsers}
+      />
+
+      {/* Delete Confirmation Modal */}
+      {deletingUser && (
+        <ConfirmDeleteModal
+          isOpen={isDeleteModalOpen}
+          onClose={() => {
+            setIsDeleteModalOpen(false);
+            setDeletingUser(null);
+          }}
+          onConfirm={handleConfirmDelete}
+          type="custom"
+          itemName={deletingUser.userName}
+          customTitle="Xóa người dùng"
+          customWarning="Bạn có chắc chắn muốn xóa người dùng này không? Tất cả dữ liệu của người dùng sẽ bị xóa vĩnh viễn và không thể khôi phục."
+          showStats={true}
+          stats={[
+            {
+              icon: 'fluent:mail-24-filled',
+              label: 'Email',
+              value: deletingUser.email
+            },
+            {
+              icon: 'fluent:person-24-filled',
+              label: 'Vai trò',
+              value: deletingUser.role
+            },
+            {
+              icon: 'fluent:calendar-24-filled',
+              label: 'Ngày tham gia',
+              value: new Date(deletingUser.createdAt).toLocaleDateString('vi-VN')
+            }
+          ]}
+          isDeleting={isDeleting}
+        />
+      )}
     </div>
   );
 };

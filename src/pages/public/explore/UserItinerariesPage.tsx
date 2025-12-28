@@ -9,6 +9,7 @@ import { useNavigate } from "react-router-dom";
 import { TripCreateModal } from "../../../components/modal";
 import ConfirmDeleteModal from "../../../components/modal/confirm/ConfirmDeleteModal";
 import { path } from "../../../utilities/path";
+import { ExpandableContent } from "../../../components";
 
 const UserItinerariesPage = () => {
   const navigate = useNavigate();
@@ -279,7 +280,7 @@ const UserItinerariesPage = () => {
             <div
               key={trip.tripId}
               onClick={() => navigate(`${path.HOME}/${path.TRIP_DETAIL.replace(':tripId', trip.tripId)}`)}
-              className="group bg-white rounded-2xl border border-gray-100 overflow-hidden cursor-pointer hover:shadow-lg hover:border-gray-200 transition-all duration-300 flex flex-col md:flex-row max-h-[320px]"
+              className="group bg-white rounded-2xl border border-gray-100 overflow-hidden cursor-pointer hover:shadow-lg hover:border-gray-200 transition-all duration-300 flex flex-col md:flex-row max-h-[250px]"
             >
               {/* Image Section */}
               <div className="md:w-72 h-56 md:h-auto relative overflow-hidden bg-gray-100 flex-shrink-0">
@@ -342,7 +343,7 @@ const UserItinerariesPage = () => {
 
                 {trip.tripDescription && (
                   <p className="text-gray-500 text-sm line-clamp-2 mb-6 leading-relaxed">
-                    {trip.tripDescription}
+                    <ExpandableContent content={trip.tripDescription} />
                   </p>
                 )}
 

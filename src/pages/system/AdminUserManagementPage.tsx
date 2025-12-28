@@ -1,49 +1,129 @@
-import React, { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Icon } from '@iconify/react';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import TravelButton from '../../components/ui/customize/TravelButton';
 import TravelInput from '../../components/ui/customize/TravelInput';
 import TravelSelect from '../../components/ui/customize/TravelSelect';
-
-// Realistic Mock Data
-const mockUsers = [
-  { id: '1', name: 'Nguyễn Minh Tuấn', email: 'tuan.nguyen@gmail.com', role: 'USER', status: 'ACTIVE', joinDate: '2023-01-15', avatar: 'https://i.pinimg.com/736x/16/ca/5c/16ca5cd1b7acaf4e7fade587f269165d.jpg' },
-  { id: '2', name: 'Trần Thị Thu Hà', email: 'ha.tran@company.vn', role: 'ADMIN', status: 'ACTIVE', joinDate: '2023-02-20', avatar: 'https://i.pinimg.com/736x/84/2b/5e/842b5e9d4cac80ce8e2fd33bca410fb0.jpg' },
-  { id: '3', name: 'Lê Hoàng Nam', email: 'nam.le@outlook.com', role: 'USER', status: 'BANNED', joinDate: '2023-03-10', avatar: 'https://i.pravatar.cc/150?u=3' },
-  { id: '4', name: 'Phạm Ngọc Anh', email: 'anh.pham@yahoo.com', role: 'USER', status: 'ACTIVE', joinDate: '2023-04-05', avatar: 'https://i.pravatar.cc/150?u=4' },
-  { id: '5', name: 'Hoàng Văn Đức', email: 'duc.hoang@tech.vn', role: 'MODERATOR', status: 'ACTIVE', joinDate: '2023-05-12', avatar: 'https://i.pravatar.cc/150?u=5' },
-  { id: '6', name: 'Vũ Thị Mai', email: 'mai.vu@gmail.com', role: 'USER', status: 'ACTIVE', joinDate: '2023-06-01', avatar: 'https://i.pravatar.cc/150?u=6' },
-  { id: '7', name: 'Đặng Quốc Bảo', email: 'bao.dang@student.edu.vn', role: 'USER', status: 'ACTIVE', joinDate: '2023-06-15', avatar: 'https://i.pravatar.cc/150?u=7' },
-  { id: '8', name: 'Bùi Phương Thảo', email: 'thao.bui@agency.com', role: 'USER', status: 'ACTIVE', joinDate: '2023-07-02', avatar: 'https://i.pravatar.cc/150?u=8' },
-];
-
-const userGrowthData = [
-  { name: 'Thứ 2', value: 8 },
-  { name: 'Thứ 3', value: 14 },
-  { name: 'Thứ 4', value: 17 },
-  { name: 'Thứ 5', value: 11 },
-  { name: 'Thứ 6', value: 19 },
-  { name: 'Thứ 7', value: 20 },
-  { name: 'Chủ Nhật', value: 16 },
-];
-
-const userRoleData = [
-  { name: 'Người dùng', value: 95, color: '#3b82f6' },
-  { name: 'Admin', value: 3, color: '#a855f7' },
-  { name: 'Kiểm duyệt viên', value: 7, color: '#f59e0b' },
-];
+import EditUserModal from '../../components/admin/EditUserModal';
+import CreateUserModal from '../../components/admin/CreateUserModal';
+import { ConfirmDeleteModal } from '../../components/modal';
+import avatarDefault from '../../assets/images/avatar_default.png';
+import { 
+  apiGetRecentUsers, 
+  apiUpdateUserStatus, 
+  apiDeleteUser,
+  apiGetTrafficData
+} from '../../services/adminDashboardService';
+import type { RecentUser, TrafficData } from '../../types/adminDashboard.types';
 
 const AdminUserManagementPage = () => {
+  const [users, setUsers] = useState<RecentUser[]>([]);
+  const [trafficData, setTrafficData] = useState<TrafficData[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [roleFilter, setRoleFilter] = useState('ALL');
   const [statusFilter, setStatusFilter] = useState('ALL');
+  const [editingUser, setEditingUser] = useState<RecentUser | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [deletingUser, setDeletingUser] = useState<RecentUser | null>(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
-  const filteredUsers = mockUsers.filter(user => {
-    const matchesSearch = user.name.toLowerCase().includes(searchTerm.toLowerCase()) || user.email.toLowerCase().includes(searchTerm.toLowerCase());
+  // Fetch users
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      const [usersData, trafficDataResponse] = await Promise.all([
+        apiGetRecentUsers(100),
+        apiGetTrafficData(7)
+      ]);
+      setUsers(usersData);
+      setTrafficData(trafficDataResponse);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchUsers = async () => {
+    try {
+      const data = await apiGetRecentUsers(100);
+      setUsers(data);
+    } catch (error) {
+      console.error('Error fetching users:', error);
+    }
+  };
+
+  const handleEditUser = (userId: string) => {
+    const user = users.find(u => u.userId === userId);
+    if (user) {
+      setEditingUser(user);
+      setIsEditModalOpen(true);
+    }
+  };
+
+  const handleLockUser = async (userId: string, currentStatus: string) => {
+    try {
+      const newStatus = currentStatus === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
+      await apiUpdateUserStatus(userId, newStatus as 'ACTIVE' | 'INACTIVE' | 'BANNED');
+      await fetchUsers();
+    } catch (error) {
+      console.error('Error updating user status:', error);
+      alert('Không thể cập nhật trạng thái người dùng');
+    }
+  };
+
+  const handleDeleteUser = (userId: string) => {
+    const user = users.find(u => u.userId === userId);
+    if (user) {
+      setDeletingUser(user);
+      setIsDeleteModalOpen(true);
+    }
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deletingUser) return;
+
+    try {
+      setIsDeleting(true);
+      await apiDeleteUser(deletingUser.userId);
+      await fetchUsers();
+      setIsDeleteModalOpen(false);
+      setDeletingUser(null);
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      alert('Không thể xóa người dùng');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const filteredUsers = users.filter(user => {
+    const matchesSearch = user.userName.toLowerCase().includes(searchTerm.toLowerCase()) || user.email.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesRole = roleFilter === 'ALL' || user.role === roleFilter;
     const matchesStatus = statusFilter === 'ALL' || user.status === statusFilter;
     return matchesSearch && matchesRole && matchesStatus;
   });
+
+  const userRoleData = [
+    { name: 'Người dùng', value: users.filter(u => u.role === 'USER').length, color: '#3b82f6' },
+    { name: 'Admin', value: users.filter(u => u.role === 'ADMIN').length, color: '#a855f7' },
+    { name: 'Kiểm duyệt viên', value: users.filter(u => u.role === 'MODERATOR').length, color: '#f59e0b' },
+  ];
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="animate-spin w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -52,7 +132,11 @@ const AdminUserManagementPage = () => {
           <h1 className="text-2xl font-bold text-gray-800">Quản lý người dùng</h1>
           <p className="text-gray-500 text-sm mt-1">Theo dõi và quản lý tài khoản thành viên</p>
         </div>
-        <TravelButton type="primary" className="flex items-center gap-2">
+        <TravelButton 
+          type="primary" 
+          className="flex items-center gap-2"
+          onClick={() => setIsCreateModalOpen(true)}
+        >
           <Icon icon="fluent:add-24-regular" className="w-5 h-5" />
           <span>Thêm mới</span>
         </TravelButton>
@@ -64,7 +148,7 @@ const AdminUserManagementPage = () => {
           <h3 className="text-lg font-bold text-gray-800 mb-6">Tăng trưởng người dùng mới</h3>
           <div className="h-[250px] w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={userGrowthData}>
+              <LineChart data={trafficData}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f3f4f6" />
                 <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#9ca3af', fontSize: 12 }} dy={10} />
                 <YAxis axisLine={false} tickLine={false} tick={{ fill: '#9ca3af', fontSize: 12 }} />
@@ -74,7 +158,7 @@ const AdminUserManagementPage = () => {
                 />
                 <Line 
                   type="monotone" 
-                  dataKey="value" 
+                  dataKey="visits" 
                   stroke="#3b82f6" 
                   strokeWidth={3} 
                   dot={{ fill: '#fff', stroke: '#3b82f6', strokeWidth: 2, r: 4 }}
@@ -160,16 +244,16 @@ const AdminUserManagementPage = () => {
             </thead>
             <tbody>
               {filteredUsers.map((user) => (
-                <tr key={user.id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
+                <tr key={user.userId} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
                       <img 
-                        src={user.avatar} 
-                        alt={user.name} 
+                        src={user.avatarImg || avatarDefault} 
+                        alt={user.userName} 
                         className="w-10 h-10 rounded-full object-cover border border-gray-200"
                       />
                       <div>
-                        <div className="font-medium text-gray-900">{user.name}</div>
+                        <div className="font-medium text-gray-900">{user.userName}</div>
                         <div className="text-xs text-gray-500">{user.email}</div>
                       </div>
                     </div>
@@ -185,22 +269,46 @@ const AdminUserManagementPage = () => {
                   </td>
                   <td className="px-6 py-4">
                     <span className={`px-2.5 py-1 rounded-full text-xs font-medium flex items-center gap-1 w-fit ${
-                      user.status === 'ACTIVE' ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-600'
+                      user.status === 'ACTIVE' ? 'bg-emerald-50 text-emerald-600' : 
+                      user.status === 'INACTIVE' ? 'bg-gray-100 text-gray-600' :
+                      'bg-red-50 text-red-600'
                     }`}>
-                      <span className={`w-1.5 h-1.5 rounded-full ${user.status === 'ACTIVE' ? 'bg-emerald-500' : 'bg-red-500'}`}></span>
-                      {user.status === 'ACTIVE' ? 'Hoạt động' : 'Đã khóa'}
+                      <span className={`w-1.5 h-1.5 rounded-full ${
+                        user.status === 'ACTIVE' ? 'bg-emerald-500' : 
+                        user.status === 'INACTIVE' ? 'bg-gray-500' :
+                        'bg-red-500'
+                      }`}></span>
+                      {user.status === 'ACTIVE' ? 'Hoạt động' : user.status === 'INACTIVE' ? 'Không hoạt động' : 'Đã khóa'}
                     </span>
                   </td>
                   <td className="px-6 py-4 text-gray-500">
-                    {new Date(user.joinDate).toLocaleDateString('vi-VN')}
+                    {new Date(user.createdAt).toLocaleDateString('vi-VN')}
                   </td>
                   <td className="px-6 py-4 text-right">
                     <div className="flex items-center justify-end gap-2">
-                      <button className="p-2 text-gray-400 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors" title="Chỉnh sửa">
+                      <button 
+                        onClick={() => handleEditUser(user.userId)}
+                        className="p-2 text-gray-400 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors cursor-pointer" 
+                        title="Chỉnh sửa"
+                      >
                         <Icon icon="fluent:edit-24-regular" className="w-5 h-5" />
                       </button>
-                      <button className="p-2 text-gray-400 hover:bg-red-50 hover:text-red-600 rounded-lg transition-colors" title="Khóa tài khoản">
-                        <Icon icon="fluent:lock-closed-24-regular" className="w-5 h-5" />
+                      <button 
+                        onClick={() => handleLockUser(user.userId, user.status)}
+                        className="p-2 text-gray-400 hover:bg-red-50 hover:text-red-600 rounded-lg transition-colors cursor-pointer" 
+                        title={user.status === 'ACTIVE' ? 'Khóa tài khoản' : 'Mở khóa tài khoản'}
+                      >
+                        <Icon 
+                          icon={user.status === 'ACTIVE' ? 'fluent:lock-closed-24-regular' : 'fluent:lock-open-24-regular'} 
+                          className="w-5 h-5" 
+                        />
+                      </button>
+                      <button 
+                        onClick={() => handleDeleteUser(user.userId)}
+                        className="p-2 text-gray-400 hover:bg-red-50 hover:text-red-600 rounded-lg transition-colors cursor-pointer" 
+                        title="Xóa tài khoản"
+                      >
+                        <Icon icon="fluent:delete-24-regular" className="w-5 h-5" />
                       </button>
                     </div>
                   </td>
@@ -215,6 +323,59 @@ const AdminUserManagementPage = () => {
           </div>
         )}
       </div>
+
+      {/* Create User Modal */}
+      <CreateUserModal
+        open={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        onSuccess={fetchUsers}
+      />
+
+      {/* Edit User Modal */}
+      <EditUserModal
+        open={isEditModalOpen}
+        user={editingUser}
+        onClose={() => {
+          setIsEditModalOpen(false);
+          setEditingUser(null);
+        }}
+        onSuccess={fetchUsers}
+      />
+
+      {/* Delete Confirmation Modal */}
+      {deletingUser && (
+        <ConfirmDeleteModal
+          isOpen={isDeleteModalOpen}
+          onClose={() => {
+            setIsDeleteModalOpen(false);
+            setDeletingUser(null);
+          }}
+          onConfirm={handleConfirmDelete}
+          type="custom"
+          itemName={deletingUser.userName}
+          customTitle="Xóa người dùng"
+          customWarning="Bạn có chắc chắn muốn xóa người dùng này không? Tất cả dữ liệu của người dùng sẽ bị xóa vĩnh viễn và không thể khôi phục."
+          showStats={true}
+          stats={[
+            {
+              icon: 'fluent:mail-24-filled',
+              label: 'Email',
+              value: deletingUser.email
+            },
+            {
+              icon: 'fluent:person-24-filled',
+              label: 'Vai trò',
+              value: deletingUser.role
+            },
+            {
+              icon: 'fluent:calendar-24-filled',
+              label: 'Ngày tham gia',
+              value: new Date(deletingUser.createdAt).toLocaleDateString('vi-VN')
+            }
+          ]}
+          isDeleting={isDeleting}
+        />
+      )}
     </div>
   );
 };

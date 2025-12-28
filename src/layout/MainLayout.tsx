@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useNavigate } from 'react-router-dom';
 import { Skeleton } from 'antd';
 import { useSelector } from 'react-redux';
 import { Header, ChatWidget } from '../components/common';
+import { path } from '../utilities/path';
 import webSocketService from '../services/webSocketService';
 
 interface MainLayoutProps {
@@ -18,12 +19,21 @@ const MainLayout: React.FC<MainLayoutProps> = ({
 }) => {
   const [isLoading, setIsLoading] = useState(showLoading);
   const wsConnectedRef = useRef(false);
+  const navigate = useNavigate();
   
   // Get auth info from Redux
-  const { token, userId } = useSelector((state: any) => ({
+  const { token, userId, role } = useSelector((state: any) => ({
     token: state.auth?.token,
-    userId: state.auth?.userId
+    userId: state.auth?.userId,
+    role: state.auth?.role
   }));
+
+  // Redirect admin users to dashboard
+  useEffect(() => {
+    if (role === 'ADMIN') {
+      navigate('/admin/dashboard', { replace: true });
+    }
+  }, [role, navigate]);
 
   // Simulate loading for demonstration
   useEffect(() => {
@@ -36,15 +46,20 @@ const MainLayout: React.FC<MainLayoutProps> = ({
   }, [showLoading, loadingDuration]);
 
   // Initialize WebSocket connection when user is authenticated
-  useEffect(() => {    if (!token || !userId) {      return;
+  useEffect(() => {
+    if (!token || !userId) {
+      return;
     }
     
-    if (wsConnectedRef.current) {      return;
+    if (wsConnectedRef.current) {
+      return;
     }
 
     const connectWebSocket = async () => {
-      try {        await webSocketService.connect(token, userId);
-        wsConnectedRef.current = true;      } catch (error) {
+      try {
+        await webSocketService.connect(token, userId);
+        wsConnectedRef.current = true;
+      } catch (error) {
         console.error('❌ MainLayout: WebSocket connection failed:', error);
         wsConnectedRef.current = false;
       }
@@ -54,7 +69,8 @@ const MainLayout: React.FC<MainLayoutProps> = ({
 
     // Cleanup on unmount or when auth changes
     return () => {
-      if (wsConnectedRef.current) {        webSocketService.disconnect();
+      if (wsConnectedRef.current) {
+        webSocketService.disconnect();
         wsConnectedRef.current = false;
       }
     };
