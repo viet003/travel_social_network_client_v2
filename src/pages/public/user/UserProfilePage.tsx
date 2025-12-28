@@ -20,6 +20,7 @@ import {
   apiUnblockUser,
 } from "../../../services/friendshipService";
 import { updateAvatarImg, updateCoverImg } from "../../../stores/actions/authAction";
+import { createOrGetPrivateConversation } from "../../../stores/actions/conversationAction";
 import type { UpdateUserDto } from "../../../types/user.types";
 
 // Auth State Interface
@@ -207,6 +208,26 @@ const UserProfilePage: React.FC = () => {
     } catch (error) {
       console.error("Error unblocking user:", error);
       message.error("Không thể bỏ chặn người dùng");
+    }
+  };
+
+  // Handle message button click
+  const handleMessageClick = async () => {
+    if (!userId) return;
+    
+    console.log('🔵 Starting conversation with userId:', userId);
+    
+    try {
+      // Create or get private conversation with this user
+      const result = await dispatch(createOrGetPrivateConversation(userId) as any);
+      console.log('✅ Conversation created/retrieved:', result);
+      message.success("Đang mở cuộc trò chuyện...");
+      
+      // TODO: Navigate to messages page or open chat modal
+      // navigate('/home/messages');
+    } catch (error) {
+      console.error("❌ Error creating conversation:", error);
+      message.error("Không thể tạo cuộc trò chuyện");
     }
   };
 
@@ -453,11 +474,14 @@ const UserProfilePage: React.FC = () => {
 
         {/* Action buttons */}
         <div className="absolute flex gap-2 sm:gap-3 top-3 right-3 sm:top-6 sm:right-6">
-          {currentUserId !== userId && (
+          {currentUserId !== userId && user?.friendshipStatus !== "BLOCKED" && (
             <>
               {renderFriendButton()}
               <Tooltip title="Nhắn tin" placement="bottom">
-                <button className="w-8 h-8 sm:w-11 sm:h-11 flex items-center justify-center text-white transition rounded-full bg-black/40 hover:bg-black/60 cursor-pointer">
+                <button 
+                  className="w-8 h-8 sm:w-11 sm:h-11 flex items-center justify-center text-white transition rounded-full bg-black/40 hover:bg-black/60 cursor-pointer"
+                  onClick={handleMessageClick}
+                >
                   <Icon
                     icon="lucide:message-circle"
                     width={16}
@@ -644,22 +668,56 @@ const UserProfilePage: React.FC = () => {
 
       {/* Main Content */}
       <div className="px-3 sm:px-6 lg:px-[50px] py-4 sm:py-6 lg:py-8 mx-auto max-w-7xl">
-        {user?.friendshipStatus === "BLOCKED" ? (
-          <div className="flex flex-col items-center justify-center py-16 sm:py-24">
-            <div className="text-center max-w-md">
-              <div className="mb-6">
-                <Icon
-                  icon="lucide:user-x"
-                  className="w-16 h-16 sm:w-20 sm:h-20 mx-auto"
-                />
+        {currentUserId !== userId && user?.friendshipStatus === "BLOCKED" ? (
+          <div className="flex flex-col items-center justify-center py-20 sm:py-32">
+            <div className="text-center max-w-md px-4">
+              <div className="mb-6 sm:mb-8">
+                <div className="inline-flex p-4 sm:p-5 rounded-full bg-red-50">
+                  <Icon
+                    icon="lucide:ban"
+                    className="w-12 h-12 sm:w-16 sm:h-16 text-red-500"
+                  />
+                </div>
               </div>
-              <h2 className="text-xl sm:text-2xl font-bold mb-3">
-                Không thể xem nội dung
+              <h2 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4 text-gray-900">
+                Nội dung bị hạn chế
               </h2>
-              <p className="text-sm sm:text-base text-gray-600">
-                Bạn đã bị chặn bởi người dùng này. Bạn không thể xem bài viết,
-                ảnh và các nội dung khác của họ.
+              <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
+                Bạn đã bị chặn bởi người dùng này và không thể xem bất kỳ nội dung nào của họ.
               </p>
+            </div>
+          </div>
+        ) : currentUserId !== userId && user?.friendshipStatus !== "ACCEPTED" ? (
+          <div className="flex flex-col items-center justify-center py-20 sm:py-32">
+            <div className="text-center max-w-md px-4">
+              <div className="mb-6 sm:mb-8">
+                <div className="inline-flex p-4 sm:p-5 rounded-full bg-blue-50">
+                  <Icon
+                    icon="lucide:lock"
+                    className="w-12 h-12 sm:w-16 sm:h-16 text-blue-500"
+                  />
+                </div>
+              </div>
+              <h2 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4 text-gray-900">
+                Nội dung riêng tư
+              </h2>
+              <p className="text-sm sm:text-base text-gray-600 leading-relaxed mb-6">
+                Người dùng này đã đặt chế độ riêng tư cho tài khoản. Hãy kết bạn để xem bài viết, ảnh và nội dung khác của họ.
+              </p>
+              {user?.friendshipStatus === "PENDING" ? (
+                <div className="inline-flex items-center gap-2 px-6 py-3 text-sm sm:text-base font-medium text-gray-600 bg-gray-100 rounded-lg">
+                  <Icon icon="lucide:clock" className="w-5 h-5" />
+                  Đã gửi lời mời kết bạn
+                </div>
+              ) : (
+                <button
+                  className="inline-flex items-center gap-2 px-6 py-3 text-sm sm:text-base font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
+                  onClick={handleSendFriendRequest}
+                >
+                  <Icon icon="lucide:user-plus" className="w-5 h-5" />
+                  Gửi lời mời kết bạn
+                </button>
+              )}
             </div>
           </div>
         ) : (
@@ -679,7 +737,7 @@ const UserProfilePage: React.FC = () => {
         onClose={() => setIsEditProfileOpen(false)}
         onSubmit={handleEditProfile}
         initialValues={{
-          userName: user?.userId || "",
+          userName: user?.userName || "",
           userProfile: {
             firstName: user?.firstName || "",
             lastName: user?.lastName || "",

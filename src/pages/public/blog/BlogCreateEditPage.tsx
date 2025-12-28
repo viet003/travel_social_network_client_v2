@@ -53,12 +53,15 @@ const BlogCreateEditPage: React.FC = () => {
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState<string>("");
   const [showTagInput, setShowTagInput] = useState<boolean>(false);
+
+  // Predefined tags
+  const predefinedTags = ["Kinh nghiệm", "Review", "Ẩm thực", "Phượt", "Check-in", "Camping"];
   
   // UI states
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  // Status options
+  // Status options - Users can only choose DRAFT or PENDING
   const statusOptions: StatusOption[] = [
     {
       value: "DRAFT",
@@ -68,17 +71,10 @@ const BlogCreateEditPage: React.FC = () => {
       color: "text-gray-600",
     },
     {
-      value: "PUBLISHED",
-      label: "Xuất bản",
-      icon: "fluent:globe-24-filled",
-      description: "Hiển thị công khai",
-      color: "text-green-600",
-    },
-    {
       value: "PENDING",
-      label: "Chờ duyệt",
+      label: "Gửi duyệt",
       icon: "fluent:clock-24-filled",
-      description: "Đang chờ phê duyệt",
+      description: "Gửi cho admin xét duyệt để xuất bản",
       color: "text-yellow-600",
     },
   ];
@@ -163,6 +159,18 @@ const BlogCreateEditPage: React.FC = () => {
 
   const removeTag = (tagToRemove: string) => {
     setTags(tags.filter((tag) => tag !== tagToRemove));
+  };
+
+  const toggleTag = (tag: string) => {
+    if (tags.includes(tag)) {
+      removeTag(tag);
+    } else {
+      if (tags.length >= 10) {
+        toast.error("Tối đa 10 thẻ");
+        return;
+      }
+      setTags([...tags, tag]);
+    }
   };
 
 
@@ -354,7 +362,7 @@ const BlogCreateEditPage: React.FC = () => {
           </div>
 
           {/* Status */}
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3">
             <div className="flex items-center gap-2">
               <label className="text-sm font-medium text-gray-700 whitespace-nowrap">
                 Trạng thái:
@@ -373,6 +381,10 @@ const BlogCreateEditPage: React.FC = () => {
                   {currentStatus.description}
                 </span>
               )}
+            </div>
+            <div className="text-xs text-gray-500 bg-blue-50 border border-blue-200 rounded-lg px-3 py-2">
+              <Icon icon="fluent:info-24-regular" className="inline w-4 h-4 mr-1 text-blue-600" />
+              Blog cần được admin phê duyệt trước khi xuất bản công khai
             </div>
           </div>
         </div>
@@ -512,22 +524,45 @@ const BlogCreateEditPage: React.FC = () => {
               Thẻ <span className="text-xs text-gray-500">(Tối đa 10)</span>
             </label>
 
+            {/* Predefined Tags */}
+            <div className="mb-3">
+              <p className="text-xs text-gray-500 mb-2">Chọn thẻ phổ biến:</p>
+              <div className="flex flex-wrap gap-2">
+                {predefinedTags.map((tag) => (
+                  <button
+                    key={tag}
+                    type="button"
+                    onClick={() => toggleTag(tag)}
+                    disabled={tags.length >= 10 && !tags.includes(tag)}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${
+                      tags.includes(tag)
+                        ? 'bg-blue-600 text-white shadow-md'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    {tags.includes(tag) && (
+                      <Icon icon="fluent:checkmark-24-filled" className="inline w-4 h-4 mr-1" />
+                    )}
+                    #{tag}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Selected Tags Display */}
             {tags.length > 0 && (
-              <div className="flex flex-wrap gap-2 mb-3">
+              <div className="flex flex-wrap gap-2 mb-3 p-3 bg-blue-50 rounded-lg border border-blue-100">
+                <span className="text-xs font-medium text-gray-600 w-full mb-1">Đã chọn ({tags.length}/10):</span>
                 {tags.map((tag, index) => (
                   <span
                     key={index}
-                    className="inline-flex items-center gap-1 px-3 py-1 text-sm text-blue-700 bg-blue-100 rounded-full"
+                    className="inline-flex items-center gap-1 px-3 py-1 text-sm text-blue-500 bg-white border border-blue-200 rounded-full shadow-sm"
                   >
-                    <Icon
-                      icon="fluent:number-symbol-24-filled"
-                      className="w-3 h-3"
-                    />
-                    {tag}
+                    #{tag}
                     <button
                       type="button"
                       onClick={() => removeTag(tag)}
-                      className="ml-1 text-blue-500 hover:text-blue-700"
+                      className="ml-1 text-blue-500 hover:text-blue-700 cursor-pointer"
                     >
                       <Icon
                         icon="fluent:dismiss-12-filled"
@@ -539,6 +574,7 @@ const BlogCreateEditPage: React.FC = () => {
               </div>
             )}
 
+            {/* Custom Tag Input */}
             {showTagInput ? (
               <div className="flex items-center gap-2">
                 <div className="flex-1">
@@ -547,7 +583,7 @@ const BlogCreateEditPage: React.FC = () => {
                     value={tagInput}
                     onChange={handleTagInputChange}
                     onKeyPress={handleTagInputKeyPress}
-                    placeholder="Nhập thẻ và nhấn Enter..."
+                    placeholder="Nhập thẻ tùy chỉnh và nhấn Enter..."
                     maxLength={30}
                   />
                 </div>
@@ -555,7 +591,7 @@ const BlogCreateEditPage: React.FC = () => {
                   type="button"
                   onClick={addTag}
                   disabled={!tagInput.trim() || tags.length >= 10}
-                  className="px-3 py-2 text-white bg-blue-500 rounded-full hover:bg-blue-600 disabled:bg-gray-300"
+                  className="px-3 py-2 text-white bg-blue-500 rounded-full hover:bg-blue-600 disabled:bg-gray-300 cursor-pointer disabled:cursor-not-allowed"
                 >
                   <Icon icon="fluent:add-24-filled" className="w-4 h-4" />
                 </button>
@@ -565,7 +601,7 @@ const BlogCreateEditPage: React.FC = () => {
                     setShowTagInput(false);
                     setTagInput("");
                   }}
-                  className="px-3 py-2 text-gray-600 bg-gray-200 rounded-full hover:bg-gray-300"
+                  className="px-3 py-2 text-gray-600 bg-gray-200 rounded-full hover:bg-gray-300 cursor-pointer"
                 >
                   <Icon icon="fluent:dismiss-24-filled" className="w-4 h-4" />
                 </button>
@@ -575,13 +611,13 @@ const BlogCreateEditPage: React.FC = () => {
                 type="button"
                 onClick={() => setShowTagInput(true)}
                 disabled={tags.length >= 10}
-                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-blue-600 border border-blue-300 rounded-lg hover:bg-blue-50 disabled:bg-gray-100 disabled:text-gray-400"
+                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-blue-600 border border-blue-300 rounded-lg hover:bg-blue-50 disabled:bg-gray-100 disabled:text-gray-400 cursor-pointer disabled:cursor-not-allowed"
               >
                 <Icon
                   icon="fluent:number-symbol-24-filled"
                   className="w-4 h-4"
                 />
-                Thêm Thẻ ({tags.length}/10)
+                Thêm Thẻ Tùy Chỉnh
               </button>
             )}
           </div>

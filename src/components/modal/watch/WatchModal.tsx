@@ -84,9 +84,7 @@ const WatchModal: React.FC<WatchModalProps> = ({
       
       try {
         await apiAddToHistory(videoId);
-        hasTrackedView.current = true;
-        console.log("Video added to history from modal");
-      } catch (error) {
+        hasTrackedView.current = true;      } catch (error) {
         console.error("Error adding to history:", error);
       }
     };
@@ -316,9 +314,7 @@ const WatchModal: React.FC<WatchModalProps> = ({
           <button
             className="text-gray-400 cursor-pointer hover:text-gray-600 p-1 sm:p-2 rounded-full hover:bg-gray-100 transition-colors"
             onClick={() => {
-              // TODO: Implement dropdown menu with options
-              console.log('Menu button clicked - dropdown not implemented yet');
-            }}
+              // TODO: Implement dropdown menu with options            }}
           >
             <svg
               className="w-4 h-4 sm:w-5 sm:h-5"

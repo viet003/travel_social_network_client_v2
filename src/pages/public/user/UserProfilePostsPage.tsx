@@ -1,15 +1,21 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useParams, useNavigate, useOutletContext } from "react-router-dom";
+import { useSelector } from "react-redux";
 import { Icon } from "@iconify/react";
 import { Image, Skeleton, message } from "antd";
 import { PostModal, PostCreateModal } from "../../../components/modal/post";
 import avatardf from "../../../assets/images/avatar_default.png";
 import { path } from "../../../utilities/path";
 import { apiGetPostsByUser } from "../../../services/postService";
-import { apiGetMyFriends } from "../../../services/friendshipService";
+import { apiGetUserFriendshipLists } from "../../../services/friendshipService";
 import { apiGetUserPhotos } from "../../../services/userService";
 import type { PostResponse, PageableResponse } from "../../../types/post.types";
 import type { UserResponse, UserPhotosResponse, UserMediaResponse } from "../../../types/user.types";
+
+// Auth State Interface
+interface AuthState {
+  userId: string | null;
+}
 
 // Types
 interface Post {
@@ -51,6 +57,7 @@ const UserProfilePostsPage: React.FC<UserProfilePostsPageProps> = ({
   onPostsLoaded,
 }) => {
   const { userId } = useParams<{ userId: string }>();
+  const currentUserId = useSelector((state: { auth: AuthState }) => state.auth.userId);
   const navigate = useNavigate();
   const { onOpenEditProfile } = useOutletContext<OutletContext>();
   const [posts, setPosts] = useState<Post[]>([]);
@@ -108,9 +115,9 @@ const UserProfilePostsPage: React.FC<UserProfilePostsPageProps> = ({
     setLoading(true);
     try {
       // Gọi song song các API: Posts, Friends, Photos
-      const [postsResponse, friendsResponse, photosResponse] = await Promise.all([
+      const [postsResponse, friendshipResponse, photosResponse] = await Promise.all([
         apiGetPostsByUser(userId, 0, 5),
-        apiGetMyFriends().catch(() => ({ data: [] })), // Catch error if not authorized
+        apiGetUserFriendshipLists(userId).catch(() => ({ data: { friends: [], pendingRequests: [], blockedUsers: [] } })), // Get target user's friends
         apiGetUserPhotos(userId).catch(() => ({ data: { avatars: [], coverImages: [], postPhotos: [] } })),
       ]);
 
@@ -147,10 +154,11 @@ const UserProfilePostsPage: React.FC<UserProfilePostsPageProps> = ({
         onPostsLoaded?.(postsData.totalElements);
       }
 
-      // Process friends
-      if (friendsResponse.data && Array.isArray(friendsResponse.data)) {
-        const friendsList = friendsResponse.data as UserResponse[];
-        setFriends(friendsList.slice(0, 9)); // Only show first 9 friends
+      // Process friends - extract from friendship lists response
+      if (friendshipResponse.data?.friends && Array.isArray(friendshipResponse.data.friends)) {
+        const friendsList = friendshipResponse.data.friends;
+        // Type assertion since friendship UserResponse is compatible with user UserResponse
+        setFriends(friendsList.slice(0, 9) as UserResponse[]); // Only show first 9 friends
         setTotalFriends(friendsList.length);
       }
 
@@ -455,8 +463,15 @@ const UserProfilePostsPage: React.FC<UserProfilePostsPageProps> = ({
       {/* Right Content Area - Posts */}
       <div className="flex-1 min-w-0 space-y-6">
         {/* Post Create Modal */}
-        <PostCreateModal setCreateSuccess={handlePostCreated} />
-
+        { userId === currentUserId && (
+          <PostCreateModal
+            setCreateSuccess={(success, newPost) => {
+              if (success && newPost) {
+                handlePostCreated(success, newPost);
+              }
+            }}
+          />
+        ) }
         {loading && page === 0 && (
           <div className="flex justify-center py-8">
             <div className="text-gray-500">Đang tải...</div>

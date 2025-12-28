@@ -96,7 +96,7 @@ const WatchCreateModal: React.FC<VideoCreateModalProps> = ({
   const categoryOptions = [
     { value: "travel", label: "Du lịch", icon: "fluent:airplane-24-filled" },
     { value: "food", label: "Ẩm thực", icon: "fluent:food-24-filled" },
-    { value: "adventure", label: "Phiêu lưu", icon: "fluent:mountain-24-filled" },
+    { value: "adventure", label: "Phiêu lưu", icon: "fluent:rocket-24-filled" },
     { value: "culture", label: "Văn hóa", icon: "fluent:building-24-filled" },
     { value: "nature", label: "Thiên nhiên", icon: "fluent:leaf-24-filled" },
     { value: "city", label: "Thành phố", icon: "fluent:city-24-filled" },
@@ -345,14 +345,6 @@ const WatchCreateModal: React.FC<VideoCreateModalProps> = ({
       // Prepare data for API
       // Use custom thumbnail if uploaded, otherwise use generated thumbnail
       const thumbnailToSend = customThumbnail || generatedThumbnailFile;
-      
-      console.log('📤 Sending watch data:', {
-        hasVideo: !!selectedVideo.file,
-        hasThumbnail: !!thumbnailToSend,
-        thumbnailType: thumbnailToSend ? (customThumbnail ? 'custom' : 'generated') : 'none',
-        thumbnailSize: thumbnailToSend?.size
-      });
-      
       const watchData = {
         video: selectedVideo.file,
         title: videoTitle,

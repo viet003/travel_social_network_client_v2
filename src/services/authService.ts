@@ -1,31 +1,8 @@
 import axiosConfig from "../configurations/axiosConfig";
+import type { LoginPayload, RegisterPayload, ResetPasswordPayload } from "../types/auth.types";
+import type { ApiResponse } from "../types/common.types";
 
-interface LoginPayload {
-    email: string;
-    password: string;
-}
-
-interface RegisterPayload {
-    userName: string;
-    email: string;
-    password: string;
-    firstName?: string;
-    lastName?: string;
-    dateOfBirth?: string;
-    gender?: string;
-}
-
-interface ResetPasswordPayload {
-    newPassword: string;
-    newPasswordConfirm: string;
-}
-
-interface ApiResponse<T = any> {
-    data: T;
-    [key: string]: any;
-}
-
-export const apiLoginService = async (payload: LoginPayload): Promise<any> => {
+export const apiLoginService = async (payload: LoginPayload): Promise<unknown> => {
     try {
         const response: ApiResponse = await axiosConfig({
             method: 'POST',
@@ -33,12 +10,12 @@ export const apiLoginService = async (payload: LoginPayload): Promise<any> => {
             data: payload
         });
         return response.data;
-    } catch (error: any) {
-        throw error.response ? error.response.data : error;
+    } catch (error: unknown) {
+        throw error && typeof error === 'object' && 'response' in error ? (error as { response: { data: unknown } }).response.data : error;
     }
 };
 
-export const apiSignupService = async (payload: RegisterPayload): Promise<any> => {
+export const apiSignupService = async (payload: RegisterPayload): Promise<unknown> => {
     try {
         const response: ApiResponse = await axiosConfig({
             method: 'POST',
@@ -46,12 +23,12 @@ export const apiSignupService = async (payload: RegisterPayload): Promise<any> =
             data: payload
         });
         return response.data;
-    } catch (error: any) {
-        throw error.response ? error.response.data : error;
+    } catch (error: unknown) {
+        throw error && typeof error === 'object' && 'response' in error ? (error as { response: { data: unknown } }).response.data : error;
     }
 };
 
-export const apiForgotPassWordService = async (email: string): Promise<any> => {
+export const apiForgotPassWordService = async (email: string): Promise<unknown> => {
   try {
     const response: ApiResponse = await axiosConfig({
       method: 'POST',
@@ -59,12 +36,12 @@ export const apiForgotPassWordService = async (email: string): Promise<any> => {
       params: { email }   
     });
     return response.data;
-  } catch (error: any) {
-    throw error.response ? error.response.data : error;
+  } catch (error: unknown) {
+    throw error && typeof error === 'object' && 'response' in error ? (error as { response: { data: unknown } }).response.data : error;
   }
 };
 
-export const apiResetPasswordService = async (token: string, payload: ResetPasswordPayload): Promise<any> => {
+export const apiResetPasswordService = async (token: string, payload: ResetPasswordPayload): Promise<unknown> => {
   try {
     const response: ApiResponse = await axiosConfig({
       method: 'POST',
@@ -73,14 +50,14 @@ export const apiResetPasswordService = async (token: string, payload: ResetPassw
       data: payload
     });
     return response.data;
-  } catch (error: any) {
-    throw error.response ? error.response.data : error;
+  } catch (error: unknown) {
+    throw error && typeof error === 'object' && 'response' in error ? (error as { response: { data: unknown } }).response.data : error;
   }
 };
 
 // Google OAuth Service - chỉ chứa API calls
 
-export const apiGoogleLoginService = async (accessToken: string): Promise<any> => {
+export const apiGoogleLoginService = async (accessToken: string): Promise<unknown> => {
   try {
     const response: ApiResponse = await axiosConfig({
       method: 'POST',
@@ -88,12 +65,12 @@ export const apiGoogleLoginService = async (accessToken: string): Promise<any> =
       data: { accessToken }
     });
     return response.data;
-  } catch (error: any) {
-    throw error.response ? error.response.data : error;
+  } catch (error: unknown) {
+    throw error && typeof error === 'object' && 'response' in error ? (error as { response: { data: unknown } }).response.data : error;
   }
 };
 
-export const apiFacebookLoginService = async (accessToken: string): Promise<any> => {
+export const apiFacebookLoginService = async (accessToken: string): Promise<unknown> => {
   try {
     const response: ApiResponse = await axiosConfig({
       method: 'POST',
@@ -101,7 +78,7 @@ export const apiFacebookLoginService = async (accessToken: string): Promise<any>
       data: { accessToken }
     });
     return response.data;
-  } catch (error: any) {
-    throw error.response ? error.response.data : error;
+  } catch (error: unknown) {
+    throw error && typeof error === 'object' && 'response' in error ? (error as { response: { data: unknown } }).response.data : error;
   }
 };

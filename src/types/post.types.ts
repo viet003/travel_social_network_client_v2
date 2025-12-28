@@ -33,6 +33,12 @@ export interface PostResponse {
         coverImageUrl: string | null;
     } | null;
     liked: boolean;
+    contentModeration?: {
+        moderationId: string;
+        moderationReason: string;
+        moderatedAt: string;
+        moderatedByUserId: string;
+    } | null;
 }
 
 export interface UpdatePostDto {

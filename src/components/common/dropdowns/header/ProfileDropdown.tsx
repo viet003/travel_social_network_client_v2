@@ -146,9 +146,9 @@ const ProfileDropdown: React.FC<ProfileDropdownProps> = ({ onClose }) => {
   }, [onClose]);
 
   return (
-    <div className="fixed px-2 top-[55px] right-[13px] w-80 bg-white border border-gray-200 rounded-2xl shadow-xl z-50 max-h-[600px] flex flex-col">
+    <div className="absolute top-full right-0 mt-2 w-80 bg-white border border-gray-200 rounded-2xl shadow-xl z-50 max-h-[600px] flex flex-col">
       {/* User Profile Section */}
-      <div className="py-4">
+      <div className="py-4 px-2">
         <div 
           className="flex items-center space-x-3 mb-3 p-2 hover:bg-gray-100 rounded-xl transition-colors cursor-pointer"
           onClick={handleProfileClick}

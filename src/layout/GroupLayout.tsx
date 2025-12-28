@@ -4,12 +4,11 @@ import { Icon } from '@iconify/react';
 import { path } from '../utilities/path';
 import { formatTimeAgo } from '../utilities/helper';
 import { SearchGroupDropdown } from '../components/common/dropdowns';
-import type { GroupResultItemProps } from '../components/common/items/GroupResultItem';
 import { GroupCreateModal } from '../components/modal';
-import { apiGetMyGroups, type GroupResponse } from '../services/groupService';
+import { apiGetMyGroups } from '../services/groupService';
+import type { GroupResponse } from '../types/group.types';
 import { toast } from 'react-toastify';
 import { LoadingSpinner } from '../components/ui/loading';
-// import { subLogo } from '../assets/images';
 
 const GroupLayout: React.FC = () => {
   // const location = useLocation();
@@ -17,29 +16,6 @@ const GroupLayout: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
   const [searchQuery, setSearchQuery] = React.useState('');
   const [showSearchDropdown, setShowSearchDropdown] = React.useState(false);
-  const [recentSearches, setRecentSearches] = React.useState<GroupResultItemProps[]>([
-    {
-      id: '1',
-      name: 'Cafe Đường Phố',
-      avatar: 'https://images.unsplash.com/photo-1511920170033-f8396924c348?w=60&h=60&fit=crop',
-      description: 'Nhóm công khai',
-      memberCount: 2500
-    },
-    {
-      id: '2',
-      name: 'Học Từ Vựng Tiếng Anh Mỗi Ngày',
-      avatar: 'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=60&h=60&fit=crop',
-      description: 'Nhóm công khai',
-      memberCount: 5000
-    },
-    {
-      id: '3',
-      name: 'Trường Người Ta',
-      avatar: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=60&h=60&fit=crop',
-      description: 'Nhóm công khai',
-      memberCount: 8900
-    }
-  ]);
 
   // API state for user's groups
   const [joinedGroups, setJoinedGroups] = React.useState<GroupResponse[]>([]);
@@ -100,15 +76,6 @@ const GroupLayout: React.FC = () => {
     return () => container.removeEventListener('scroll', handleScroll);
   }, [handleScroll]);
   
-  const handleRemoveSearch = (id: string) => {
-    setRecentSearches(recentSearches.filter(item => item.id !== id));
-  };
-
-  const handleSearchItemClick = (item: GroupResultItemProps) => {
-    console.log('Navigate to group:', item.name);
-    // TODO: Navigate to group detail page
-  };
-
   return (
     <div className="bg-gray-50 flex min-h-[calc(100vh-55px)] relative">
       {/* Overlay for mobile when sidebar is open */}
@@ -167,11 +134,9 @@ const GroupLayout: React.FC = () => {
             />
             
             {/* Search Dropdown */}
-            {showSearchDropdown && (
+            {showSearchDropdown && searchQuery.trim() && (
               <SearchGroupDropdown
-                searchResults={recentSearches}
-                onRemove={handleRemoveSearch}
-                onItemClick={handleSearchItemClick}
+                searchQuery={searchQuery}
                 onClose={() => setShowSearchDropdown(false)}
               />
             )}

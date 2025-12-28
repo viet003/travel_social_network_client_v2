@@ -11,6 +11,8 @@ import logo from '../../../assets/images/logo.png';
 import avatardf from '../../../assets/images/avatar_default.png';
 import { path } from '../../../utilities/path';
 import { SearchResultDropdown, ChatDropdown, NotificationsDropdown, ProfileDropdown, CreateDropdown } from '../dropdowns';
+import { useNotification } from '../../../hooks/useNotification';
+import { useUnreadMessages } from '../../../hooks/useUnreadMessages';
 
 interface AuthState {
   userId: string | null;
@@ -54,6 +56,8 @@ const NavButton: React.FC<NavButtonProps> = ({ icon, tooltip, onClick, isActive 
 const Header: React.FC = () => {
   const { avatar } = useSelector((state: { auth: AuthState }) => state.auth);
   const [showSearchResults, setShowSearchResults] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [inputValue, setInputValue] = useState('');
   const [showChatDropdown, setShowChatDropdown] = useState(false);
   const [showNotificationsDropdown, setShowNotificationsDropdown] = useState(false);
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
@@ -61,12 +65,44 @@ const Header: React.FC = () => {
 
   const navigate = useNavigate();
   const location = useLocation();
+  
+  // Get unread notification count from hook
+  const { unreadCount, refreshUnreadCount } = useNotification();
+  
+  // Get unread messages status from hook
+  const { hasUnreadMessages, clearUnreadMessages } = useUnreadMessages();
+  
+  // Debug: Log hasUnreadMessages state
+  React.useEffect(() => {
+    console.log('🔍 Header: hasUnreadMessages changed to:', hasUnreadMessages);
+  }, [hasUnreadMessages]);
+
+  // Debounce search query - delay API call by 500ms
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      console.log('⏰ Debounce complete, setting searchQuery:', inputValue);
+      setSearchQuery(inputValue);
+    }, 500);
+
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [inputValue]);
 
   const isRouteActive = (routePath: string): boolean => {
     if (routePath === path.HOME) {
       return location.pathname === path.HOME || location.pathname === `${path.HOME}/`;
     }
     return location.pathname.startsWith(`${path.HOME}/${routePath}`);
+  };
+
+  // Handle Enter key to navigate to search detail page
+  const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && inputValue.trim()) {
+      console.log('🔍 Enter pressed, navigating to search page with query:', inputValue);
+      setShowSearchResults(false);
+      navigate(`${path.HOME}/${path.SEARCH}?q=${encodeURIComponent(inputValue.trim())}`);
+    }
   };
 
   // Handle click outside to close search results
@@ -116,8 +152,15 @@ const Header: React.FC = () => {
             <input
               type="text"
               placeholder="Tìm kiếm trên TravelNest"
-              className="w-full pl-10 pr-4 py-2 bg-gray-100 border-0 rounded-full text-sm placeholder-gray-500 focus:outline-none transition-all duration-200 cursor-text"
+              value={inputValue}
+              onChange={(e) => {
+                console.log('📝 Header input onChange:', e.target.value);
+                setInputValue(e.target.value);
+                setShowSearchResults(true);
+              }}
               onFocus={() => setShowSearchResults(true)}
+              onKeyDown={handleSearchKeyDown}
+              className="w-full pl-10 pr-4 py-2 bg-gray-100 border-0 rounded-full text-sm placeholder-gray-500 focus:outline-none transition-all duration-200 cursor-text"
             />
           </div>
 
@@ -133,8 +176,15 @@ const Header: React.FC = () => {
 
           {/* Search Results Dropdown - Di chuyển vào trong search bar container */}
           {showSearchResults && (
-            <div className="fixed top-0 left-0 z-50">
-              <SearchResultDropdown onClose={() => setShowSearchResults(false)} />
+            <div className="fixed top-0 left-0 z-[1000]">
+              <SearchResultDropdown 
+                searchQuery={searchQuery}
+                onClose={() => {
+                  setShowSearchResults(false);
+                  setSearchQuery('');
+                  setInputValue('');
+                }} 
+              />
             </div>
           )}
         </div>
@@ -186,7 +236,7 @@ const Header: React.FC = () => {
         <div className="flex items-center space-x-2 flex-1 justify-end max-w-md">
           {/* Menu Icon with Create Dropdown */}
           <TravelTooltip title="Menu">
-            <div className="relative" data-create-container>
+            <div className="relative z-[1000]" data-create-container>
               <button 
                 className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center hover:bg-gray-300 transition-colors duration-200 cursor-pointer"
                 onClick={() => setShowCreateDropdown(!showCreateDropdown)}
@@ -203,14 +253,22 @@ const Header: React.FC = () => {
 
           {/* Messenger Icon with Dropdown */}
           <TravelTooltip title="Đoạn chat">
-            <div className="relative" data-chat-container>
+            <div className="relative z-[1000]" data-chat-container>
               <button 
                 className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center hover:bg-gray-300 transition-colors duration-200 cursor-pointer relative"
-                onClick={() => setShowChatDropdown(!showChatDropdown)}
+                onClick={() => {
+                  setShowChatDropdown(!showChatDropdown);
+                  // Clear unread messages when opening chat dropdown
+                  if (!showChatDropdown && hasUnreadMessages) {
+                    clearUnreadMessages();
+                  }
+                }}
               >
                 <Icon icon="fluent:chat-24-filled" className="h-5 w-5 text-black" />
-                {/* Notification badge */}
-                <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">3</span>
+                {/* Red dot indicator - only show if there are unread messages */}
+                {hasUnreadMessages && (
+                  <span className="absolute top-0 right-0 w-3 h-3 bg-red-500 rounded-full border-2 border-white"></span>
+                )}
               </button>
 
               {/* Chat Dropdown */}
@@ -222,26 +280,33 @@ const Header: React.FC = () => {
 
           {/* Notifications Icon with Dropdown */}
           <TravelTooltip title="Thông báo">
-            <div className="relative" data-notification-container>
+            <div className="relative z-[1000]" data-notification-container>
               <button 
                 className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center hover:bg-gray-300 transition-colors duration-200 cursor-pointer relative"
                 onClick={() => setShowNotificationsDropdown(!showNotificationsDropdown)}
               >
                 <Icon icon="fluent:alert-24-filled" className="h-5 w-5 text-black" />
                 {/* Notification badge */}
-                <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">5</span>
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
+                    {unreadCount}
+                  </span>
+                )}
               </button>
 
               {/* Notifications Dropdown */}
               {showNotificationsDropdown && (
-                <NotificationsDropdown onClose={() => setShowNotificationsDropdown(false)} />
+                <NotificationsDropdown 
+                  onClose={() => setShowNotificationsDropdown(false)}
+                  onUnreadCountChange={refreshUnreadCount}
+                />
               )}
             </div>
           </TravelTooltip>
 
           {/* Profile Picture with Dropdown */}
           <TravelTooltip title="Tài khoản">
-            <div className="relative" data-profile-container>
+            <div className="relative z-[1000]" data-profile-container>
               <button 
                 className="w-10 h-10 rounded-full hover:opacity-80 transition-opacity duration-200 cursor-pointer relative"
                 onClick={() => setShowProfileDropdown(!showProfileDropdown)}

@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Icon } from '@iconify/react';
 import { OtherGroupCard } from '../../../components/common/cards';
-import { apiSearchGroups, apiJoinGroup, type GroupResponse } from '../../../services/groupService';
+import { apiJoinGroup } from '../../../services/groupService';
+import { apiSearchGroups } from '../../../services/searchService';
+import type { GroupResponse } from '../../../types/group.types';
 import { toast } from 'react-toastify';
 
 interface ExtendedGroupResponse extends GroupResponse {
@@ -23,13 +25,16 @@ const GroupSuggestionsPage: React.FC = () => {
   const fetchSuggestedGroups = async () => {
     setIsLoading(true);
     try {
-      // Fetch groups with empty keyword to get random/all groups
+      // Use fulltext search API with empty keyword to get groups
       const response = await apiSearchGroups('', 0, 20);
-      const allGroups = response.data.content;
       
-      // Filter out groups the user is already a member of
-      const nonMemberGroups = allGroups.filter(group => !group.isMember);
-      setSuggestedGroups(nonMemberGroups);
+      if (response.success && response.data) {
+        const allGroups = response.data.content;
+        
+        // Filter out groups the user is already a member of
+        const nonMemberGroups = allGroups.filter((group: GroupResponse) => !group.isMember);
+        setSuggestedGroups(nonMemberGroups);
+      }
     } catch (error) {
       console.error('Error fetching suggested groups:', error);
       toast.error('Không thể tải danh sách gợi ý nhóm');

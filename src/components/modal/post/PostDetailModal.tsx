@@ -13,26 +13,12 @@ import { TravelImage, ExpandableContent } from "../../ui";
 import avatardf from "../../../assets/images/avatar_default.png";
 import { apiGetCommentsByPostId } from "../../../services/commentService";
 import type { PostResponse as PostResponseType } from "../../../types/post.types";
+import type { CommentResponse } from "../../../types/comment.types";
 import SharedPostPreview from "./SharedPostPreview";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination } from "swiper/modules";
 import type { Swiper as SwiperType } from "swiper";
 import "../../../styles/post-modal.css";
-
-// Types
-interface Comment {
-  id?: string;
-  commentId?: string; // Backend uses commentId
-  avatarImg?: string;
-  firstName?: string;
-  lastName?: string;
-  fullName?: string; // Backend uses fullName
-  content: string;
-  createdAt: string;
-  replyCount?: number;
-  level?: number;
-  parentCommentId?: string;
-}
 
 interface Group {
   groupId: string;
@@ -64,7 +50,7 @@ interface PostDetailModalProps {
   isLiked?: boolean;
   setIsLiked?: (liked: boolean) => void;
   postCommentCount?: number;
-  handleComment?: (comment: Comment) => void;
+  handleComment?: (comment: CommentResponse) => void;
   onCommentCountChange?: () => void; // Callback to increment comment count
   postShareCount?: number;
   onShare?: () => void;
@@ -104,8 +90,8 @@ const PostDetailModal: React.FC<PostDetailModalProps> = ({
   const [currentImageIndex, setCurrentImageIndex] = useState<number>(
     selectedImageIndex || 0
   );
-  const [newComment, setNewComment] = useState<Comment | null>(null);
-  const [comments, setComments] = useState<Comment[]>([]);
+  const [newComment, setNewComment] = useState<CommentResponse | null>(null);
+  const [comments, setComments] = useState<CommentResponse[]>([]);
   const [page, setPage] = useState<number>(0);
   const [hasMore, setHasMore] = useState<boolean>(true);
   const [loading, setLoading] = useState<boolean>(false);
@@ -146,9 +132,7 @@ const PostDetailModal: React.FC<PostDetailModalProps> = ({
         postId,
         pageNum,
         commentSort
-      );
-      console.log("User comments data:", commentResponse);
-      const comments = commentResponse?.data?.content || [];
+      );      const comments = commentResponse?.data?.content || [];
       if (pageNum === 0) {
         setComments(comments);
       } else {
@@ -633,7 +617,7 @@ const PostDetailModal: React.FC<PostDetailModalProps> = ({
               <>
                 {comments.map((comment, idx) => (
                   <div
-                    key={comment.id || comment.commentId || idx}
+                    key={comment.commentId}
                     ref={
                       comments.length === idx + 1 ? lastCommentElementRef : null
                     }
@@ -643,17 +627,13 @@ const PostDetailModal: React.FC<PostDetailModalProps> = ({
                       level={0}
                       maxLevel={2}
                       postId={postId}
-                      onReply={(parentId, content) => {
-                        console.log("Reply to:", parentId, "Content:", content);
-                        // Handle reply logic here
+                      onReply={(parentId, content) => {                        // Handle reply logic here
                       }}
                       onCommentCreated={onCommentCountChange}
                       onCommentDeleted={(deletedId) => {
                         // Remove deleted comment from list
                         setComments((prev) =>
-                          prev.filter(
-                            (c) => (c.id || c.commentId) !== deletedId
-                          )
+                          prev.filter((c) => c.commentId !== deletedId)
                         );
                         // Decrement comment count
                         onCommentCountChange?.();
@@ -679,7 +659,7 @@ const PostDetailModal: React.FC<PostDetailModalProps> = ({
             <CommentCreateModal
               postId={postId}
               handleComment={handleComment || (() => {})}
-              setNewComment={(comment: Comment) => setNewComment(comment)}
+              setNewComment={(comment: CommentResponse) => setNewComment(comment)}
               currentUserAvatar={currentUserAvatar}
               setLoading={setLoading}
             />

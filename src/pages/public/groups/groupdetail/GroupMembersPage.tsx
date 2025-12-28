@@ -8,13 +8,11 @@ import {
   apiChangeMemberRole,
   apiApproveJoinRequest,
   apiRejectJoinRequest,
-  type GroupMemberResponse,
-  type GroupResponse
 } from '../../../../services/groupService';
 import { toast } from 'react-toastify';
 import avatardf from '../../../../assets/images/avatar_default.png';
 import { TravelButton } from '../../../../components/ui/customize';
-
+import type { GroupMemberResponse, GroupResponse } from '../../../../types/group.types';
 interface AuthState {
   userId: string | null;
   userName: string | null;
@@ -28,10 +26,11 @@ interface AuthState {
 interface OutletContext {
   groupData: GroupResponse | null;
   isMember: boolean;
+  currentUserRole: string | null;
 }
 
 const GroupMembersPage: React.FC = () => {
-  const { isMember } = useOutletContext<OutletContext>();
+  const { isMember, currentUserRole } = useOutletContext<OutletContext>();
   const { groupId } = useParams<{ groupId: string }>();
   const navigate = useNavigate();
   const currentUserId = useSelector((state: { auth: AuthState }) => state.auth.userId);
@@ -42,7 +41,6 @@ const GroupMembersPage: React.FC = () => {
   const [totalElements, setTotalElements] = useState(0);
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
-  const [currentUserRole, setCurrentUserRole] = useState<string | null>(null);
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
   const observer = useRef<IntersectionObserver | null>(null);
 
@@ -53,7 +51,7 @@ const GroupMembersPage: React.FC = () => {
       try {
         const response = await apiGetGroupById(groupId);
         if (response.data) {
-          setCurrentUserRole(response.data.currentUserRole);
+          // currentUserRole is already available from context
         }
       } catch (error) {
         console.error('Error fetching group info:', error);
@@ -64,7 +62,7 @@ const GroupMembersPage: React.FC = () => {
 
   // Fetch members from API
   const fetchMembers = async (pageNum: number = 0, append: boolean = false) => {
-    if (!groupId || loading || !isMember) return;
+    if (!groupId || loading || (!isMember && currentUserRole !== 'ADMIN')) return;
 
     setLoading(true);
     try {
@@ -271,7 +269,7 @@ const GroupMembersPage: React.FC = () => {
 
   return (
     <div className="space-y-4">
-      {!isMember ? (
+      {!isMember && currentUserRole !== 'ADMIN' ? (
         <div className="bg-white rounded-lg shadow-sm p-12 text-center">
           <Icon
             icon="fluent:lock-closed-24-regular"

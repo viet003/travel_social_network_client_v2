@@ -8,6 +8,7 @@ interface TravelSelectProps {
   options?: Array<{ value: string; label: string }>;
   className?: string;
   disabled?: boolean;
+  getPopupContainer?: (trigger: HTMLElement) => HTMLElement;
 }
 
 const TravelSelect: React.FC<TravelSelectProps> = ({
@@ -17,6 +18,7 @@ const TravelSelect: React.FC<TravelSelectProps> = ({
   options = [],
   className = '',
   disabled = false,
+  getPopupContainer,
   ...props
 }) => {
   return (
@@ -52,6 +54,7 @@ const TravelSelect: React.FC<TravelSelectProps> = ({
         onChange={onChange}
         options={options}
         disabled={disabled}
+        getPopupContainer={getPopupContainer}
         className={`w-full focus:outline-none focus:ring-0 ${className}`}
         style={{
           backgroundColor: '#f9fafb',

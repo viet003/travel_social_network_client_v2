@@ -8,6 +8,8 @@ export interface Blog {
   thumbnailUrl?: string;
   location?: string;
   viewCount: number;
+  likeCount: number;
+  reviewCount: number;
   averageRating: number;
   totalRatings: number;
   status: BlogStatus;
@@ -19,6 +21,12 @@ export interface Blog {
   createdAt: string;
   updatedAt: string;
   hasReviewed?: boolean; // True if current user has already reviewed this blog
+  contentModeration?: {
+    moderationId: string;
+    moderationReason: string;
+    moderatedAt: string;
+    moderatedByUserId: string;
+  } | null;
 }
 
 export interface UserSummary {

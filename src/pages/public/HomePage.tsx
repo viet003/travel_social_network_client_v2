@@ -39,28 +39,33 @@ const HomePage: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
-      console.log(`Fetching news feed page ${pageNum}...`);
-      
       const response = await apiGetNewsFeed(pageNum, 10);
       
       if (response.success && response.data) {
-        console.log(`Loaded ${response.data.length} posts for page ${pageNum}`);
+        const { content = [], totalPages = 0, pageNumber = 0 } = response.data;
+        
+        // when we requested a different page
+        if (pageNum > 0 && pageNumber === 0) {
+          console.log('Cache refreshed - resetting to page 0');
+          setPosts(content || []);
+          setPage(0);
+          setHasMore(totalPages > 1);
+          return;
+        }
         
         if (pageNum === 0) {
-          // Initial load
-          setPosts(response.data);
+          // Initial load or refresh
+          setPosts(content || []);
         } else {
-          // Append new posts, filter out duplicates
           setPosts(prev => {
             const existingIds = new Set(prev.map(p => p.postId));
-            const newPosts = response.data.filter(p => !existingIds.has(p.postId));
+            const newPosts = (content || []).filter(p => !existingIds.has(p.postId));
             return [...prev, ...newPosts];
           });
         }
         
-        // Check if there are more posts to load
-        setHasMore(response.data.length === 10);
-        // setHasMore(true); // Tạm thời luôn true để test
+        // Determine if more pages exist
+        setHasMore(pageNumber + 1 < totalPages);
       } else {
         setHasMore(false);
       }
@@ -82,7 +87,6 @@ const HomePage: React.FC = () => {
       observer.current = new IntersectionObserver(
         (entries) => {
           if (entries[0].isIntersecting && hasMore) {
-            console.log('Reached end of feed, loading more...');
             setPage((prevPage) => prevPage + 1);
           }
         },
@@ -113,7 +117,6 @@ const HomePage: React.FC = () => {
   // Reload feed after creating a post
   const handlePostCreated = (success: boolean, newPost?: PostResponse) => {
     if (success && newPost) {
-      console.log('Post created successfully! Adding to top of feed...', newPost);
       // Add new post to the beginning of the array
       setPosts(prev => [newPost, ...prev]);
     }
@@ -139,7 +142,10 @@ const HomePage: React.FC = () => {
             <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
               <p>{error}</p>
               <button 
-                onClick={() => fetchNewsFeed(1)}
+                onClick={() => {
+                  setPage(0);
+                  fetchNewsFeed(0);
+                }}
                 className="mt-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
               >
                 Thử lại
@@ -151,9 +157,10 @@ const HomePage: React.FC = () => {
           <div className="space-y-4 sm:space-y-6">
             {posts.length > 0 ? (
               <>
-                {posts.filter(post => !hiddenPostIds.has(post.postId)).map((post, index) => {
-                  // Attach ref to the last post for infinite scroll
-                  if (posts.length === index + 1) {
+                {posts.filter(post => !hiddenPostIds.has(post.postId)).map((post, index, visiblePosts) => {
+                  const isLastPost = visiblePosts.length === index + 1;
+                  
+                  if (isLastPost) {
                     return (
                       <div key={post.postId} ref={lastPostElementRef}>
                         <PostModal

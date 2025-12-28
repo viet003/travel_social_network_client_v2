@@ -1,19 +1,24 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useDispatch } from 'react-redux';
 import { Icon } from '@iconify/react';
 import FriendCard from '../../../components/common/cards/FriendCard';
 import { SearchFriendDropdown } from '../../../components/common/dropdowns';
-import type { UserResultItemProps } from '../../../components/common/items';
 import { apiGetMyFriends, apiUnfriend } from '../../../services/friendshipService';
+import { createOrGetPrivateConversation } from '../../../stores/actions/conversationAction';
 import type { UserResponse } from '../../../types/friendship.types';
+import { apiSearchUsers } from '../../../services/searchService';
 import { toast } from 'react-toastify';
 import { useLoading } from '../../../hooks/useLoading';
 import ConfirmDeleteModal from '../../../components/modal/confirm/ConfirmDeleteModal';
 import avatardf from '../../../assets/images/avatar_default.png';
 
 const AllFriendsPage: React.FC = () => {
+  const dispatch = useDispatch();
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearchResults, setShowSearchResults] = useState(false);
   const [allFriends, setAllFriends] = useState<UserResponse[]>([]);
+  const [searchResults, setSearchResults] = useState<UserResponse[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
   const { isLoading, showLoading, hideLoading } = useLoading(true);
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
   const [friendToUnfriend, setFriendToUnfriend] = useState<{ userId: string; name: string } | null>(null);
@@ -38,23 +43,53 @@ const AllFriendsPage: React.FC = () => {
     fetchAllFriends();
   }, []);
 
-  // Filter friends based on search query
-  const filteredFriends = allFriends.filter(friend =>
-    (friend.userProfile.fullName || friend.userName).toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Search friends using fulltext search API
+  const searchFriends = useCallback(async (keyword: string) => {
+    if (!keyword.trim()) {
+      setSearchResults([]);
+      setIsSearching(false);
+      return;
+    }
 
-  // Convert filtered friends to search results format
-  const searchResults: UserResultItemProps[] = filteredFriends.slice(0, 5).map(friend => ({
-    id: friend.userId || '',
-    name: friend.userProfile.fullName || friend.userName,
-    avatar: friend.avatarImg || avatardf,
-    description: 'Bạn bè'
-  }));
+    setIsSearching(true);
+    try {
+      const response = await apiSearchUsers(keyword, 0, 50);
+      if (response.success && response.data) {
+        // Filter to only show users who are friends
+        const friendIds = new Set(allFriends.map(f => f.userId));
+        const friendResults = response.data.content.filter((user: UserResponse) => 
+          friendIds.has(user.userId)
+        );
+        setSearchResults(friendResults);
+      }
+    } catch (error) {
+      console.error('Error searching friends:', error);
+      // Fallback to local filter if API fails
+      const localFiltered = allFriends.filter(friend =>
+        (friend.userProfile.fullName || friend.userName).toLowerCase().includes(keyword.toLowerCase())
+      );
+      setSearchResults(localFiltered);
+    } finally {
+      setIsSearching(false);
+    }
+  }, [allFriends]);
 
-  const removeSearchResult = (id: string) => {
-    // This would typically remove from filtered view or unfriend
-    console.log('Remove search result:', id);
-  };
+  // Debounce search
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (searchQuery.trim()) {
+        searchFriends(searchQuery);
+      } else {
+        setSearchResults([]);
+        setIsSearching(false);
+      }
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [searchQuery, searchFriends]);
+
+  // Get displayed friends: search results if searching, all friends otherwise
+  const displayedFriends = searchQuery.trim() ? searchResults : allFriends;
 
   // Handle unfriend action
   const handleUnfriend = async (userId: string, friendName: string) => {
@@ -78,6 +113,17 @@ const AllFriendsPage: React.FC = () => {
     } finally {
       setShowConfirmDelete(false);
       setFriendToUnfriend(null);
+    }
+  };
+
+  // Handle message action - create/get conversation and open chat
+  const handleMessage = async (userId: string, friendName: string) => {
+    try {
+      await dispatch(createOrGetPrivateConversation(userId) as any);
+      toast.success(`Đang mở cuộc trò chuyện với ${friendName}`);
+    } catch (error) {
+      console.error('Error creating conversation:', error);
+      toast.error('Không thể mở cuộc trò chuyện');
     }
   };
 
@@ -145,12 +191,7 @@ const AllFriendsPage: React.FC = () => {
             {/* Search Results Dropdown */}
             {showSearchResults && searchQuery.trim() && (
               <SearchFriendDropdown
-                searchResults={searchResults}
-                onRemove={removeSearchResult}
-                onItemClick={(item) => {
-                  console.log('Clicked:', item.name);
-                  setShowSearchResults(false);
-                }}
+                searchQuery={searchQuery}
                 onClose={() => setShowSearchResults(false)}
               />
             )}
@@ -159,26 +200,31 @@ const AllFriendsPage: React.FC = () => {
       </div>
 
       {/* Friends Grid */}
-      {filteredFriends.length > 0 ? (
+      {displayedFriends.length > 0 ? (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-          {filteredFriends.map((friend, index) => (
+          {isSearching && (
+            <div className="col-span-full flex justify-center py-8">
+              <Icon icon="eos-icons:loading" className="h-8 w-8" style={{ color: 'var(--travel-primary-500)' }} />
+            </div>
+          )}
+          {!isSearching && displayedFriends.map((friend, index) => (
             <FriendCard
               key={friend.userId}
               id={index + 1}
               name={friend.userProfile.fullName || friend.userName}
               avatar={friend.avatarImg || avatardf}
-              mutualFriends={null} // API doesn't provide mutual friends count yet
+              mutualFriends={null} 
               primaryAction={{
                 label: 'Nhắn tin',
                 icon: 'fluent:chat-24-filled',
-                onClick: () => console.log('Message', friend.userId),
+                onClick: () => handleMessage(friend.userId || '', friend.userProfile.fullName || friend.userName),
                 variant: 'secondary'
               }}
               secondaryAction={{
                 label: 'Hủy kết bạn',
                 onClick: () => handleUnfriend(friend.userId || '', friend.userProfile.fullName || friend.userName)
               }}
-              onCardClick={() => console.log('View profile', friend.userId)}
+              onCardClick={() => {}}
             />
           ))}
         </div>

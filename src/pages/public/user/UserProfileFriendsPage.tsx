@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { Icon } from '@iconify/react';
 import { Skeleton, Image, Tabs, message } from 'antd';
 import { apiGetUserFriendshipLists, apiAcceptFriendRequest, apiRejectFriendRequest } from '../../../services/friendshipService';
-import type { UserFriendshipListsResponse, FriendshipResponse, UserResponse } from '../../../types/friendship.types';
+import { apiCreateOrGetPrivateConversation } from '../../../services/conversationService';
+import { setActiveConversation, addConversation } from '../../../stores/actions/conversationAction';
+import type { UserFriendshipListsResponse } from '../../../types/friendship.types';
 import avatardf from '../../../assets/images/avatar_default.png';
 
 interface AuthState {
@@ -14,6 +16,7 @@ interface AuthState {
 const UserProfileFriendsPage: React.FC = () => {
   const { userId } = useParams<{ userId: string }>();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const currentUserId = useSelector((state: { auth: AuthState }) => state.auth.userId);
   const [friendshipData, setFriendshipData] = useState<UserFriendshipListsResponse | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
@@ -54,6 +57,7 @@ const UserProfileFriendsPage: React.FC = () => {
 
   useEffect(() => {
     fetchFriendshipLists();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId]);
 
   const handleAcceptRequest = async (friendshipId: string) => {
@@ -79,7 +83,29 @@ const UserProfileFriendsPage: React.FC = () => {
   };
 
   const handleFriendClick = (friendId: string) => {
-    navigate(`/user/${friendId}`);
+    navigate(`/home/user/${friendId}`);
+  };
+
+  const handleSendMessage = async (friendUserId: string) => {
+    try {
+      // Create or get private conversation
+      const response = await apiCreateOrGetPrivateConversation(friendUserId);
+      
+      if (response.data) {
+        const conversation = response.data;
+        
+        // Add to Redux store
+        dispatch(addConversation(conversation));
+        
+        // Set as active conversation to open ChatWidget
+        dispatch(setActiveConversation(conversation.conversationId));
+        
+        message.success('Đã mở đoạn chat');
+      }
+    } catch (err) {
+      console.error('Error creating conversation:', err);
+      message.error('Không thể mở đoạn chat');
+    }
   };
 
   // Get data based on active tab
@@ -169,7 +195,10 @@ const UserProfileFriendsPage: React.FC = () => {
               className="p-3 sm:p-4 transition-shadow bg-white border border-gray-200 rounded-lg hover:shadow-md"
             >
               <div className="flex items-center gap-2.5 sm:gap-3 mb-2.5 sm:mb-3">
-                <div className="relative w-12 h-12 sm:w-16 sm:h-16 flex-shrink-0">
+                <div 
+                  className="relative w-12 h-12 sm:w-16 sm:h-16 flex-shrink-0 cursor-pointer"
+                  onClick={() => navigate(`/home/user/${request.friendProfile.userId}`)}
+                >
                   {imageLoading[request.friendProfile.userId || ''] && (
                     <Skeleton.Avatar 
                       active 
@@ -226,11 +255,13 @@ const UserProfileFriendsPage: React.FC = () => {
           {(activeTab === 'friends' || activeTab === 'blocked') && filteredData.map((user) => (
             <div
               key={user.userId}
-              className="p-3 sm:p-4 transition-shadow bg-white border border-gray-200 rounded-lg hover:shadow-md cursor-pointer"
-              onClick={() => handleFriendClick(user.userId || '')}
+              className="p-3 sm:p-4 transition-shadow bg-white border border-gray-200 rounded-lg hover:shadow-md"
             >
               <div className="flex items-center gap-2.5 sm:gap-3 mb-2.5 sm:mb-3">
-                <div className="relative w-12 h-12 sm:w-16 sm:h-16 flex-shrink-0">
+                <div 
+                  className="relative w-12 h-12 sm:w-16 sm:h-16 flex-shrink-0 cursor-pointer"
+                  onClick={() => handleFriendClick(user.userId || '')}
+                >
                   {imageLoading[user.userId || ''] && (
                     <Skeleton.Avatar 
                       active 
@@ -271,7 +302,7 @@ const UserProfileFriendsPage: React.FC = () => {
                     className="flex items-center justify-center flex-1 gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-gray-700 transition bg-gray-100 rounded-lg hover:bg-gray-200 cursor-pointer"
                     onClick={(e) => {
                       e.stopPropagation();
-                      console.log('Send message to', user.userId);
+                      handleSendMessage(user.userId || '');
                     }}
                   >
                     <Icon icon="lucide:message-circle" className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />

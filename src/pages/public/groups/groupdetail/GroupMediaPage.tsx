@@ -4,15 +4,17 @@ import { Icon } from '@iconify/react';
 import TravelButton from '../../../../components/ui/customize/TravelButton';
 import LoadingSpinner from '../../../../components/ui/loading/LoadingSpinner';
 import { apiGetGroupMedia } from '../../../../services/groupService';
-import type { PostMediaResponse, GroupResponse } from '../../../../services/groupService';
+import type { GroupResponse } from '../../../../types/group.types';
+import type { PostMediaResponse } from '../../../../types/media.types';
 
 interface OutletContext {
   groupData: GroupResponse | null;
   isMember: boolean;
+  currentUserRole: string | null;
 }
 
 const GroupMediaPage: React.FC = () => {
-  const { isMember } = useOutletContext<OutletContext>();
+  const { isMember, currentUserRole } = useOutletContext<OutletContext>();
   const { groupId } = useParams<{ groupId: string }>();
   const navigate = useNavigate();
   const [activeMediaTab, setActiveMediaTab] = useState<'photos' | 'videos'>('photos');
@@ -23,7 +25,7 @@ const GroupMediaPage: React.FC = () => {
 
   // Fetch media when tab changes
   useEffect(() => {
-    if (!groupId || !isMember) return;
+    if (!groupId || (!isMember && currentUserRole !== 'ADMIN')) return;
     
     const fetchMedia = async () => {
       setIsLoading(true);
@@ -46,7 +48,7 @@ const GroupMediaPage: React.FC = () => {
     };
 
     fetchMedia();
-  }, [groupId, activeMediaTab, isMember]);
+  }, [groupId, activeMediaTab, isMember, currentUserRole]);
 
   const mediaTabs = [
     { id: 'photos' as const, label: 'Ảnh', icon: 'fluent:image-24-filled', count: photos.length },
@@ -59,7 +61,7 @@ const GroupMediaPage: React.FC = () => {
 
   return (
     <div className="space-y-4">
-      {!isMember ? (
+      {!isMember && currentUserRole !== 'ADMIN' ? (
         <div className="bg-white rounded-lg shadow-sm p-12 text-center">
           <Icon
             icon="fluent:lock-closed-24-regular"

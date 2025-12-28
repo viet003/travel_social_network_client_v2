@@ -6,7 +6,7 @@ import { path } from '../../../utilities/path';
 import { GoogleLoginButton, FacebookLoginButton } from '../buttons';
 import { TravelInput, TravelButton } from '../../ui/customize';
 import { LoadingSpinner } from '../../ui/loading';
-import { background } from '../../../assets/images';
+import  travel_vietnam  from '../../../assets/images/travel_vietnam.png';
 
 const ForgotPasswordForm = () => {
   const [email, setEmail] = useState('');
@@ -126,7 +126,7 @@ const ForgotPasswordForm = () => {
               />
             ) : null}
             <img
-              src={background}
+              src={travel_vietnam}
               alt="Social Network"
               className={`w-full h-auto rounded-3xl object-cover ${imageLoading ? 'hidden' : 'block'}`}
               onLoad={handleImageLoad}
@@ -258,7 +258,7 @@ const ForgotPasswordForm = () => {
             />
           ) : null}
           <img
-            src={background}
+            src={travel_vietnam}
             alt="Social Network"
             className={`w-full h-auto rounded-3xl object-cover ${imageLoading ? 'hidden' : 'block'}`}
             onLoad={handleImageLoad}

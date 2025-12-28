@@ -1,7 +1,10 @@
-import React, { useState } from 'react';
-import { Outlet } from 'react-router-dom';
+import React, { useState, useEffect, useRef } from 'react';
+import { Outlet, useNavigate } from 'react-router-dom';
 import { Skeleton } from 'antd';
-import { Header } from '../components/common';
+import { useSelector } from 'react-redux';
+import { Header, ChatWidget } from '../components/common';
+import { path } from '../utilities/path';
+import webSocketService from '../services/webSocketService';
 
 interface MainLayoutProps {
   children?: React.ReactNode;
@@ -15,9 +18,25 @@ const MainLayout: React.FC<MainLayoutProps> = ({
   loadingDuration = 800 
 }) => {
   const [isLoading, setIsLoading] = useState(showLoading);
+  const wsConnectedRef = useRef(false);
+  const navigate = useNavigate();
+  
+  // Get auth info from Redux
+  const { token, userId, role } = useSelector((state: any) => ({
+    token: state.auth?.token,
+    userId: state.auth?.userId,
+    role: state.auth?.role
+  }));
+
+  // Redirect admin users to dashboard
+  useEffect(() => {
+    if (role === 'ADMIN') {
+      navigate('/admin/dashboard', { replace: true });
+    }
+  }, [role, navigate]);
 
   // Simulate loading for demonstration
-  React.useEffect(() => {
+  useEffect(() => {
     if (showLoading) {
       const timer = setTimeout(() => {
         setIsLoading(false);
@@ -25,6 +44,37 @@ const MainLayout: React.FC<MainLayoutProps> = ({
       return () => clearTimeout(timer);
     }
   }, [showLoading, loadingDuration]);
+
+  // Initialize WebSocket connection when user is authenticated
+  useEffect(() => {
+    if (!token || !userId) {
+      return;
+    }
+    
+    if (wsConnectedRef.current) {
+      return;
+    }
+
+    const connectWebSocket = async () => {
+      try {
+        await webSocketService.connect(token, userId);
+        wsConnectedRef.current = true;
+      } catch (error) {
+        console.error('❌ MainLayout: WebSocket connection failed:', error);
+        wsConnectedRef.current = false;
+      }
+    };
+
+    connectWebSocket();
+
+    // Cleanup on unmount or when auth changes
+    return () => {
+      if (wsConnectedRef.current) {
+        webSocketService.disconnect();
+        wsConnectedRef.current = false;
+      }
+    };
+  }, [token, userId]);
 
   if (isLoading) {
     return (
@@ -88,12 +138,17 @@ const MainLayout: React.FC<MainLayoutProps> = ({
     <div className="min-h-screen bg-gray-50">
       <div className="flex flex-col h-screen">
         {/* Header */}
-        <Header />
+        <div className="relative z-[1000]">
+          <Header />
+        </div>
 
         {/* Main Content */}
         <main className="flex-1 overflow-y-auto">
           {children || <Outlet />}
         </main>
+
+        {/* Chat Widget - Fixed at bottom right */}
+        <ChatWidget />
       </div>
     </div>
   );

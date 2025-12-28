@@ -1,33 +1,6 @@
 import axiosConfig from "../configurations/axiosConfig";
-
-interface ApiResponse<T = unknown> {
-  data: T;
-  status: string;
-  success: boolean;
-  [key: string]: unknown;
-}
-
-interface PageableResponse<T> {
-  content: T[];
-  pageable: {
-    pageNumber: number;
-    pageSize: number;
-  };
-  totalElements: number;
-  totalPages: number;
-  last: boolean;
-  size: number;
-  number: number;
-  first: boolean;
-  numberOfElements: number;
-  empty: boolean;
-}
-
-interface CreateBlogReviewPayload {
-  blogId: string;
-  content: string;
-  rating?: number; // 1-5 stars, optional
-}
+import type { ApiResponse, PageableResponse } from "../types/common.types";
+import type { BlogReviewResponse, CreateBlogReviewPayload } from "../types/blogReview.types";
 
 // ========== BLOG REVIEW APIs ==========
 

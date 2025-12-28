@@ -40,6 +40,11 @@ const GroupCreateModal: React.FC<GroupCreateModalProps> = ({ setCreateSuccess })
   } | null>(null);
   const [isCreating, setIsCreating] = useState<boolean>(false);
   const [privacy, setPrivacy] = useState<string>("public");
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [customTag, setCustomTag] = useState<string>("");
+
+  // Predefined tags
+  const predefinedTags = ["Phượt", "Review", "Ẩm thực", "Camping"];
 
   // Privacy options
   const privacyOptions: PrivacyOption[] = [
@@ -65,6 +70,8 @@ const GroupCreateModal: React.FC<GroupCreateModalProps> = ({ setCreateSuccess })
     setDescription("");
     setSelectedImage(null);
     setPrivacy("public");
+    setSelectedTags([]);
+    setCustomTag("");
   };
 
   const handleImageSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -99,6 +106,14 @@ const GroupCreateModal: React.FC<GroupCreateModalProps> = ({ setCreateSuccess })
     setSelectedImage(null);
   };
 
+  const toggleTag = (tag: string) => {
+    if (selectedTags.includes(tag)) {
+      setSelectedTags(selectedTags.filter(t => t !== tag));
+    } else {
+      setSelectedTags([...selectedTags, tag]);
+    }
+  };
+
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -118,11 +133,19 @@ const GroupCreateModal: React.FC<GroupCreateModalProps> = ({ setCreateSuccess })
       // Server expects boolean privacy: true -> private, false -> public
       const privacyBool = privacy === 'private';
 
+      // Combine selected tags and custom tag
+      const allTags = [...selectedTags];
+      if (customTag.trim()) {
+        allTags.push(customTag.trim());
+      }
+      const tagsString = allTags.length > 0 ? allTags.join(', ') : undefined;
+
       const response = await apiCreateGroup({
         name: groupName.trim(),
         description: description.trim(),
         privacy: privacyBool,
-        cover: selectedImage?.file
+        cover: selectedImage?.file,
+        tags: tagsString
       });
 
       if (response && response.success) {
@@ -265,6 +288,44 @@ const GroupCreateModal: React.FC<GroupCreateModalProps> = ({ setCreateSuccess })
                   onChange={setPrivacy}
                   options={privacyOptions}
                 />
+              </div>
+
+              {/* Tags Selection */}
+              <div>
+                <label className="block mb-2 text-sm font-medium text-gray-700">
+                  Thể loại nhóm <span className="text-xs text-gray-500">(Tùy chọn)</span>
+                </label>
+                <div className="flex flex-wrap gap-2 mb-3">
+                  {predefinedTags.map((tag) => (
+                    <button
+                      key={tag}
+                      type="button"
+                      onClick={() => toggleTag(tag)}
+                      className={`px-4 py-2 rounded-lg text-sm font-medium transition-all cursor-pointer ${
+                        selectedTags.includes(tag)
+                          ? 'bg-blue-600 text-white shadow-md'
+                          : 'bg-gray-100 text-blue-500 hover:bg-gray-200'
+                      }`}
+                    >
+                      {selectedTags.includes(tag) && (
+                        <Icon icon="fluent:checkmark-24-filled" className="inline w-4 h-4 mr-1" />
+                      )}
+                      #{tag}
+                    </button>
+                  ))}
+                </div>
+                <TravelInput
+                  type="text"
+                  value={customTag}
+                  onChange={(e) => setCustomTag(e.target.value)}
+                  placeholder="Hoặc nhập thể loại khác..."
+                  maxLength={50}
+                />
+                <span className="text-xs text-gray-500 mt-1 block">
+                  {selectedTags.length > 0 && `Đã chọn: ${selectedTags.join(', ')}`}
+                  {selectedTags.length > 0 && customTag.trim() && ' + '}
+                  {customTag.trim()}
+                </span>
               </div>
 
               {/* Image Upload Section */}

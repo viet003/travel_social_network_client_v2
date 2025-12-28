@@ -8,6 +8,7 @@ import {
   FAQPage,
   WatchPage,
   ExplorePage,
+  TripDetailPage,
   VideoDetailPage,
   MediaPostDetailPage,
   MediaWatchDetailPage,
@@ -17,14 +18,22 @@ import {
   UserProfileVideosPage,
   UserProfileReviewsPage,
   UserProfileFriendsPage,
+  AdminDashboardPage,
+  AdminUserManagementPage,
+  AdminBlogManagementPage,
+  AdminGroupManagementPage,
 } from "./pages";
+import SearchResultPage from "./pages/public/SearchGlobalPage";
+import SearchExplorePage from "./pages/public/SearchExplorePage";
 import {
   MainLayout,
   LandingLayout,
   FriendsLayout,
   GroupLayout,
   ExploreLayout,
+  AdminLayout,
 } from "./layout";
+import BlogDetailPage from "./pages/public/blog/BlogDetailPage";
 import {
   FriendsHomePage,
   FriendRequestsPage,
@@ -39,6 +48,7 @@ import {
   GroupSuggestionsPage,
   GroupDetailPage,
 } from "./pages/public/groups";
+import { GroupDetailPage as AdminGroupDetailPage } from "./pages/public/groups";
 import {
   GroupAboutPage,
   GroupDiscussionPage,
@@ -60,7 +70,6 @@ import {
   SeasonalTravelGuidePage,
 } from "./pages/public/explore";
 import BlogCreateEditPage from "./pages/public/blog/BlogCreateEditPage";
-import BlogDetailPage from "./pages/public/blog/BlogDetailPage";
 import {
   LoginForm,
   SignUpForm,
@@ -68,7 +77,7 @@ import {
   ResetPasswordForm,
 } from "./components/auth";
 import { ToastContainer } from "react-toastify";
-import { ProtectedRoute, ProtectedResetRoute } from "./components/index";
+import { ProtectedRoute, ProtectedResetRoute, AdminProtectedRoute } from "./components/index";
 import "./index.css";
 
 function App() {
@@ -169,6 +178,9 @@ function App() {
               element={<SeasonalTravelGuidePage />}
             />
           </Route>
+          <Route path={path.SEARCH} element={<SearchResultPage />} />
+          <Route path={path.EXPLORE_SEARCH} element={<SearchExplorePage />} />
+          <Route path={path.TRIP_DETAIL} element={<TripDetailPage />} />
           <Route path={path.VIDEO_DETAIL} element={<VideoDetailPage />} />
           <Route
             path={path.MEDIA_WATCH_DETAIL}
@@ -204,6 +216,29 @@ function App() {
           <Route path={path.SETTINGS} element={<PrivacyPage />} />
           <Route path={path.FEEDBACK} element={<FAQPage />} />
         </Route>
+
+        {/* Admin Routes */}
+        <Route path={path.ADMIN} element={
+          <AdminProtectedRoute>
+            <AdminLayout />
+          </AdminProtectedRoute>
+        }>
+          <Route index element={<Navigate to={path.ADMIN_DASHBOARD} replace />} />
+          <Route path={path.ADMIN_DASHBOARD} element={<AdminDashboardPage />} />
+          <Route path={path.ADMIN_USERS} element={<AdminUserManagementPage />} />
+          <Route path={path.ADMIN_BLOGS} element={<AdminBlogManagementPage />} />
+          <Route path={path.ADMIN_GROUPS} element={<AdminGroupManagementPage />} />
+          <Route path={path.ADMIN_BLOG_DETAIL} element={<BlogDetailPage />} />
+          <Route path={path.ADMIN_GROUP_DETAIL} element={<AdminGroupDetailPage />}>
+            <Route index element={<GroupDiscussionPage />} />
+            <Route path={path.GROUP_ABOUT} element={<GroupAboutPage />} />
+            <Route path={path.GROUP_MEMBERS} element={<GroupMembersPage />} />
+            <Route path={path.GROUP_MEDIA} element={<GroupMediaPage />} />
+          </Route>
+          <Route path={path.ADMIN_REPORTS} element={<div className="p-8 text-gray-500">Reports Management Module (Coming Soon)</div>} />
+          <Route path={path.ADMIN_SETTINGS} element={<div className="p-8 text-gray-500">System Settings Module (Coming Soon)</div>} />
+        </Route>
+
         <Route path={path.STAR} element={<Navigate to="/" replace />} />
       </Routes>
       <ToastContainer />

@@ -58,3 +58,27 @@ export const formatDate = (dateString: string): string => {
   if (diffInDays < 365) return `${Math.floor(diffInDays / 30)} tháng trước`;
   return `${Math.floor(diffInDays / 365)} năm trước`;
 };
+
+// Format time for chat/conversation (shorter format without "trước")
+export const formatChatTime = (dateTime: string | null | undefined): string => {
+  if (!dateTime) return '';
+  
+  const date = new Date(dateTime);
+  if (isNaN(date.getTime())) return '';
+  
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMs / 3600000);
+  const diffDays = Math.floor(diffMs / 86400000);
+  
+  if (diffMins < 1) {
+    return 'Vừa xong';
+  } else if (diffMins < 60) {
+    return `${diffMins} phút`;
+  } else if (diffHours < 24) {
+    return `${diffHours} giờ`;
+  } else {
+    return `${diffDays} ngày`;
+  }
+};

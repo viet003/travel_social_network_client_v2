@@ -15,7 +15,7 @@ const featuredVideos = [
     id: '550e8400-e29b-41d4-a716-446655440001',
     title: 'Khám phá Hạ Long - Kỳ quan thế giới',
     videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
-    thumbnailUrl: 'https://images.unsplash.com/photo-1559592413-7cec4d0cae2b?w=800',
+    thumbnailUrl: 'https://i.pinimg.com/1200x/ca/85/57/ca8557797ba51454bb35e972a6063f99.jpg',
     author: 'Travel Vietnam',
     views: '125K',
     time: '2 giờ trước'
@@ -24,7 +24,7 @@ const featuredVideos = [
     id: '550e8400-e29b-41d4-a716-446655440002',
     title: 'Phố cổ Hội An về đêm',
     videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
-    thumbnailUrl: 'https://images.unsplash.com/photo-1583417319070-4a69db38a482?w=800',
+    thumbnailUrl: 'https://i.pinimg.com/736x/f5/3d/7d/f53d7d2b3edef915a0baaf49d807a3da.jpg',
     author: 'Discover Quang Nam',
     views: '89K',
     time: '5 giờ trước'
@@ -64,8 +64,8 @@ const recentVideos: WatchResponse[] = [
     watchId: '550e8400-e29b-41d4-a716-446655440101',
     user: {
       userId: 'user-uuid-456',
-      userName: 'Mountain Explorer',
-      avatarImg: 'https://i.pravatar.cc/150?img=3'
+      userName: 'Tà Xùa Trekkers',
+      avatarImg: 'https://i.pinimg.com/736x/7d/8b/de/7d8bde7783ef4aa5de3bee5ee0acfada.jpg'
     },
     title: 'Săn mây Tà Xùa - Trải nghiệm độc đáo',
     description: 'Hành trình săn mây tại Tà Xùa, Yên Bái. Cảnh quan thiên nhiên hùng vĩ và biển mây mờ ảo tạo nên trải nghiệm khó quên.',
@@ -79,7 +79,7 @@ const recentVideos: WatchResponse[] = [
     shareCount: 34,
     viewCount: 45000,
     createdAt: '2024-01-18T08:00:00Z',
-    tags: ['trekking', 'mountain', 'cloud', 'adventure'],
+    tags: ['chill', 'taxua', 'sanmay'],
     liked: false,
     watched: false
   },

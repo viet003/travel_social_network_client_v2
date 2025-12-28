@@ -1,12 +1,6 @@
 import axiosConfig from "../configurations/axiosConfig";
-import type { ApiResponse } from "../types/post.types";
-
-export interface TagResponse {
-  tagId: number;
-  title: string;
-  slug: string;
-  createdAt: string;
-}
+import type { ApiResponse } from "../types/common.types";
+import type { TagResponse } from "../types/tag.types";
 
 /**
  * Search tags

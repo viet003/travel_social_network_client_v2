@@ -1,7 +1,8 @@
 import React from 'react';
 import { Icon } from '@iconify/react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { apiGetGroupById, type GroupResponse } from '../../../../services/groupService';
+import { apiGetGroupById } from '../../../../services/groupService';
+import type { GroupResponse } from '../../../../types/group.types';
 import { toast } from 'react-toastify';
 
 const GroupAboutPage: React.FC = () => {

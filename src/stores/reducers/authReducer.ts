@@ -8,8 +8,10 @@ const initState = {
     lastName: null,
     avatar: null,
     cover: null,
+    role: null,
     isLoggedIn: false,
     token: null,
+    refreshToken: null,
     msg: '',
 };
 
@@ -25,8 +27,10 @@ const authReducer = (state = initState, action: any) => {
                 lastName: action?.data?.userProfile?.lastName,
                 avatar: action?.data?.avatarImg,
                 cover: action?.data?.coverImg,
+                role: action?.data?.role,
                 isLoggedIn: true,
                 token: action?.data?.token,
+                refreshToken: action?.data?.refreshToken,
                 msg: '',
             };
         case actionTypes.LOGIN_FAIL:
@@ -39,8 +43,10 @@ const authReducer = (state = initState, action: any) => {
                 lastName: null,
                 avatar: null,
                 cover: null,
+                role: null,
                 isLoggedIn: false,
                 token: null,
+                refreshToken: null,
                 msg: action?.data?.msg ? action?.data?.msg : '',
             };
         case actionTypes.LOGOUT:
@@ -53,8 +59,10 @@ const authReducer = (state = initState, action: any) => {
                 lastName: null,
                 avatar: null,
                 cover: null,
+                role: null,
                 isLoggedIn: false,
                 token: null,
+                refreshToken: null,
                 msg: '',
             };
         case actionTypes.CHECK_AUTH_STATUS:
@@ -67,6 +75,7 @@ const authReducer = (state = initState, action: any) => {
                 lastName: null,
                 avatar: null,
                 cover: null,
+                role: null,
                 isLoggedIn: !!action?.data?.token,
                 token: action?.data?.token || null,
                 msg: action?.data?.msg || '',

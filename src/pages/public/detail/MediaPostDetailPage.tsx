@@ -19,24 +19,11 @@ import avatardf from "../../../assets/images/avatar_default.png";
 import { apiGetCommentsByPostId } from "../../../services/commentService";
 import { apiGetPostById } from "../../../services/postService";
 import type { PostResponse } from "../../../types/post.types";
+import type { CommentResponse } from "../../../types/comment.types";
 import type { RootState } from "../../../stores/types/storeTypes";
 import { formatTimeAgo, formatPrivacy } from "../../../utilities/helper";
 import "../../../styles/swiper-custom.css";
 import "../../../styles/post-modal.css";
-
-interface Comment {
-  id?: string;
-  commentId?: string;
-  avatarImg?: string;
-  firstName?: string;
-  lastName?: string;
-  fullName?: string;
-  content: string;
-  createdAt: string;
-  replyCount?: number;
-  level?: number;
-  parentCommentId?: string;
-}
 
 const MediaPostDetailPage: React.FC = () => {
   const { postId, mediaId } = useParams<{ postId: string; mediaId: string }>();
@@ -48,11 +35,11 @@ const MediaPostDetailPage: React.FC = () => {
   const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
   const swiperRef = useRef<SwiperType | null>(null);
 
-  const [comments, setComments] = useState<Comment[]>([]);
+  const [comments, setComments] = useState<CommentResponse[]>([]);
   const [commentPage, setCommentPage] = useState<number>(0);
   const [hasMoreComments, setHasMoreComments] = useState<boolean>(true);
   const [loadingComments, setLoadingComments] = useState<boolean>(false);
-  const [newComment, setNewComment] = useState<Comment | null>(null);
+  const [newComment, setNewComment] = useState<CommentResponse | null>(null);
   const [commentSort, setCommentSort] = useState<SortOption>("most_relevant");
 
   const [isLiked, setIsLiked] = useState<boolean>(false);
@@ -627,7 +614,7 @@ const MediaPostDetailPage: React.FC = () => {
                   <>
                     {comments.map((comment, idx) => (
                       <div
-                        key={comment.id || comment.commentId || idx}
+                        key={comment.commentId || idx}
                         ref={
                           comments.length === idx + 1
                             ? lastCommentElementRef
@@ -651,7 +638,7 @@ const MediaPostDetailPage: React.FC = () => {
                           onCommentDeleted={(deletedId) => {
                             setComments((prev) =>
                               prev.filter(
-                                (c) => (c.id || c.commentId) !== deletedId
+                                (c) => c.commentId !== deletedId
                               )
                             );
                             handleCommentDeleted();
@@ -677,7 +664,7 @@ const MediaPostDetailPage: React.FC = () => {
             <CommentCreateModal
               postId={postData.postId}
               handleComment={() => {}}
-              setNewComment={(comment: Comment) => setNewComment(comment)}
+              setNewComment={(comment: CommentResponse) => setNewComment(comment)}
               currentUserAvatar={auth.avatar || avatardf}
               setLoading={setLoadingComments}
             />

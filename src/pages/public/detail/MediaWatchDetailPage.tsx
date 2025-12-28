@@ -17,22 +17,9 @@ import { apiGetCommentsByWatchId } from "../../../services/commentService";
 import { apiGetWatchById, apiAddToHistory } from "../../../services/watchService";
 import type { RootState } from "../../../stores/types/storeTypes";
 import { formatTimeAgo, formatPrivacy } from "../../../utilities/helper";
-import type { WatchResponse } from "../../../types/video.types";
+import type { WatchResponse } from "../../../types/watch.types";
+import type { CommentResponse } from "../../../types/comment.types";
 import "../../../styles/post-modal.css";
-
-interface Comment {
-  id?: string;
-  commentId?: string;
-  avatarImg?: string;
-  firstName?: string;
-  lastName?: string;
-  fullName?: string;
-  content: string;
-  createdAt: string;
-  replyCount?: number;
-  level?: number;
-  parentCommentId?: string;
-}
 
 const MediaWatchDetailPage: React.FC = () => {
   const { watchId } = useParams<{ watchId: string }>();
@@ -42,11 +29,11 @@ const MediaWatchDetailPage: React.FC = () => {
   const [watchData, setWatchData] = useState<WatchResponse | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const [comments, setComments] = useState<Comment[]>([]);
+  const [comments, setComments] = useState<CommentResponse[]>([]);
   const [commentPage, setCommentPage] = useState<number>(0);
   const [hasMoreComments, setHasMoreComments] = useState<boolean>(true);
   const [loadingComments, setLoadingComments] = useState<boolean>(false);
-  const [newComment, setNewComment] = useState<Comment | null>(null);
+  const [newComment, setNewComment] = useState<CommentResponse | null>(null);
   const [commentSort, setCommentSort] = useState<SortOption>("most_relevant");
 
   const [isLiked, setIsLiked] = useState<boolean>(false);
@@ -68,7 +55,6 @@ const MediaWatchDetailPage: React.FC = () => {
       try {
         await apiAddToHistory(watchId);
         hasTrackedView.current = true;
-        console.log("Video added to history");
       } catch (error) {
         console.error("Error adding to history:", error);
       }
@@ -270,7 +256,7 @@ const MediaWatchDetailPage: React.FC = () => {
               <div className="flex items-center space-x-2">
                 <img
                   src={watchData.user?.avatarImg || avatardf}
-                  alt={watchData.user?.fullName || watchData.user?.userName}
+                  alt={watchData.user?.userProfile?.fullName || watchData.user?.userName}
                   className="w-10 h-10 rounded-full object-cover cursor-pointer"
                   onClick={() =>
                     navigate(`/home/user/${watchData.user?.userId}`)
@@ -283,7 +269,7 @@ const MediaWatchDetailPage: React.FC = () => {
                       navigate(`/home/user/${watchData.user?.userId}`)
                     }
                   >
-                    {watchData.user?.fullName || watchData.user?.userName}
+                    {watchData.user?.userProfile?.fullName || watchData.user?.userName}
                   </h2>
                   <div className="flex items-center gap-1 text-xs text-gray-500">
                     <span>{formatTimeAgo(watchData.createdAt)}</span>
@@ -396,7 +382,7 @@ const MediaWatchDetailPage: React.FC = () => {
             <div className="flex items-start space-x-3 mb-3">
               <img
                 src={watchData.user?.avatarImg || avatardf}
-                alt={watchData.user?.fullName || watchData.user?.userName}
+                alt={watchData.user?.userProfile?.fullName || watchData.user?.userName}
                 className="w-10 h-10 rounded-full object-cover cursor-pointer flex-shrink-0"
                 onClick={() => navigate(`/home/user/${watchData.user?.userId}`)}
               />
@@ -409,7 +395,7 @@ const MediaWatchDetailPage: React.FC = () => {
                         navigate(`/home/user/${watchData.user?.userId}`)
                       }
                     >
-                      {watchData.user?.fullName || watchData.user?.userName}
+                      {watchData.user?.userProfile?.fullName || watchData.user?.userName}
                     </span>
                     {watchData.location && (
                       <>
@@ -572,7 +558,7 @@ const MediaWatchDetailPage: React.FC = () => {
                   <>
                     {comments.map((comment, idx) => (
                       <div
-                        key={comment.id || comment.commentId || idx}
+                        key={comment.commentId || idx}
                         ref={
                           comments.length === idx + 1
                             ? lastCommentElementRef
@@ -584,19 +570,12 @@ const MediaWatchDetailPage: React.FC = () => {
                           level={0}
                           maxLevel={2}
                           watchId={watchData.watchId}
-                          onReply={(parentId, content) => {
-                            console.log(
-                              "Reply to:",
-                              parentId,
-                              "Content:",
-                              content
-                            );
-                          }}
+                          onReply={() => {}}
                           onCommentCreated={handleCommentCountChange}
                           onCommentDeleted={(deletedId) => {
                             setComments((prev) =>
                               prev.filter(
-                                (c) => (c.id || c.commentId) !== deletedId
+                                (c) => c.commentId !== deletedId
                               )
                             );
                             handleCommentDeleted();
@@ -623,7 +602,7 @@ const MediaWatchDetailPage: React.FC = () => {
             <CommentCreateModal
               watchId={watchData.watchId}
               handleComment={() => {}}
-              setNewComment={(comment: Comment) => setNewComment(comment)}
+              setNewComment={(comment: CommentResponse) => setNewComment(comment)}
               currentUserAvatar={auth.avatar || avatardf}
               setLoading={setLoadingComments}
             />

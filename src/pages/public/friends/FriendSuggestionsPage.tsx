@@ -126,7 +126,7 @@ const FriendSuggestionsPage: React.FC = () => {
                 label: 'Gỡ',
                 onClick: () => handleRemoveSuggestion(suggestion.friendProfile.userId || '')
               }}
-              onCardClick={() => console.log('View profile', suggestion.friendProfile.userId)}
+              onCardClick={() => {}}
             />
           ))}
         </div>

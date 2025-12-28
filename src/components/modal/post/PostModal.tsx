@@ -134,14 +134,7 @@ const PostModal: React.FC<PostModalProps> = ({
 
   const navigate = useNavigate();
 
-  // Debug logging
-  console.log("PostModal render:", {
-    isShare,
-    hasSharedPost: !!sharedPost,
-    sharedPost,
-  });
-
-  // Process mediaList to separate images and videos
+  // Debug logging  // Process mediaList to separate images and videos
   const imageMedia = updatedMediaList.filter((media) => media.type === "IMAGE");
   const videoMedia = updatedMediaList.filter((media) => media.type === "VIDEO");
 
@@ -444,9 +437,7 @@ const PostModal: React.FC<PostModalProps> = ({
               src={avatar || avatardf}
               alt="avatar"
               className="absolute -bottom-1 -right-1 w-6 h-6 sm:w-7 sm:h-7 object-cover rounded-full border-2 border-white cursor-pointer"
-              onClick={() => {
-                console.log(userId);
-                navigate(`/home/user/${userId}`);
+              onClick={() => {                navigate(`/home/user/${userId}`);
               }}
             />
           </div>
@@ -587,9 +578,7 @@ const PostModal: React.FC<PostModalProps> = ({
               src={avatar || avatardf}
               alt="avatar"
               className="object-cover w-8 h-8 sm:w-10 sm:h-10 rounded-full cursor-pointer flex-shrink-0"
-              onClick={() => {
-                console.log(userId);
-                navigate(`/home/user/${userId}`);
+              onClick={() => {                navigate(`/home/user/${userId}`);
               }}
             />
             <div className="flex flex-col flex-1 min-w-0">

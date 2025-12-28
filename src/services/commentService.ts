@@ -1,17 +1,6 @@
 import axiosConfig from "../configurations/axiosConfig";
-
-interface ApiResponse<T = any> {
-  data: T;
-  status: string;
-  [key: string]: any;
-}
-
-interface CreateCommentPayload {
-  postId?: string;
-  watchId?: string;
-  content: string;
-  parentCommentId?: string;
-}
+import type { ApiResponse, PageableResponse } from "../types/common.types";
+import type { CreateCommentPayload, CommentResponse } from "../types/comment.types";
 
 // ========== NEW APIs WITH MEANINGFUL NAMES ==========
 
@@ -19,7 +8,7 @@ export const apiGetCommentsByPostId = async (
   postId: string, 
   page: number, 
   sort?: 'newest' | 'oldest' | 'most_relevant'
-): Promise<ApiResponse> => {
+): Promise<ApiResponse<PageableResponse<CommentResponse>>> => {
   try {
     let url = `comment/post/${postId}?page=${page}`;
     if (sort) {
@@ -39,7 +28,7 @@ export const apiGetCommentsByWatchId = async (
   watchId: string, 
   page: number, 
   sort?: 'newest' | 'oldest' | 'most_relevant'
-): Promise<ApiResponse> => {
+): Promise<ApiResponse<PageableResponse<CommentResponse>>> => {
   try {
     let url = `comment/watch/${watchId}?page=${page}`;
     if (sort) {
@@ -55,7 +44,7 @@ export const apiGetCommentsByWatchId = async (
   }
 };
 
-export const apiGetRepliesByCommentId = async (commentId: string, page: number): Promise<ApiResponse> => {
+export const apiGetRepliesByCommentId = async (commentId: string, page: number): Promise<ApiResponse<PageableResponse<CommentResponse>>> => {
   try {
     const response = await axiosConfig({
       method: 'GET',
@@ -67,7 +56,7 @@ export const apiGetRepliesByCommentId = async (commentId: string, page: number):
   }
 };
 
-export const apiCreateCommentForContent = async (payload: CreateCommentPayload): Promise<ApiResponse> => {
+export const apiCreateCommentForContent = async (payload: CreateCommentPayload): Promise<ApiResponse<CommentResponse>> => {
   try {
     const response = await axiosConfig({
       method: 'POST',
@@ -83,7 +72,7 @@ export const apiCreateCommentForContent = async (payload: CreateCommentPayload):
   }
 };
 
-export const apiUpdateCommentContent = async (commentId: string, content: string): Promise<ApiResponse> => {
+export const apiUpdateCommentContent = async (commentId: string, content: string): Promise<ApiResponse<CommentResponse>> => {
   try {
     const response = await axiosConfig({
       method: 'PATCH',
@@ -99,7 +88,7 @@ export const apiUpdateCommentContent = async (commentId: string, content: string
   }
 };
 
-export const apiDeleteCommentById = async (commentId: string): Promise<ApiResponse> => {
+export const apiDeleteCommentById = async (commentId: string): Promise<ApiResponse<void>> => {
   try {
     const response = await axiosConfig({
       method: 'DELETE',
@@ -114,7 +103,7 @@ export const apiDeleteCommentById = async (commentId: string): Promise<ApiRespon
   }
 };
 
-export const apiToggleLikeOnComment = async (commentId: string): Promise<ApiResponse> => {
+export const apiToggleLikeOnComment = async (commentId: string): Promise<ApiResponse<CommentResponse>> => {
   try {
     const response = await axiosConfig({
       method: 'PUT',

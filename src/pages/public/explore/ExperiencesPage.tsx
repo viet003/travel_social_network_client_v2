@@ -43,9 +43,7 @@ const ExperiencesPage = () => {
       
       observer.current = new IntersectionObserver(
         (entries) => {
-          if (entries[0].isIntersecting && hasMore) {
-            console.log('Reached end of blogs, loading more...');
-            setPage((prevPage) => prevPage + 1);
+          if (entries[0].isIntersecting && hasMore) {            setPage((prevPage) => prevPage + 1);
           }
         },
         { 

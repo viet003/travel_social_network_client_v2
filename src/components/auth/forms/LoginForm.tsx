@@ -7,7 +7,7 @@ import { path } from '../../../utilities/path';
 import { GoogleLoginButton, FacebookLoginButton } from '../buttons';
 import { TravelInput, TravelButton, TravelCheckbox } from '../../ui/customize';
 import { LoadingSpinner } from '../../ui/loading';
-import { background } from '../../../assets/images';
+import  travel_vietnam  from '../../../assets/images/travel_vietnam.png';
 
 const LoginForm = () => {
   const [email, setEmail] = useState('');
@@ -183,7 +183,7 @@ const LoginForm = () => {
             />
           ) : null}
           <img
-            src={background}
+            src={travel_vietnam}
             alt="Social Network"
             className={`w-full h-auto rounded-3xl object-cover ${imageLoading ? 'hidden' : 'block'}`}
             onLoad={handleImageLoad}
