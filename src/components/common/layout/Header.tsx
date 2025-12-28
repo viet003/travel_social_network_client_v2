@@ -67,7 +67,7 @@ const Header: React.FC = () => {
   const location = useLocation();
   
   // Get unread notification count from hook
-  const { unreadCount } = useNotification();
+  const { unreadCount, refreshUnreadCount } = useNotification();
   
   // Get unread messages status from hook
   const { hasUnreadMessages, clearUnreadMessages } = useUnreadMessages();
@@ -176,7 +176,7 @@ const Header: React.FC = () => {
 
           {/* Search Results Dropdown - Di chuyển vào trong search bar container */}
           {showSearchResults && (
-            <div className="fixed top-0 left-0 z-50">
+            <div className="fixed top-0 left-0 z-[1000]">
               <SearchResultDropdown 
                 searchQuery={searchQuery}
                 onClose={() => {
@@ -236,7 +236,7 @@ const Header: React.FC = () => {
         <div className="flex items-center space-x-2 flex-1 justify-end max-w-md">
           {/* Menu Icon with Create Dropdown */}
           <TravelTooltip title="Menu">
-            <div className="relative" data-create-container>
+            <div className="relative z-[1000]" data-create-container>
               <button 
                 className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center hover:bg-gray-300 transition-colors duration-200 cursor-pointer"
                 onClick={() => setShowCreateDropdown(!showCreateDropdown)}
@@ -253,7 +253,7 @@ const Header: React.FC = () => {
 
           {/* Messenger Icon with Dropdown */}
           <TravelTooltip title="Đoạn chat">
-            <div className="relative" data-chat-container>
+            <div className="relative z-[1000]" data-chat-container>
               <button 
                 className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center hover:bg-gray-300 transition-colors duration-200 cursor-pointer relative"
                 onClick={() => {
@@ -280,7 +280,7 @@ const Header: React.FC = () => {
 
           {/* Notifications Icon with Dropdown */}
           <TravelTooltip title="Thông báo">
-            <div className="relative" data-notification-container>
+            <div className="relative z-[1000]" data-notification-container>
               <button 
                 className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center hover:bg-gray-300 transition-colors duration-200 cursor-pointer relative"
                 onClick={() => setShowNotificationsDropdown(!showNotificationsDropdown)}
@@ -296,14 +296,17 @@ const Header: React.FC = () => {
 
               {/* Notifications Dropdown */}
               {showNotificationsDropdown && (
-                <NotificationsDropdown onClose={() => setShowNotificationsDropdown(false)} />
+                <NotificationsDropdown 
+                  onClose={() => setShowNotificationsDropdown(false)}
+                  onUnreadCountChange={refreshUnreadCount}
+                />
               )}
             </div>
           </TravelTooltip>
 
           {/* Profile Picture with Dropdown */}
           <TravelTooltip title="Tài khoản">
-            <div className="relative" data-profile-container>
+            <div className="relative z-[1000]" data-profile-container>
               <button 
                 className="w-10 h-10 rounded-full hover:opacity-80 transition-opacity duration-200 cursor-pointer relative"
                 onClick={() => setShowProfileDropdown(!showProfileDropdown)}

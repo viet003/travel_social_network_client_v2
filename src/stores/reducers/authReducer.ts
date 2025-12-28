@@ -11,6 +11,7 @@ const initState = {
     role: null,
     isLoggedIn: false,
     token: null,
+    refreshToken: null,
     msg: '',
 };
 
@@ -29,6 +30,7 @@ const authReducer = (state = initState, action: any) => {
                 role: action?.data?.role,
                 isLoggedIn: true,
                 token: action?.data?.token,
+                refreshToken: action?.data?.refreshToken,
                 msg: '',
             };
         case actionTypes.LOGIN_FAIL:
@@ -44,6 +46,7 @@ const authReducer = (state = initState, action: any) => {
                 role: null,
                 isLoggedIn: false,
                 token: null,
+                refreshToken: null,
                 msg: action?.data?.msg ? action?.data?.msg : '',
             };
         case actionTypes.LOGOUT:
@@ -59,6 +62,7 @@ const authReducer = (state = initState, action: any) => {
                 role: null,
                 isLoggedIn: false,
                 token: null,
+                refreshToken: null,
                 msg: '',
             };
         case actionTypes.CHECK_AUTH_STATUS:

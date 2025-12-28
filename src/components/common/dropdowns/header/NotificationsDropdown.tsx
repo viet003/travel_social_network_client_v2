@@ -10,9 +10,10 @@ import avatarDefault from '../../../../assets/images/avatar_default.png';
 
 interface NotificationsDropdownProps {
   onClose?: () => void;
+  onUnreadCountChange?: () => void;
 }
 
-const NotificationsDropdown: React.FC<NotificationsDropdownProps> = ({ onClose }) => {
+const NotificationsDropdown: React.FC<NotificationsDropdownProps> = ({ onClose, onUnreadCountChange }) => {
   const [activeTab, setActiveTab] = useState('Tất cả');
   const navigate = useNavigate();
   
@@ -66,6 +67,7 @@ const NotificationsDropdown: React.FC<NotificationsDropdownProps> = ({ onClose }
     // Mark as read
     if (!notification.read) {
       await markAsRead(notification.notificationId);
+      onUnreadCountChange?.();
     }
 
     // Navigate based on notification type
@@ -144,6 +146,7 @@ const NotificationsDropdown: React.FC<NotificationsDropdownProps> = ({ onClose }
   // Handle mark all as read
   const handleMarkAllAsRead = async () => {
     await markAllAsRead();
+    onUnreadCountChange?.();
   };
 
   // Handle click outside to close dropdown
@@ -173,7 +176,7 @@ const NotificationsDropdown: React.FC<NotificationsDropdownProps> = ({ onClose }
 
   return (
     <div 
-      className="absolute top-full right-0 mt-2 p-2 w-[360px] bg-white border border-gray-200 rounded-2xl shadow-xl z-50 max-h-[calc(100vh-80px)] flex flex-col"
+      className="absolute top-full right-0 mt-2 p-2 w-[360px] bg-white border border-gray-200 rounded-2xl shadow-xl max-h-[calc(100vh-80px)] flex flex-col z-[1001]"
       data-notification-container
     >
       {/* Notifications Header */}

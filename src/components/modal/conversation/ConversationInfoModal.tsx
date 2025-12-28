@@ -9,9 +9,12 @@ import {
   apiGetConversationMedia,
   apiUpdateGroupAvatar,
   apiRemoveMembersFromConversation,
+  apiDeleteConversation,
+  apiGetConversationById,
 } from "../../../services/conversationService";
 import { setActiveConversation } from "../../../stores/actions/conversationAction";
 import AddMembersModal from "../../modal/conversation/AddMembersModal";
+import CreateConversationModal from "../../modal/conversation/CreateConversationModal";
 import ConfirmDeleteModal from "../../modal/confirm/ConfirmDeleteModal";
 import avatardf from "../../../assets/images/avatar_default.png";
 import { path } from "../../../utilities/path";
@@ -20,6 +23,7 @@ interface ConversationInfoModalProps {
   conversation: ConversationResponse;
   isOpen: boolean;
   onClose: () => void;
+  onConversationUpdated?: (updatedConversation: ConversationResponse) => void;
 }
 
 interface MediaItem {
@@ -43,6 +47,7 @@ const ConversationInfoModal: React.FC<ConversationInfoModalProps> = ({
   conversation,
   isOpen,
   onClose,
+  onConversationUpdated,
 }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -58,6 +63,8 @@ const ConversationInfoModal: React.FC<ConversationInfoModalProps> = ({
   const [memberToRemove, setMemberToRemove] = useState<MemberItem | null>(null);
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const [isRemovingMember, setIsRemovingMember] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const avatarInputRef = useRef<HTMLInputElement>(null);
 
   const loadMembers = useCallback(async () => {
@@ -462,6 +469,31 @@ const ConversationInfoModal: React.FC<ConversationInfoModalProps> = ({
                   Tìm kiếm trong cuộc trò chuyện
                 </span>
               </button>
+              {conversation.type === "GROUP" && (
+                <>
+                  <button
+                    onClick={() => setShowEditModal(true)}
+                    className="w-full flex items-center gap-3 px-3 py-2 hover:bg-gray-50 rounded-lg transition-colors text-left cursor-pointer"
+                  >
+                    <Icon icon="fluent:edit-24-regular" className="w-5 h-5 text-blue-600" />
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-gray-900">Chỉnh sửa nhóm</p>
+                      <p className="text-xs text-gray-500">Thay đổi tên nhóm</p>
+                    </div>
+                  </button>
+
+                  <button
+                    onClick={() => setShowDeleteConfirm(true)}
+                    className="w-full flex items-center gap-3 px-3 py-2 hover:bg-red-50 rounded-lg transition-colors text-left cursor-pointer"
+                  >
+                    <Icon icon="fluent:delete-24-regular" className="w-5 h-5 text-red-600" />
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-red-600">Xóa nhóm</p>
+                      <p className="text-xs text-red-400">Xóa vĩnh viễn nhóm chat</p>
+                    </div>
+                  </button>
+                </>
+              )}
               {conversation.type === "PRIVATE" && (
                 <button className="w-full flex items-center gap-3 px-3 py-2 hover:bg-red-50 rounded-lg transition-colors text-left cursor-pointer">
                   <Icon icon="lucide:user-x" className="w-5 h-5 text-red-600" />
@@ -495,6 +527,49 @@ const ConversationInfoModal: React.FC<ConversationInfoModalProps> = ({
         customTitle="Xóa thành viên khỏi nhóm"
         customWarning="Thành viên này sẽ bị xóa khỏi nhóm và không thể nhận tin nhắn mới. Bạn có thể thêm lại họ sau."
         isDeleting={isRemovingMember}
+      />
+
+      {/* Edit Group Name Modal */}
+      <CreateConversationModal
+        isOpen={showEditModal}
+        onClose={() => setShowEditModal(false)}
+        onConversationUpdated={async () => {
+          try {
+            // Reload conversation data
+            const response = await apiGetConversationById(conversation.conversationId);
+            const updatedConversation = response.data;
+            
+            setShowEditModal(false);
+            antdMessage.success("Đã cập nhật tên nhóm");
+            
+            // Notify parent component to update conversation list
+            onConversationUpdated?.(updatedConversation);
+          } catch (error) {
+            console.error("Failed to reload conversation:", error);
+          }
+        }}
+        editMode={true}
+        conversation={conversation}
+      />
+
+      {/* Delete Conversation Confirmation */}
+      <ConfirmDeleteModal
+        isOpen={showDeleteConfirm}
+        onClose={() => setShowDeleteConfirm(false)}
+        onConfirm={async () => {
+          try {
+            await apiDeleteConversation(conversation.conversationId);
+            antdMessage.success("Đã xóa nhóm chat");
+            setShowDeleteConfirm(false);
+            onClose();
+          } catch (error) {
+            antdMessage.error("Không thể xóa nhóm chat");
+          }
+        }}
+        type="custom"
+        itemName={conversation.conversationName || "nhóm chat"}
+        customTitle="Xóa nhóm chat"
+        customWarning="Nhóm chat này sẽ bị xóa vĩnh viễn. Tất cả tin nhắn và thành viên sẽ bị xóa. Hành động này không thể hoàn tác."
       />
     </>
   );

@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { Icon } from "@iconify/react";
 import { message as antdMessage } from "antd";
 import type { RootState } from "../../../stores/types/storeTypes";
-import { setActiveConversation } from "../../../stores/actions/conversationAction";
+import { setActiveConversation, updateConversation } from "../../../stores/actions/conversationAction";
 import ConversationInfoModal from "../../modal/conversation/ConversationInfoModal";
 import ChatBody from "./ChatBody";
 import avatardf from "../../../assets/images/avatar_default.png";
@@ -647,7 +647,7 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ onClose }) => {
   // If we have ID but no conversation data yet, show loading state
   if (!activeConversation) {
     return (
-      <div className="fixed bottom-0 right-6 z-50 flex flex-col w-[400px] max-h-[600px] bg-white rounded-t-lg shadow-2xl border border-gray-200">
+      <div className="fixed bottom-0 right-6 z-[10] flex flex-col w-[400px] max-h-[600px] bg-white rounded-t-lg shadow-2xl border border-gray-200">
         <div className="flex items-center justify-between px-4 py-3 rounded-t-lg bg-pink-500">
           <div className="flex items-center gap-3 flex-1">
             <div className="text-white font-semibold text-sm">Đang tải...</div>
@@ -676,12 +676,16 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ onClose }) => {
         conversation={activeConversation}
         isOpen={showInfoModal}
         onClose={() => setShowInfoModal(false)}
+        onConversationUpdated={(updatedConversation) => {
+          // Update conversation in Redux store
+          dispatch(updateConversation(updatedConversation));
+        }}
       />
     );
   }
 
   return (
-    <div className="fixed bottom-0 right-6 z-50 flex flex-col max-w-[400px] w-full bg-white max-h-[560px] rounded-t-lg shadow-2xl border border-gray-200">
+    <div className="fixed bottom-0 right-6 z-[50] flex flex-col max-w-[400px] w-full bg-white max-h-[560px] rounded-t-lg shadow-2xl border border-gray-200">
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 rounded-t-lg" style={{ backgroundColor: '#0866ff' }}>
         <div className="flex items-center gap-3 flex-1 min-w-0">

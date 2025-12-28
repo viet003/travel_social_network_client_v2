@@ -11,6 +11,8 @@ class WebSocketService {
   private reconnectAttempts = 0;
   private maxReconnectAttempts = 5;
   private reconnectDelay = 3000;
+  private currentToken: string | null = null;
+  private currentUserId: string | null = null;
 
   /**
    * Khởi tạo kết nối WebSocket với STOMP over SockJS
@@ -18,6 +20,9 @@ class WebSocketService {
    * @param userId - User ID for subscription
    */
   connect(token: string, userId: string): Promise<void> {
+    // Store current credentials for reconnection
+    this.currentToken = token;
+    this.currentUserId = userId;
     return new Promise((resolve, reject) => {
       if (this.client?.connected) {
         console.log('✅ WebSocket already connected');
@@ -485,6 +490,34 @@ class WebSocketService {
   }
 
   /**
+   * Update token and reconnect WebSocket with new token
+   * Should be called when token is refreshed
+   * @param newToken - New JWT token
+   */
+  updateToken(newToken: string) {
+    if (!this.currentUserId) {
+      console.warn('⚠️ Cannot update token: No userId stored');
+      return;
+    }
+
+    console.log('🔄 Token updated, reconnecting WebSocket...');
+    this.currentToken = newToken;
+    
+    // Disconnect current connection
+    if (this.client?.connected) {
+      this.client.deactivate();
+    }
+    
+    // Reset reconnection attempts
+    this.reconnectAttempts = 0;
+    
+    // Reconnect with new token
+    this.connect(newToken, this.currentUserId).catch(error => {
+      console.error('❌ Failed to reconnect with new token:', error);
+    });
+  }
+
+  /**
    * Disconnect WebSocket
    */
   disconnect() {
@@ -494,6 +527,8 @@ class WebSocketService {
     }
     this.messageHandlers.clear();
     this.reconnectAttempts = 0;
+    this.currentToken = null;
+    this.currentUserId = null;
   }
 
   /**

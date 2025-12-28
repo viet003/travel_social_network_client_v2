@@ -280,7 +280,7 @@ const UserItinerariesPage = () => {
             <div
               key={trip.tripId}
               onClick={() => navigate(`${path.HOME}/${path.TRIP_DETAIL.replace(':tripId', trip.tripId)}`)}
-              className="group bg-white rounded-2xl border border-gray-100 overflow-hidden cursor-pointer hover:shadow-lg hover:border-gray-200 transition-all duration-300 flex flex-col md:flex-row max-h-[250px]"
+              className="group bg-white rounded-2xl border border-gray-100 overflow-hidden cursor-pointer hover:shadow-lg hover:border-gray-200 transition-all duration-300 flex flex-col md:flex-row max-h-[300px]"
             >
               {/* Image Section */}
               <div className="md:w-72 h-56 md:h-auto relative overflow-hidden bg-gray-100 flex-shrink-0">

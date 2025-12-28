@@ -138,7 +138,9 @@ const MainLayout: React.FC<MainLayoutProps> = ({
     <div className="min-h-screen bg-gray-50">
       <div className="flex flex-col h-screen">
         {/* Header */}
-        <Header />
+        <div className="relative z-[1000]">
+          <Header />
+        </div>
 
         {/* Main Content */}
         <main className="flex-1 overflow-y-auto">

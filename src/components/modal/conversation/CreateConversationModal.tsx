@@ -1,20 +1,28 @@
 import React, { useState, useEffect } from "react";
 import { Icon } from "@iconify/react";
 import { apiGetMyFriends } from "../../../services/friendshipService";
-import { apiCreateGroupConversation } from "../../../services/conversationService";
+import { apiCreateGroupConversation, apiUpdateGroupName, apiGetConversationMembers } from "../../../services/conversationService";
 import type { UserResponse } from "../../../types/friendship.types";
+import type { ConversationResponse } from "../../../types/conversation.types";
 import avatardf from "../../../assets/images/avatar_default.png";
 
 interface CreateConversationModalProps {
   isOpen: boolean;
   onClose: () => void;
   onConversationCreated?: (conversationId: string) => void;
+  onConversationUpdated?: () => void;
+  // Edit mode props
+  editMode?: boolean;
+  conversation?: ConversationResponse;
 }
 
 const CreateConversationModal: React.FC<CreateConversationModalProps> = ({
   isOpen,
   onClose,
   onConversationCreated,
+  onConversationUpdated,
+  editMode = false,
+  conversation,
 }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [friends, setFriends] = useState<UserResponse[]>([]);
@@ -23,12 +31,18 @@ const CreateConversationModal: React.FC<CreateConversationModalProps> = ({
   const [loading, setLoading] = useState(false);
   const [creating, setCreating] = useState(false);
 
-  // Fetch friends list
+  // Initialize data for edit mode
   useEffect(() => {
     if (isOpen) {
-      fetchFriends();
+      if (editMode && conversation) {
+        setGroupName(conversation.conversationName || "");
+        // Không cần fetch members vì edit mode chỉ sửa tên
+      } else {
+        setGroupName("");
+        fetchFriends();
+      }
     }
-  }, [isOpen]);
+  }, [isOpen, editMode, conversation]);
 
   const fetchFriends = async () => {
     setLoading(true);
@@ -63,22 +77,41 @@ const CreateConversationModal: React.FC<CreateConversationModalProps> = ({
     });
   };
 
-  // Handle create conversation
-  const handleCreate = async () => {
-    if (selectedUsers.length < 1) {
-      alert("Vui lòng chọn ít nhất 1 người để tạo nhóm chat");
+  // Handle create/update conversation
+  const handleSubmit = async () => {
+    if (!groupName.trim()) {
+      alert("Vui lòng nhập tên nhóm");
       return;
     }
 
-    if (!groupName.trim()) {
-      alert("Vui lòng nhập tên nhóm");
+    // Edit mode - chỉ update tên
+    if (editMode && conversation) {
+      setCreating(true);
+      try {
+        await apiUpdateGroupName(conversation.conversationId, groupName.trim());
+        if (onConversationUpdated) {
+          onConversationUpdated();
+        }
+        handleClose();
+      } catch (error) {
+        console.error("Failed to update conversation:", error);
+        alert("Không thể cập nhật tên nhóm");
+      } finally {
+        setCreating(false);
+      }
+      return;
+    }
+
+    // Create mode - cần chọn members
+    if (selectedUsers.length < 1) {
+      alert("Vui lòng chọn ít nhất 1 người để tạo nhóm chat");
       return;
     }
 
     setCreating(true);
     try {
       const memberIds = selectedUsers.map((u) => u.userId!);
-      const response = await apiCreateGroupConversation(groupName, memberIds);
+      const response = await apiCreateGroupConversation(groupName.trim(), memberIds);
       const conversationId = response.data.conversationId;
 
       if (onConversationCreated) {
@@ -115,8 +148,12 @@ const CreateConversationModal: React.FC<CreateConversationModalProps> = ({
               />
               TravelNest
             </span>
-            <h2 className="text-2xl font-bold text-gray-800">Tạo nhóm chat mới</h2>
-            <p className="text-sm text-gray-500">Chọn bạn bè để tạo cuộc trò chuyện</p>
+            <h2 className="text-2xl font-bold text-gray-800">
+              {editMode ? "Chỉnh sửa nhóm chat" : "Tạo nhóm chat mới"}
+            </h2>
+            <p className="text-sm text-gray-500">
+              {editMode ? "Cập nhật thông tin nhóm" : "Chọn bạn bè để tạo cuộc trò chuyện"}
+            </p>
           </div>
           <button
             className="absolute flex items-center justify-center w-8 h-8 text-gray-600 rounded-full bg-gray-white right-6 top-6 hover:bg-gray-300 cursor-pointer"
@@ -153,11 +190,12 @@ const CreateConversationModal: React.FC<CreateConversationModalProps> = ({
               </div>
             </div>
 
-            {/* Search & Selection */}
-            <div className="flex flex-col h-full">
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Thành viên ({selectedUsers.length})
-              </label>
+            {/* Search & Selection - Only show in create mode */}
+            {!editMode && (
+              <div className="flex flex-col h-full">
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Thành viên ({selectedUsers.length})
+                </label>
 
               {/* Search Bar */}
               <div className="relative mb-3 group">
@@ -206,10 +244,12 @@ const CreateConversationModal: React.FC<CreateConversationModalProps> = ({
                 </div>
               )}
             </div>
+            )}
           </div>
 
-          {/* Friends List - Scrollable Area */}
-          <div className="flex-1 overflow-y-auto px-2 mx-4 mb-4 border border-gray-100 rounded-xl bg-gray-50/50">
+          {/* Friends List - Scrollable Area - Only show in create mode */}
+          {!editMode && (
+            <div className="flex-1 overflow-y-auto px-2 mx-4 mb-4 border border-gray-100 rounded-xl bg-gray-50/50">
             {loading ? (
               <div className="flex flex-col items-center justify-center h-40 text-gray-500">
                 <Icon
@@ -287,6 +327,7 @@ const CreateConversationModal: React.FC<CreateConversationModalProps> = ({
               </div>
             )}
           </div>
+          )}
         </div>
 
         {/* Footer */}
@@ -298,19 +339,19 @@ const CreateConversationModal: React.FC<CreateConversationModalProps> = ({
             Hủy bỏ
           </button>
           <button
-            onClick={handleCreate}
-            disabled={creating || selectedUsers.length < 1 || !groupName.trim()}
+            onClick={handleSubmit}
+            disabled={creating || !groupName.trim() || (!editMode && selectedUsers.length < 1)}
             className="px-6 py-2.5 text-sm font-medium text-white bg-blue-600 rounded-xl hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm shadow-blue-200 flex items-center gap-2"
           >
             {creating ? (
               <>
                 <Icon icon="line-md:loading-loop" className="w-4 h-4" />
-                <span>Đang tạo...</span>
+                <span>{editMode ? "Đang cập nhật..." : "Đang tạo..."}</span>
               </>
             ) : (
               <>
-                <Icon icon="fluent:add-circle-24-filled" className="w-4 h-4" />
-                <span>Tạo nhóm</span>
+                <Icon icon={editMode ? "fluent:checkmark-circle-24-filled" : "fluent:add-circle-24-filled"} className="w-4 h-4" />
+                <span>{editMode ? "Cập nhật" : "Tạo nhóm"}</span>
               </>
             )}
           </button>

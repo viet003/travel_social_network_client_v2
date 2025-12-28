@@ -5,6 +5,7 @@ import { Icon } from '@iconify/react';
 import { path } from '../utilities/path';
 import { logout } from '../stores/actions/authAction';
 import { ProfileDropdown, NotificationsDropdown } from '../components/common';
+import { useNotification } from '../hooks/useNotification';
 import defaultAvatar from '../assets/images/avatar_default.png';
 
 const AdminLayout = () => {
@@ -18,6 +19,9 @@ const AdminLayout = () => {
   const [showNotificationsDropdown, setShowNotificationsDropdown] = useState(false);
   const profileDropdownRef = useRef<HTMLDivElement>(null);
   const notificationsDropdownRef = useRef<HTMLDivElement>(null);
+
+  // Get unread notification count from hook
+  const { refreshUnreadCount } = useNotification();
 
   // Close profile dropdown when clicking outside
   useEffect(() => {
@@ -182,7 +186,7 @@ const AdminLayout = () => {
                   <Icon icon="fluent:search-24-regular" className="w-6 h-6" />
                 </button>
                 
-                <div className="relative z-50" ref={notificationsDropdownRef}>
+                <div className="relative z-[1000]" ref={notificationsDropdownRef}>
                   <button 
                     className="p-2.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600 rounded-xl transition-all relative group cursor-pointer"
                     onClick={() => setShowNotificationsDropdown(!showNotificationsDropdown)}
@@ -192,14 +196,17 @@ const AdminLayout = () => {
                   </button>
                   
                   {showNotificationsDropdown && (
-                    <NotificationsDropdown onClose={() => setShowNotificationsDropdown(false)} />
+                    <NotificationsDropdown 
+                      onClose={() => setShowNotificationsDropdown(false)}
+                      onUnreadCountChange={refreshUnreadCount}
+                    />
                   )}
                 </div>
             </div>
             
             <div className="h-8 w-px bg-gray-200"></div>
 
-            <div className="relative z-50" ref={profileDropdownRef}>
+            <div className="relative z-[1000]" ref={profileDropdownRef}>
               <div 
                 className="flex items-center gap-3 pl-2 cursor-pointer hover:bg-gray-50 p-1.5 rounded-xl transition-colors"
                 onClick={() => setShowProfileDropdown(!showProfileDropdown)}

@@ -257,3 +257,50 @@ export const apiRemoveMembersFromConversation = async (
         throw error;
     }
 };
+
+/**
+ * Update group conversation name
+ * @param conversationId - Conversation UUID
+ * @param groupName - New group name
+ * @returns Updated conversation response
+ */
+export const apiUpdateGroupName = async (
+    conversationId: string,
+    groupName: string
+): Promise<ApiResponse<ConversationResponse>> => {
+    try {
+        const response = await axiosConfig({
+            method: 'PUT',
+            url: `/conversations/${conversationId}/name`,
+            data: { groupName }
+        });
+        return response.data;
+    } catch (error: unknown) {
+        if (error && typeof error === 'object' && 'response' in error) {
+            throw (error as { response: { data: unknown } }).response.data;
+        }
+        throw error;
+    }
+};
+
+/**
+ * Delete conversation (admin only for groups)
+ * @param conversationId - Conversation UUID
+ * @returns Success response
+ */
+export const apiDeleteConversation = async (
+    conversationId: string
+): Promise<ApiResponse<void>> => {
+    try {
+        const response = await axiosConfig({
+            method: 'DELETE',
+            url: `/conversations/${conversationId}`
+        });
+        return response.data;
+    } catch (error: unknown) {
+        if (error && typeof error === 'object' && 'response' in error) {
+            throw (error as { response: { data: unknown } }).response.data;
+        }
+        throw error;
+    }
+};
