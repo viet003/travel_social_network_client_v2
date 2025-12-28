@@ -46,6 +46,21 @@ export interface TripScheduleResponse {
 export type TripStatus = 'PLANNING' | 'CONFIRMED' | 'ONGOING' | 'COMPLETED' | 'CANCELLED';
 export type ActivityType = 'VISIT' | 'MEAL' | 'ACCOMMODATION' | 'TRANSPORT' | 'OTHER';
 
+// Trip Calendar - for calendar view
+export interface TripCalendar {
+  tripId: string;
+  tripName: string;
+  destination: string | null;
+  scheduleDate: string; // The specific date this trip appears on the calendar (ISO 8601)
+  startDate: string; // Trip start date
+  endDate: string; // Trip end date
+  status: TripStatus;
+  conversationId: string;
+  conversationName: string | null;
+  conversationAvatar: string | null;
+  schedulesOnDate: number; // Number of schedules on this specific date
+}
+
 export interface TripDto {
   conversationId: string;
   tripName: string;

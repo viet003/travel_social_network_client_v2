@@ -2,23 +2,59 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Icon } from "@iconify/react";
 import { SimpleCalendar } from "../cards";
+import { TripHoverModal } from "../../modal";
 import { apiGetUserConversations } from "../../../services/conversationService";
 import { apiGetMyGroups } from "../../../services/groupService";
+import { apiGetTripsByUserForCalendar } from "../../../services/tripService";
 import type { ConversationResponse } from "../../../types/conversation.types";
 import type { GroupResponse } from "../../../types/group.types";
+import type { TripCalendar } from "../../../types/trip.types";
 import { avatarDefault } from "../../../assets/images";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { setActiveConversation, addConversation } from "../../../stores/actions/conversationAction";
 import { formatChatTime } from "../../../utilities/helper";
 import { path } from "../../../utilities/path";
+import dayjs from "dayjs";
 
 const RightSidebar: React.FC = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const authState = useSelector((state: { auth: { userId: string } }) => state.auth);
+  const { userId } = authState;
+  
   const [conversations, setConversations] = useState<ConversationResponse[]>([]);
   const [isLoadingConversations, setIsLoadingConversations] = useState(false);
   const [groups, setGroups] = useState<GroupResponse[]>([]);
   const [isLoadingGroups, setIsLoadingGroups] = useState(false);
+  
+  // Trip calendar states
+  const [trips, setTrips] = useState<TripCalendar[]>([]);
+  const [isLoadingTrips, setIsLoadingTrips] = useState(false);
+  const [hoveredTrip, setHoveredTrip] = useState<{ trip: TripCalendar; element: HTMLElement } | null>(null);
+  const [currentMonth] = useState(dayjs());
+
+  // Fetch trips for calendar
+  useEffect(() => {
+    const fetchTrips = async () => {
+      if (!userId) return;
+      
+      try {
+        setIsLoadingTrips(true);
+        // Get trips for current month ± 1 month
+        const startDate = currentMonth.subtract(1, 'month').startOf('month').toISOString();
+        const endDate = currentMonth.add(1, 'month').endOf('month').toISOString();
+        
+        const response = await apiGetTripsByUserForCalendar(userId, startDate, endDate);
+        setTrips(response.data);
+      } catch (error) {
+        console.error('Error fetching trips:', error);
+      } finally {
+        setIsLoadingTrips(false);
+      }
+    };
+
+    fetchTrips();
+  }, [userId, currentMonth]);
 
   // Fetch conversations
   useEffect(() => {
@@ -74,21 +110,52 @@ const RightSidebar: React.FC = () => {
     dispatch(setActiveConversation(conversation.conversationId));
   };
 
+  // Handle trip hover
+  const handleTripHover = (trip: TripCalendar, element: HTMLElement) => {
+    setHoveredTrip({ trip, element });
+  };
+
+  // Handle trip leave
+  const handleTripLeave = () => {
+    setHoveredTrip(null);
+  };
+
+  // Handle date click - navigate to trips page
+  const handleDateClick = (_date: dayjs.Dayjs, trips?: TripCalendar[]) => {
+    if (trips && trips.length > 0) {
+      // If there are trips, navigate to first trip detail
+      navigate(`${path.HOME}/${path.TRIP_DETAIL.replace(':tripId', trips[0].tripId)}`);
+    }
+  };
+
   return (
     <div className="w-80 bg-white p-4 sticky top-0 h-[calc(100vh-60px)] overflow-y-auto">
       {/* Calendar Section */}
       <div className="mb-6">
         <h3 className="font-bold text-black mb-4">Lịch trình của bạn</h3>
-        <SimpleCalendar
-          events={{
-            "2025-11-18": true,
-            "2025-11-20": true,
-            "2025-11-25": true,
-          }}
-          onDateClick={(date) => console.log(date.format("YYYY-MM-DD"))}
-          eventColor="#1890ff"
-        />
+        {isLoadingTrips ? (
+          <div className="flex justify-center py-8">
+            <Icon icon="eos-icons:loading" className="w-8 h-8 text-blue-500" />
+          </div>
+        ) : (
+          <SimpleCalendar
+            trips={trips}
+            onDateClick={handleDateClick}
+            onTripHover={handleTripHover}
+            onTripLeave={handleTripLeave}
+            eventColor="#1890ff"
+          />
+        )}
       </div>
+
+      {/* Trip Hover Modal */}
+      {hoveredTrip && (
+        <TripHoverModal
+          trip={hoveredTrip.trip}
+          anchorElement={hoveredTrip.element}
+          onClose={handleTripLeave}
+        />
+      )}
 
       {/* Contacts Section */}
       <div className="mb-6">

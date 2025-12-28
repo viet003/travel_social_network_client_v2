@@ -7,18 +7,10 @@ import type {
   PageableResponse,
   ApiResponse,
   TripStatus,
-  ActivityType
+  ActivityType,
+  TripCalendar
 } from "../types/trip.types";
 
-// ========== TRIP OPERATIONS ==========
-
-/**
- * Create a new trip
- * Endpoint: POST /trips
- * Description: Create a new trip for a conversation with optional cover image
- * @param tripDto - Trip data transfer object
- * @returns Created trip response
- */
 export const apiCreateTrip = async (
   tripDto: TripDto & { coverImage?: File }
 ): Promise<ApiResponse<TripResponse>> => {
@@ -51,14 +43,7 @@ export const apiCreateTrip = async (
   }
 };
 
-/**
- * Update a trip
- * Endpoint: PUT /trips/{tripId}
- * Description: Update an existing trip with optional cover image
- * @param tripId - Trip UUID
- * @param tripDto - Trip data transfer object
- * @returns Updated trip response
- */
+
 export const apiUpdateTrip = async (
   tripId: string,
   tripDto: TripDto & { coverImage?: File }
@@ -259,15 +244,38 @@ export const apiGetTripsByStatus = async (
   }
 };
 
+/**
+ * Get trips for calendar view
+ * Endpoint: GET /trips/user/{userId}/calendar
+ * Description: Get all trips by user grouped by schedule dates for calendar display
+ * @param userId - User UUID
+ * @param startDate - Start date for calendar range (ISO 8601)
+ * @param endDate - End date for calendar range (ISO 8601)
+ * @returns List of calendar trip entries
+ */
+export const apiGetTripsByUserForCalendar = async (
+  userId: string,
+  startDate: string,
+  endDate: string
+): Promise<ApiResponse<TripCalendar[]>> => {
+  try {
+    const response = await axiosConfig({
+      method: 'GET',
+      url: `/trips/user/${userId}/calendar`,
+      params: { startDate, endDate }
+    });
+    return response.data;
+  } catch (error: unknown) {
+    if (error && typeof error === 'object' && 'data' in error) {
+      throw (error as { data: unknown }).data;
+    }
+    throw error;
+  }
+};
+
 // ========== TRIP SCHEDULE OPERATIONS ==========
 
-/**
- * Create a trip schedule
- * Endpoint: POST /trips/schedules
- * Description: Create a new schedule/activity for a trip
- * @param scheduleDto - Schedule data transfer object
- * @returns Created schedule response
- */
+
 export const apiCreateSchedule = async (
   scheduleDto: TripScheduleDto
 ): Promise<ApiResponse<TripScheduleResponse>> => {
@@ -286,14 +294,6 @@ export const apiCreateSchedule = async (
   }
 };
 
-/**
- * Update a schedule
- * Endpoint: PUT /trips/schedules/{scheduleId}
- * Description: Update an existing trip schedule
- * @param scheduleId - Schedule UUID
- * @param scheduleDto - Schedule data transfer object
- * @returns Updated schedule response
- */
 export const apiUpdateSchedule = async (
   scheduleId: string,
   scheduleDto: TripScheduleDto
@@ -313,13 +313,6 @@ export const apiUpdateSchedule = async (
   }
 };
 
-/**
- * Get schedule by ID
- * Endpoint: GET /trips/schedules/{scheduleId}
- * Description: Retrieve a specific schedule by its ID
- * @param scheduleId - Schedule UUID
- * @returns Schedule response
- */
 export const apiGetScheduleById = async (
   scheduleId: string
 ): Promise<ApiResponse<TripScheduleResponse>> => {
@@ -337,13 +330,6 @@ export const apiGetScheduleById = async (
   }
 };
 
-/**
- * Delete a schedule
- * Endpoint: DELETE /trips/schedules/{scheduleId}
- * Description: Delete a trip schedule
- * @param scheduleId - Schedule UUID
- * @returns Success response
- */
 export const apiDeleteSchedule = async (
   scheduleId: string
 ): Promise<ApiResponse<null>> => {
@@ -361,13 +347,6 @@ export const apiDeleteSchedule = async (
   }
 };
 
-/**
- * Get schedules by trip
- * Endpoint: GET /trips/{tripId}/schedules
- * Description: Retrieve all schedules for a specific trip
- * @param tripId - Trip UUID
- * @returns List of schedules
- */
 export const apiGetSchedulesByTrip = async (
   tripId: string
 ): Promise<ApiResponse<TripScheduleResponse[]>> => {
@@ -385,14 +364,6 @@ export const apiGetSchedulesByTrip = async (
   }
 };
 
-/**
- * Get schedules by date
- * Endpoint: GET /trips/{tripId}/schedules/date
- * Description: Retrieve schedules for a specific date
- * @param tripId - Trip UUID
- * @param date - Date in ISO 8601 format
- * @returns List of schedules
- */
 export const apiGetSchedulesByDate = async (
   tripId: string,
   date: string
@@ -412,14 +383,7 @@ export const apiGetSchedulesByDate = async (
   }
 };
 
-/**
- * Get schedules by activity type
- * Endpoint: GET /trips/{tripId}/schedules/type/{activityType}
- * Description: Retrieve schedules by activity type
- * @param tripId - Trip UUID
- * @param activityType - Activity type
- * @returns List of schedules
- */
+
 export const apiGetSchedulesByActivityType = async (
   tripId: string,
   activityType: ActivityType
