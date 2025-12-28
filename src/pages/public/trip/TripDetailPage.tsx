@@ -30,6 +30,7 @@ const TripDetailPage = () => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [scheduleToDelete, setScheduleToDelete] =
     useState<TripScheduleResponse | null>(null);
+  const [expandedDays, setExpandedDays] = useState<Set<string>>(new Set());
 
   const handleOpenCreateSchedule = () => {
     setEditingSchedule(null);
@@ -83,6 +84,58 @@ const TripDetailPage = () => {
       throw error;
     }
   };
+
+  const refetchSchedules = async () => {
+    if (!tripId) return;
+    try {
+      const schedulesResponse = await apiGetSchedulesByTrip(tripId);
+      if (schedulesResponse.success && schedulesResponse.data) {
+        setSchedules(schedulesResponse.data);
+      }
+    } catch (error) {
+      console.error("Error refetching schedules:", error);
+    }
+  };
+
+  const toggleDay = (dateKey: string) => {
+    setExpandedDays((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(dateKey)) {
+        newSet.delete(dateKey);
+      } else {
+        newSet.add(dateKey);
+      }
+      return newSet;
+    });
+  };
+
+  // Group schedules by date
+  const groupSchedulesByDate = () => {
+    const grouped: { [key: string]: TripScheduleResponse[] } = {};
+    schedules.forEach((schedule) => {
+      const dateKey = new Date(schedule.scheduleDate).toLocaleDateString("vi-VN");
+      if (!grouped[dateKey]) {
+        grouped[dateKey] = [];
+      }
+      grouped[dateKey].push(schedule);
+    });
+    // Sort schedules within each day by startTime
+    Object.keys(grouped).forEach((dateKey) => {
+      grouped[dateKey].sort((a, b) => {
+        const timeA = a.startTime ? new Date(a.startTime).getTime() : 0;
+        const timeB = b.startTime ? new Date(b.startTime).getTime() : 0;
+        return timeA - timeB;
+      });
+    });
+    return grouped;
+  };
+
+  const groupedSchedules = groupSchedulesByDate();
+  const sortedDates = Object.keys(groupedSchedules).sort((a, b) => {
+    const dateA = schedules.find(s => new Date(s.scheduleDate).toLocaleDateString("vi-VN") === a);
+    const dateB = schedules.find(s => new Date(s.scheduleDate).toLocaleDateString("vi-VN") === b);
+    return dateA && dateB ? new Date(dateA.scheduleDate).getTime() - new Date(dateB.scheduleDate).getTime() : 0;
+  });
 
   useEffect(() => {
     const fetchData = async () => {
@@ -373,111 +426,188 @@ const TripDetailPage = () => {
                 />
                 Lịch trình chi tiết
               </h2>
-              <button
-                onClick={handleOpenCreateSchedule}
-                className="text-sm font-medium text-blue-600 hover:bg-blue-50 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1 cursor-pointer"
-              >
-                <Icon icon="fluent:add-24-regular" className="w-4 h-4" />
-                Thêm hoạt động
-              </button>
-            </div>
-
-            <div
-              className={`space-y-6 relative ${
-                schedules.length > 0
-                  ? "before:absolute before:inset-0 before:ml-6 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-gray-200 before:to-transparent"
-                  : ""
-              }`}
-            >
-              {schedules.map((schedule) => (
-                <div
-                  key={schedule.tripScheduleId}
-                  className="relative flex items-start group"
+              <div className="flex items-center gap-2">
+                {sortedDates.length > 0 && (
+                  <>
+                    <button
+                      onClick={() => setExpandedDays(new Set(sortedDates))}
+                      className="text-xs font-medium text-gray-600 hover:text-gray-900 px-2 py-1 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
+                    >
+                      Mở tất cả
+                    </button>
+                    <button
+                      onClick={() => setExpandedDays(new Set())}
+                      className="text-xs font-medium text-gray-600 hover:text-gray-900 px-2 py-1 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
+                    >
+                      Đóng tất cả
+                    </button>
+                  </>
+                )}
+                <button
+                  onClick={handleOpenCreateSchedule}
+                  className="text-sm font-medium text-blue-600 hover:bg-blue-50 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1 cursor-pointer"
                 >
-                  {/* Timeline Dot */}
-                  <div className="absolute left-6 -translate-x-1/2 mt-1.5 w-3 h-3 rounded-full border-2 border-white bg-blue-500 shadow-sm z-10 group-hover:scale-125 transition-transform"></div>
-
-                  {/* Content Card */}
-                  <div className="ml-12 w-full bg-white rounded-xl border border-gray-100 p-4 hover:shadow-md transition-shadow duration-300">
-                    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <span
-                            className={`px-2 py-0.5 rounded text-xs font-medium ${getActivityColor(
-                              schedule.activityType
-                            )}`}
-                          >
-                            {getActivityLabel(schedule.activityType)}
-                          </span>
-                          <span className="text-xs text-gray-400 font-medium">
-                            {formatTime(schedule.startTime)} -{" "}
-                            {formatTime(schedule.endTime)}
-                          </span>
-                        </div>
-                        <h3 className="text-lg font-semibold text-gray-900 mb-1">
-                          {schedule.title}
-                        </h3>
-                        {schedule.description && (
-                          <p className="text-gray-500 text-sm mb-2">
-                            {schedule.description}
-                          </p>
-                        )}
-                        <div className="flex items-center gap-4 text-xs text-gray-500">
-                          {schedule.location && (
-                            <div className="flex items-center gap-1">
-                              <Icon
-                                icon="fluent:location-16-regular"
-                                className="w-3.5 h-3.5"
-                              />
-                              {schedule.location}
-                            </div>
-                          )}
-                          {schedule.estimatedCost &&
-                            schedule.estimatedCost > 0 && (
-                              <div className="flex items-center gap-1">
-                                <Icon
-                                  icon="fluent:money-16-regular"
-                                  className="w-3.5 h-3.5"
-                                />
-                                {formatCurrency(schedule.estimatedCost)}
-                              </div>
-                            )}
-                        </div>
-                      </div>
-
-                      <div className="flex sm:flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button
-                          onClick={() => handleOpenEditSchedule(schedule)}
-                          className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
-                        >
-                          <Icon
-                            icon="fluent:edit-16-regular"
-                            className="w-5 h-5"
-                          />
-                        </button>
-                        <button
-                          onClick={() => handleDeleteSchedule(schedule)}
-                          className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
-                        >
-                          <Icon
-                            icon="fluent:delete-16-regular"
-                            className="w-5 h-5"
-                          />
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-
-              {schedules.length === 0 && (
-                <div className="text-center py-8 bg-gray-50 rounded-xl border border-dashed border-gray-200">
-                  <p className="text-gray-500 text-sm">
-                    Chưa có hoạt động nào được lên lịch.
-                  </p>
-                </div>
-              )}
+                  <Icon icon="fluent:add-24-regular" className="w-4 h-4" />
+                  Thêm hoạt động
+                </button>
+              </div>
             </div>
+
+            {schedules.length === 0 ? (
+              <div className="text-center py-8 bg-gray-50 rounded-xl border border-dashed border-gray-200">
+                <p className="text-gray-500 text-sm">
+                  Chưa có hoạt động nào được lên lịch.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {sortedDates.map((dateKey) => {
+                  const daySchedules = groupedSchedules[dateKey];
+                  const isExpanded = expandedDays.has(dateKey);
+                  const totalCostForDay = daySchedules.reduce(
+                    (sum, schedule) => sum + (schedule.estimatedCost || 0),
+                    0
+                  );
+
+                  return (
+                    <div
+                      key={dateKey}
+                      className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm"
+                    >
+                      {/* Collapsible Header */}
+                      <div
+                        onClick={() => toggleDay(dateKey)}
+                        className="bg-gradient-to-r from-gray-50 to-gray-100 px-5 py-4 flex justify-between items-center cursor-pointer hover:from-gray-100 hover:to-gray-200 transition-all"
+                      >
+                        <div className="flex items-center gap-4">
+                          <div className="w-12 h-12 rounded-xl bg-gray-900 text-white flex flex-col items-center justify-center">
+                            <span className="text-xs font-medium text-gray-400">
+                              {new Date(daySchedules[0].scheduleDate).toLocaleDateString("vi-VN", { weekday: "short" })}
+                            </span>
+                            <span className="text-lg font-bold">
+                              {new Date(daySchedules[0].scheduleDate).getDate()}
+                            </span>
+                          </div>
+                          <div>
+                            <h4 className="font-bold text-gray-900">{dateKey}</h4>
+                            <div className="flex items-center gap-3 text-xs text-gray-500 mt-1">
+                              <span>{daySchedules.length} hoạt động</span>
+                              {totalCostForDay > 0 && (
+                                <>
+                                  <span>•</span>
+                                  <span className="font-medium text-green-600">
+                                    {formatCurrency(totalCostForDay)}
+                                  </span>
+                                </>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                        <Icon
+                          icon={
+                            isExpanded
+                              ? "fluent:chevron-up-24-regular"
+                              : "fluent:chevron-down-24-regular"
+                          }
+                          className="w-6 h-6 text-gray-400 transition-transform"
+                        />
+                      </div>
+
+                      {/* Collapsible Content */}
+                      {isExpanded && (
+                        <div className="p-5 space-y-4 bg-gray-50">
+                          {daySchedules.map((schedule, idx) => (
+                            <div
+                              key={schedule.tripScheduleId}
+                              className="relative flex items-start group"
+                            >
+                              {/* Timeline Dot */}
+                              {idx < daySchedules.length - 1 && (
+                                <div className="absolute left-3 top-8 bottom-[-16px] w-0.5 bg-gray-200"></div>
+                              )}
+                              <div className="absolute left-0 mt-1.5 w-6 h-6 rounded-full border-2 border-white bg-blue-500 shadow-sm z-10 flex items-center justify-center">
+                                <div className="w-2 h-2 bg-white rounded-full"></div>
+                              </div>
+
+                              {/* Content Card */}
+                              <div className="ml-10 w-full bg-white rounded-xl border border-gray-100 p-4 hover:shadow-md transition-shadow duration-300">
+                                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+                                  <div className="flex-1">
+                                    <div className="flex items-center gap-2 mb-1">
+                                      <span
+                                        className={`px-2 py-0.5 rounded text-xs font-medium ${getActivityColor(
+                                          schedule.activityType
+                                        )}`}
+                                      >
+                                        {getActivityLabel(schedule.activityType)}
+                                      </span>
+                                      <span className="text-xs text-gray-400 font-medium">
+                                        {formatTime(schedule.startTime)}
+                                        {schedule.endTime && ` - ${formatTime(schedule.endTime)}`}
+                                      </span>
+                                    </div>
+                                    <h3 className="text-lg font-semibold text-gray-900 mb-1">
+                                      {schedule.title}
+                                    </h3>
+                                    {schedule.description && (
+                                      <p className="text-gray-500 text-sm mb-2">
+                                        {schedule.description}
+                                      </p>
+                                    )}
+                                    <div className="flex items-center gap-4 text-xs text-gray-500">
+                                      {schedule.location && (
+                                        <div className="flex items-center gap-1">
+                                          <Icon
+                                            icon="fluent:location-16-regular"
+                                            className="w-3.5 h-3.5"
+                                          />
+                                          {schedule.location}
+                                        </div>
+                                      )}
+                                      {schedule.estimatedCost &&
+                                        schedule.estimatedCost > 0 && (
+                                          <div className="flex items-center gap-1">
+                                            <Icon
+                                              icon="fluent:money-16-regular"
+                                              className="w-3.5 h-3.5"
+                                            />
+                                            {formatCurrency(schedule.estimatedCost)}
+                                          </div>
+                                        )}
+                                    </div>
+                                  </div>
+
+                                  <div className="flex sm:flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <button
+                                      onClick={() => handleOpenEditSchedule(schedule)}
+                                      className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
+                                    >
+                                      <Icon
+                                        icon="fluent:edit-16-regular"
+                                        className="w-5 h-5"
+                                      />
+                                    </button>
+                                    <button
+                                      onClick={() => handleDeleteSchedule(schedule)}
+                                      className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
+                                    >
+                                      <Icon
+                                        icon="fluent:delete-16-regular"
+                                        className="w-5 h-5"
+                                      />
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </section>
         </div>
 
@@ -621,6 +751,9 @@ const TripDetailPage = () => {
         isOpen={isAiModalOpen}
         onClose={() => setIsAiModalOpen(false)}
         tripId={tripId || ""}
+        destination={trip?.destination || undefined}
+        budget={trip?.budget || undefined}
+        onSchedulesApplied={refetchSchedules}
       />
 
       {/* Trip Schedule Modal */}
