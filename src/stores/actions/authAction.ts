@@ -26,7 +26,7 @@ interface ApiResponse {
 
 export const login = (payload: LoginPayload) => async (dispatch: any): Promise<ApiResponse | undefined> => {
     try {
-        const response: ApiResponse = await apiLoginService(payload);
+        const response = await apiLoginService(payload) as ApiResponse;
 
         if (response?.success) {
             dispatch({
@@ -90,7 +90,7 @@ export const updateAvatarImg = (imgUrl: string) => ({
 
 export const register = (payload: RegisterPayload) => async (dispatch: any): Promise<ApiResponse | undefined> => {
     try {
-        const response: ApiResponse = await apiSignupService(payload);
+        const response = await apiSignupService(payload) as ApiResponse;
 
         if (response?.success) {
             dispatch({
@@ -124,7 +124,7 @@ export const updateCoverImg = (imgUrl: string) => ({
 // Google Login Action
 export const googleLogin = (credential: string) => async (dispatch: any): Promise<ApiResponse | undefined> => {
     try {
-        const response: ApiResponse = await apiGoogleLoginService(credential);
+        const response = await apiGoogleLoginService(credential) as ApiResponse;
 
         if (response?.success) {
             dispatch({
@@ -152,7 +152,7 @@ export const googleLogin = (credential: string) => async (dispatch: any): Promis
 // Facebook Login Action
 export const facebookLogin = (accessToken: string) => async (dispatch: any): Promise<ApiResponse | undefined> => {
     try {
-        const response: ApiResponse = await apiFacebookLoginService(accessToken);
+        const response = await apiFacebookLoginService(accessToken) as ApiResponse;
 
         if (response?.success) {
             dispatch({

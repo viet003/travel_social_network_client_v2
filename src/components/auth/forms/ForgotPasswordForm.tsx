@@ -30,15 +30,16 @@ const ForgotPasswordForm = () => {
     setError('');
 
     try {
-      const response = await apiForgotPassWordService(email);
+      const response = await apiForgotPassWordService(email) as { success?: boolean; message?: string };
 
       if (response?.success) {
         setIsEmailSent(true);
       } else {
         setError(response?.message || 'Có lỗi xảy ra khi gửi email');
       }
-    } catch (error) {
-      setError(error?.message || 'Có lỗi xảy ra khi gửi email');
+    } catch (error: unknown) {
+      const err = error as { message?: string };
+      setError(err?.message || 'Có lỗi xảy ra khi gửi email');
     } finally {
       setIsLoading(false);
     }

@@ -1,6 +1,6 @@
 import axiosConfig from "../configurations/axiosConfig";
 import type { ApiResponse, PageableResponse } from "../types/common.types";
-import type { BlogReviewResponse, CreateBlogReviewPayload } from "../types/blogReview.types";
+import type { CreateBlogReviewPayload } from "../types/blogReview.types";
 
 // ========== BLOG REVIEW APIs ==========
 

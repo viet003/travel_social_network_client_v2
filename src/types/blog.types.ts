@@ -57,7 +57,11 @@ export interface BlogDto {
   readingTime?: number;
 }
 
-export interface BlogResponse {
+// BlogResponse is the same as Blog - used in ApiResponse<BlogResponse>
+export type BlogResponse = Blog;
+
+// Legacy interfaces (deprecated)
+export interface BlogApiResponse {
   success: boolean;
   message: string;
   data?: Blog;

@@ -73,9 +73,16 @@ export const getCitiesByCountry = async (countryCode: any, limit = 5) => {
   }
 };
 
+interface CityData {
+  city: string;
+  country: string;
+  region?: string;
+  population?: number;
+}
+
 // Format city data for dropdown
-export const formatCityData = (cities) => {
-  return cities.map(city => ({
+export const formatCityData = (cities: CityData[]) => {
+  return cities.map((city: CityData) => ({
     value: `${city.city}, ${city.country}`,
     label: `${city.city}, ${city.country}`,
     city: city.city,

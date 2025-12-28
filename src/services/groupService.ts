@@ -1,6 +1,6 @@
 import axiosConfig from "../configurations/axiosConfig";
 import type { ApiResponse, PageableResponse } from "../types/common.types";
-import type { GroupResponse, GroupMemberResponse, FriendMember } from "../types/group.types";
+import type { GroupResponse, GroupMemberResponse } from "../types/group.types";
 import type { PostMediaResponse } from "../types/media.types";
 
 /**

@@ -11,7 +11,7 @@ class WebSocketService {
   private reconnectAttempts = 0;
   private maxReconnectAttempts = 5;
   private reconnectDelay = 3000;
-  private currentToken: string | null = null;
+  private storedToken: string | null = null;
   private currentUserId: string | null = null;
 
   /**
@@ -21,7 +21,7 @@ class WebSocketService {
    */
   connect(token: string, userId: string): Promise<void> {
     // Store current credentials for reconnection
-    this.currentToken = token;
+    this.storedToken = token;
     this.currentUserId = userId;
     return new Promise((resolve, reject) => {
       if (this.client?.connected) {
@@ -501,7 +501,7 @@ class WebSocketService {
     }
 
     console.log('🔄 Token updated, reconnecting WebSocket...');
-    this.currentToken = newToken;
+    this.storedToken = newToken;
     
     // Disconnect current connection
     if (this.client?.connected) {
@@ -527,7 +527,7 @@ class WebSocketService {
     }
     this.messageHandlers.clear();
     this.reconnectAttempts = 0;
-    this.currentToken = null;
+    this.storedToken = null;
     this.currentUserId = null;
   }
 
@@ -536,6 +536,13 @@ class WebSocketService {
    */
   isConnected(): boolean {
     return this.client?.connected || false;
+  }
+
+  /**
+   * Get the current stored token
+   */
+  getStoredToken(): string | null {
+    return this.storedToken;
   }
 }
 

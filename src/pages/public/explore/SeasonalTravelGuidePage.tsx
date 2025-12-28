@@ -411,9 +411,10 @@ const SeasonalTravelGuidePage = () => {
         note: 'Giá cao nhất năm từ 20/12 đến 5/1, đặt trước 3-4 tháng'
       }
     }
-  };
+  } as const;
 
-  const currentSeason = seasons[activeTab];
+  type SeasonKey = keyof typeof seasons;
+  const currentSeason = seasons[activeTab as SeasonKey];
 
   return (
     <div className="min-h-screen bg-white">
@@ -530,7 +531,7 @@ const SeasonalTravelGuidePage = () => {
               <h3 className="text-xl font-bold text-gray-900">Đặc điểm khí hậu</h3>
             </div>
             <ul className="grid md:grid-cols-2 gap-3">
-              {currentSeason.characteristics.map((char, index) => (
+              {currentSeason.characteristics.map((char: string, index: number) => (
                 <li key={index} className="flex items-start space-x-2">
                   <span className="w-2 h-2 bg-gray-900 rounded-full mt-2"></span>
                   <span className="text-gray-700">{char}</span>
@@ -547,7 +548,7 @@ const SeasonalTravelGuidePage = () => {
             <h3 className="text-2xl font-bold text-gray-900">Thư viện ảnh {currentSeason.name}</h3>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {currentSeason.galleryImages.map((imgUrl, index) => (
+            {currentSeason.galleryImages.map((imgUrl: string, index: number) => (
               <div key={index} className="overflow-hidden rounded-xl border border-gray-200">
                 <img 
                   src={imgUrl} 
@@ -567,7 +568,7 @@ const SeasonalTravelGuidePage = () => {
             <h3 className="text-2xl font-bold text-gray-900">Điểm đến lý tưởng</h3>
           </div>
           <div className="grid md:grid-cols-3 gap-6">
-            {currentSeason.destinations.map((dest, index) => (
+            {currentSeason.destinations.map((dest: { name: string; description: string; activities: readonly string[] }, index: number) => (
               <div key={index} className="rounded-xl border border-gray-200 hover:shadow-lg transition-all overflow-hidden">
                 {/* Destination Image */}
                 <div className="relative aspect-video overflow-hidden">
@@ -585,7 +586,7 @@ const SeasonalTravelGuidePage = () => {
                   <h4 className="text-xl font-bold text-gray-900 mb-2">{dest.name}</h4>
                   <p className="text-gray-600 mb-4">{dest.description}</p>
                   <div className="flex flex-wrap gap-2">
-                    {dest.activities.map((activity, idx) => (
+                    {dest.activities.map((activity: string, idx: number) => (
                       <span key={idx} className="px-3 py-1 bg-gray-100 text-gray-900 rounded-full text-sm font-medium">
                         {activity}
                       </span>
@@ -610,7 +611,7 @@ const SeasonalTravelGuidePage = () => {
                 <h4 className="text-lg font-bold text-gray-900">Quần áo</h4>
               </div>
               <ul className="space-y-2">
-                {currentSeason.packing.clothing.map((item, index) => (
+                {currentSeason.packing.clothing.map((item: string, index: number) => (
                   <li key={index} className="flex items-center space-x-2 text-gray-700">
                     <Icon icon="fluent:checkmark-circle-24-filled" className="w-4 h-4 text-gray-900" />
                     <span>{item}</span>
@@ -624,7 +625,7 @@ const SeasonalTravelGuidePage = () => {
                 <h4 className="text-lg font-bold text-gray-900">Phụ kiện</h4>
               </div>
               <ul className="space-y-2">
-                {currentSeason.packing.accessories.map((item, index) => (
+                {currentSeason.packing.accessories.map((item: string, index: number) => (
                   <li key={index} className="flex items-center space-x-2 text-gray-700">
                     <Icon icon="fluent:checkmark-circle-24-filled" className="w-4 h-4 text-gray-900" />
                     <span>{item}</span>
@@ -638,7 +639,7 @@ const SeasonalTravelGuidePage = () => {
                 <h4 className="text-lg font-bold text-gray-900">Đồ cần thiết</h4>
               </div>
               <ul className="space-y-2">
-                {currentSeason.packing.essentials.map((item, index) => (
+                {currentSeason.packing.essentials.map((item: string, index: number) => (
                   <li key={index} className="flex items-center space-x-2 text-gray-700">
                     <Icon icon="fluent:checkmark-circle-24-filled" className="w-4 h-4 text-gray-900" />
                     <span>{item}</span>
@@ -658,7 +659,7 @@ const SeasonalTravelGuidePage = () => {
               <h3 className="text-2xl font-bold text-gray-900">Lưu ý quan trọng</h3>
             </div>
             <ul className="space-y-2">
-              {currentSeason.tips.map((tip, index) => (
+              {currentSeason.tips.map((tip: string, index: number) => (
                 <li key={index} className="flex items-start space-x-3 p-2 bg-gray-50 rounded-lg">
                   <span className="font-bold text-gray-900 mt-0.5">#{index + 1}</span>
                   <span className="text-gray-700 leading-snug">{tip}</span>
@@ -701,7 +702,7 @@ const SeasonalTravelGuidePage = () => {
                 <h3 className="text-2xl font-bold text-gray-900">Hoạt động nổi bật</h3>
               </div>
               <ul className="space-y-2">
-                {currentSeason.activities.map((activity, index) => (
+                {currentSeason.activities.map((activity: string, index: number) => (
                   <li key={index} className="flex items-center space-x-3 p-2 bg-gray-50 rounded-lg">
                     <span className="w-6 h-6 bg-gray-900 text-white rounded-full flex items-center justify-center font-bold text-sm">
                       {index + 1}
@@ -903,7 +904,7 @@ const SeasonalTravelGuidePage = () => {
               </div>
               
               {/* Small Images Grid */}
-              {currentSeason.inspirationImages.map((imgUrl, index) => (
+              {currentSeason.inspirationImages.map((imgUrl: string, index: number) => (
                 <div key={index} className="aspect-square overflow-hidden rounded-xl border border-gray-200">
                   <img 
                     src={imgUrl} 

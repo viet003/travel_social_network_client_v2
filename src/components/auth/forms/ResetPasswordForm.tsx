@@ -63,7 +63,7 @@ const ResetPasswordForm = () => {
       const response = await apiResetPasswordService(token, {
         newPassword,
         newPasswordConfirm: confirmPassword
-      });
+      }) as { success?: boolean; message?: string };
 
       if (response?.success) {
         setSuccess(true);
@@ -73,8 +73,9 @@ const ResetPasswordForm = () => {
       } else {
         setError(response?.message || 'Đặt lại mật khẩu thất bại');
       }
-    } catch (error: any) {
-      setError(error?.message || 'Có lỗi xảy ra khi đặt lại mật khẩu');
+    } catch (error: unknown) {
+      const err = error as { message?: string };
+      setError(err?.message || 'Có lỗi xảy ra khi đặt lại mật khẩu');
     } finally {
       setIsLoading(false);
     }

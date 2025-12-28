@@ -65,7 +65,7 @@ export const useUnreadMessages = () => {
     }
 
     // Listen for unread message notifications from dedicated endpoint
-    const unsubscribeWs = webSocketService.onUnreadMessage((notification: any) => {
+    const unsubscribeWs = webSocketService.onUnreadMessage((_notification: unknown) => {
       // Server sends to /queue/unread-messages - always show red dot
       notifyUnreadStateChange(true);
     });

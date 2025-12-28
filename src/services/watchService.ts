@@ -2,6 +2,7 @@ import axiosConfig from "../configurations/axiosConfig";
 import type { ApiResponse, PageableResponse } from "../types/common.types";
 import type { 
   WatchResponse,
+  WatchWithIdsResponse,
   CreateWatchDto,
   UpdateWatchDto
 } from "../types/watch.types";

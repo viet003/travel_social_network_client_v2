@@ -1,5 +1,5 @@
 import actionTypes from "../types/actionTypes";
-import type { ConversationResponse } from "../../services/conversationService";
+import type { ConversationResponse } from "../../types/conversation.types";
 
 export interface ConversationState {
     conversations: ConversationResponse[];

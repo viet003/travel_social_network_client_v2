@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Icon } from "@iconify/react";
 import { apiGetMyFriends } from "../../../services/friendshipService";
-import { apiCreateGroupConversation, apiUpdateGroupName, apiGetConversationMembers } from "../../../services/conversationService";
+import { apiCreateGroupConversation, apiUpdateGroupName } from "../../../services/conversationService";
 import type { UserResponse } from "../../../types/friendship.types";
 import type { ConversationResponse } from "../../../types/conversation.types";
 import avatardf from "../../../assets/images/avatar_default.png";

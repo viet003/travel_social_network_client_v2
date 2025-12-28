@@ -3,7 +3,6 @@ import { Outlet, useNavigate } from 'react-router-dom';
 import { Skeleton } from 'antd';
 import { useSelector } from 'react-redux';
 import { Header, ChatWidget } from '../components/common';
-import { path } from '../utilities/path';
 import webSocketService from '../services/webSocketService';
 
 interface MainLayoutProps {

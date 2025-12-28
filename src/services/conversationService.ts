@@ -1,6 +1,6 @@
 import axiosConfig from "../configurations/axiosConfig";
 import type { ApiResponse, PageableResponse } from "../types/common.types";
-import type { ConversationResponse, UserSummary } from "../types/conversation.types";
+import type { ConversationResponse } from "../types/conversation.types";
 
 // Conversation Service - API calls for conversation operations
 

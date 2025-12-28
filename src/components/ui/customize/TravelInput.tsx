@@ -78,17 +78,6 @@ const TravelInput: React.FC<TravelInputProps> = ({
           minLength={minLength}
           disabled={disabled}
           className={`w-full ${error ? 'border-red-500' : ''} ${className}`}
-          styles={{
-            input: {
-              '&::placeholder': {
-                color: '#9ca3af',
-                opacity: 1,
-              },
-              '&:focus::placeholder': {
-                opacity: 0,
-              },
-            },
-          }}
           {...props}
         />
       </ConfigProvider>

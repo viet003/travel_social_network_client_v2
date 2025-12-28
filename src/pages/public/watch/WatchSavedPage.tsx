@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Icon } from '@iconify/react';
 import { useNavigate } from 'react-router-dom';
 import WatchModal from '../../../components/modal/watch/WatchModal';
-import type { WatchResponse } from '../../../types/video.types';
+import type { WatchResponse } from '../../../types/watch.types';
 import { apiGetSavedWatches } from '../../../services/watchService';
 import { message } from 'antd';
 
@@ -120,13 +120,13 @@ const WatchSavedPage: React.FC = () => {
                 <WatchModal
                   videoId={video.watchId}
                   userId={video.user.userId}
-                  avatar={video.user.avatarImg}
-                  userName={video.user.userName || video.user.fullName || 'Unknown User'}
-                  location={video.location}
+                  avatar={video.user.avatarImg || undefined}
+                  userName={video.user.userName || video.user.userProfile?.fullName || 'Unknown User'}
+                  location={video.location || undefined}
                   timeAgo={video.createdAt}
                   content={video.description || ''}
                   videoUrl={video.videoUrl}
-                  thumbnailUrl={video.thumbnailUrl}
+                  thumbnailUrl={video.thumbnailUrl || undefined}
                   likeCount={video.likeCount}
                   commentCount={video.commentCount}
                   shareCount={video.shareCount}

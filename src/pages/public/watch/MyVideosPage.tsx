@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { VideoThumbnailCard } from '../../../components/common/cards';
 import { WatchEditModal } from '../../../components/modal/watch';
 import { ConfirmDeleteModal } from '../../../components/modal';
-import type { WatchResponse } from '../../../types/video.types';
+import type { WatchResponse } from '../../../types/watch.types';
 import { apiGetMyWatches, apiGetMyWatchStatistics, apiDeleteWatch, type WatchStatistics } from '../../../services/watchService';
 import { toast } from 'react-toastify';
 
@@ -269,14 +269,20 @@ const MyVideosPage: React.FC = () => {
             setIsEditModalOpen(false);
             setSelectedVideoForEdit(null);
           }}
-          onSuccess={handleEditSuccess}
+          onSuccess={(updatedVideo) => {
+            if (updatedVideo) {
+              // Type assertion to match our WatchResponse which includes 'saved' field
+              const video = updatedVideo as import('../../../types/watch.types').WatchResponse;
+              handleEditSuccess(video);
+            }
+          }}
           watchData={{
             watchId: selectedVideoForEdit.watchId,
             title: selectedVideoForEdit.title,
             description: selectedVideoForEdit.description || '',
             videoUrl: selectedVideoForEdit.videoUrl,
-            thumbnailUrl: selectedVideoForEdit.thumbnailUrl,
-            location: selectedVideoForEdit.location,
+            thumbnailUrl: selectedVideoForEdit.thumbnailUrl || undefined,
+            location: selectedVideoForEdit.location || undefined,
             privacy: selectedVideoForEdit.privacy,
             category: 'travel', // You might want to add category to WatchResponse
             tags: selectedVideoForEdit.tags

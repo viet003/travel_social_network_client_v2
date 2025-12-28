@@ -60,6 +60,10 @@ export interface WatchResponse {
   tags: string[];
 }
 
+export interface WatchWithIdsResponse extends WatchResponse {
+  watchHistoryId?: string;
+}
+
 export interface WatchStatistics {
   totalVideos: number;
   totalViews: number;

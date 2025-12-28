@@ -3,7 +3,7 @@ import {
     apiGetUserConversations,
     apiCreateOrGetPrivateConversation,
 } from "../../services/conversationService";
-import type { ConversationResponse } from "../../services/conversationService";
+import type { ConversationResponse } from "../../types/conversation.types";
 import type { Dispatch } from "redux";
 
 // Action to set conversations list

@@ -3,7 +3,7 @@ import { Icon } from '@iconify/react';
 import { useNavigate } from 'react-router-dom';
 import { message } from 'antd';
 import WatchModal from '../../../components/modal/watch/WatchModal';
-import type { WatchWithIdsResponse } from '../../../types/video.types';
+import type { WatchWithIdsResponse } from '../../../types/watch.types';
 import { apiGetWatchHistory } from '../../../services/watchService';
 
 const WatchHistoryPage: React.FC = () => {
@@ -121,13 +121,13 @@ const WatchHistoryPage: React.FC = () => {
                 <WatchModal
                   videoId={video.watchId}
                   userId={video.user.userId}
-                  avatar={video.user.avatarImg}
-                  userName={video.user.userName || video.user.fullName || 'Unknown User'}
-                  location={video.location}
+                  avatar={video.user.avatarImg || undefined}
+                  userName={video.user.userName || video.user.userProfile?.fullName || 'Unknown User'}
+                  location={video.location || undefined}
                   timeAgo={video.createdAt}
                   content={video.description || ''}
                   videoUrl={video.videoUrl}
-                  thumbnailUrl={video.thumbnailUrl}
+                  thumbnailUrl={video.thumbnailUrl || undefined}
                   likeCount={video.likeCount}
                   commentCount={video.commentCount}
                   shareCount={video.shareCount}
