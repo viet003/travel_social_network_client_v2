@@ -5,6 +5,7 @@ import { Icon } from '@iconify/react';
 import { path } from '../utilities/path';
 import { logout } from '../stores/actions/authAction';
 import { ProfileDropdown, NotificationsDropdown } from '../components/common';
+import defaultAvatar from '../assets/images/avatar_default.png';
 
 const AdminLayout = () => {
   const navigate = useNavigate();
@@ -163,9 +164,16 @@ const AdminLayout = () => {
       <main className="flex-1 ml-72 flex flex-col min-w-0 bg-gray-50/30">
         {/* Header */}
         <header className="h-20 bg-white/80 backdrop-blur-md border-b border-gray-200 flex items-center justify-between px-8 sticky top-0 z-10 transition-all duration-300">
-          <div>
-            <h2 className="text-2xl font-bold text-gray-800">{getPageTitle()}</h2>
-            <p className="text-sm text-gray-500 mt-0.5">Chào mừng trở lại, {fullName?.split(' ').pop() || 'Admin'}!</p>
+          <div className="flex items-center gap-6">
+            <div className="flex items-center gap-3 text-blue-600">
+              <div className="p-2 bg-blue-50 rounded-xl">
+                <Icon icon="fluent:compass-northwest-24-filled" className="w-6 h-6" />
+              </div>
+              <div>
+                <h2 className="text-lg font-bold text-gray-800">{getPageTitle()}</h2>
+                <p className="text-xs text-gray-500">Chào mừng trở lại, {fullName?.split(' ').pop() || 'Admin'}!</p>
+              </div>
+            </div>
           </div>
           
           <div className="flex items-center gap-6">
@@ -204,9 +212,9 @@ const AdminLayout = () => {
                 </div>
                 <div className="relative">
                   <img 
-                      src={avatar || "https://i.pinimg.com/736x/1b/6a/c1/1b6ac1a458b9979625bc0e9701a42f8d.jpg"} 
+                      src={avatar || defaultAvatar} 
                       alt="Admin Avatar" 
-                      className="w-10 h-10 rounded-xl object-cover border-2 border-white"
+                      className="w-10 h-10 rounded-full object-cover border-2 border-white"
                   />
                   <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 border-2 border-white rounded-full"></div>
                 </div>

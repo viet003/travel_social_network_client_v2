@@ -1,37 +1,109 @@
-import React, { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Icon } from '@iconify/react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import TravelInput from '../../components/ui/customize/TravelInput';
 import TravelSelect from '../../components/ui/customize/TravelSelect';
-
-// Realistic Mock Data
-const mockGroups = [
-  { id: '1', name: 'Hội mê du lịch bụi', members: 187, status: 'ACTIVE', createdBy: 'Nguyễn Minh Tuấn', date: '2022-11-10', postsPerDay: 142, category: 'Phượt', thumbnail: 'https://i.pinimg.com/736x/7e/92/a3/7e92a3a332bb71af1ce2c9ded6cdfd1b.jpg' },
-  { id: '2', name: 'Review Homestay Đà Lạt', members: 156, status: 'ACTIVE', createdBy: 'Trần Thị Thu Hà', date: '2023-01-05', postsPerDay: 98, category: 'Review', thumbnail: 'https://i.pinimg.com/1200x/4f/49/27/4f49274cebfb08920c2f864637462a3d.jpg' },
-  { id: '3', name: 'Phượt Xuyên Việt', members: 198, status: 'WARNING', createdBy: 'Lê Hoàng Nam', date: '2021-08-20', postsPerDay: 176, category: 'Phượt', thumbnail: 'https://i.pinimg.com/1200x/00/8a/b1/008ab12098c70aed501ada315982f70e.jpg' },
-  { id: '4', name: 'Săn mây Tà Xùa', members: 134, status: 'ACTIVE', createdBy: 'Phạm Ngọc Anh', date: '2023-03-15', postsPerDay: 76, category: 'Check-in', thumbnail: 'https://statics.vinpearl.com/ta-xua-yen-bai-01_1629083710.jpg' },
-  { id: '5', name: 'Cắm trại cuối tuần', members: 89, status: 'BANNED', createdBy: 'Hoàng Văn Đức', date: '2023-04-01', postsPerDay: 0, category: 'Camping', thumbnail: 'https://statics.vinpearl.com/cam-trai-3_1635334223.jpg' },
-  { id: '6', name: 'Ẩm thực 3 miền', members: 192, status: 'ACTIVE', createdBy: 'Vũ Thị Mai', date: '2022-05-12', postsPerDay: 165, category: 'Ẩm thực', thumbnail: 'https://statics.vinpearl.com/am-thuc-viet-nam-01_1630908084.jpg' },
-  { id: '7', name: 'Tìm bạn đồng hành', members: 167, status: 'ACTIVE', createdBy: 'Đặng Quốc Bảo', date: '2023-02-28', postsPerDay: 124, category: 'Kết nối', thumbnail: 'https://statics.vinpearl.com/du-lich-phu-quoc-1_1634179459.jpg' },
-];
-
-const groupCategoryData = [
-  { name: 'Phượt', value: 178, color: '#3b82f6' },
-  { name: 'Review', value: 134, color: '#10b981' },
-  { name: 'Ẩm thực', value: 156, color: '#f59e0b' },
-  { name: 'Camping', value: 98, color: '#22c55e' },
-  { name: 'Khác', value: 67, color: '#6b7280' },
-];
+import { apiGetAllGroups } from '../../services/adminDashboardService';
+import { apiLockGroup, apiUnlockGroup } from '../../services/groupService';
+import { toast } from 'react-toastify';
+import type { AdminGroup } from '../../types/adminGroup.types';
+import avatarDefault from '../../assets/images/avatar_default.png';
 
 const AdminGroupManagementPage = () => {
+  const navigate = useNavigate();
+  const [groups, setGroups] = useState<AdminGroup[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL');
+  const [showLockModal, setShowLockModal] = useState(false);
+  const [selectedGroup, setSelectedGroup] = useState<AdminGroup | null>(null);
+  const [lockReason, setLockReason] = useState('');
 
-  const filteredGroups = mockGroups.filter(group => {
-    const matchesSearch = group.name.toLowerCase().includes(searchTerm.toLowerCase());
+  useEffect(() => {
+    fetchGroups();
+  }, []);
+
+  const handleViewGroup = (groupId: string) => {
+    navigate(`/admin/group/${groupId}`);
+  };
+
+  const handleLockClick = (group: AdminGroup) => {
+    setSelectedGroup(group);
+    setShowLockModal(true);
+    setLockReason('');
+  };
+
+  const handleConfirmLock = async () => {
+    if (!selectedGroup) return;
+    if (!lockReason.trim()) {
+      toast.error('Vui lòng nhập lý do khóa nhóm');
+      return;
+    }
+
+    try {
+      await apiLockGroup(selectedGroup.groupId, lockReason);
+      
+      // Update local state immediately
+      setGroups(groups.map(g => 
+        g.groupId === selectedGroup.groupId 
+          ? { ...g, isLocked: true, status: 'BANNED' as const, moderationReason: lockReason }
+          : g
+      ));
+      
+      toast.success('Khóa nhóm thành công');
+      setShowLockModal(false);
+      setSelectedGroup(null);
+      setLockReason('');
+    } catch (error) {
+      console.error('Error locking group:', error);
+      toast.error('Khóa nhóm thất bại');
+    }
+  };
+
+  const handleUnlock = async (group: AdminGroup) => {
+    try {
+      await apiUnlockGroup(group.groupId);
+      
+      // Update local state immediately
+      setGroups(groups.map(g => 
+        g.groupId === group.groupId 
+          ? { ...g, isLocked: false, status: 'ACTIVE' as const, moderationReason: undefined }
+          : g
+      ));
+      
+      toast.success('Mở khóa nhóm thành công');
+    } catch (error) {
+      console.error('Error unlocking group:', error);
+      toast.error('Mở khóa nhóm thất bại');
+    }
+  };
+
+  const fetchGroups = async () => {
+    try {
+      setLoading(true);
+      const data = await apiGetAllGroups(100);
+      setGroups(data);
+    } catch (error) {
+      console.error('Error fetching groups:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const filteredGroups = groups.filter(group => {
+    const matchesSearch = group.groupName.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === 'ALL' || group.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
+
+  const groupCategoryData = [
+    { name: 'Phượt', value: groups.filter(g => g.tags?.includes('Phượt') || g.tags?.includes('phượt')).length, color: '#3b82f6' },
+    { name: 'Review', value: groups.filter(g => g.tags?.includes('Review') || g.tags?.includes('review')).length, color: '#10b981' },
+    { name: 'Ẩm thực', value: groups.filter(g => g.tags?.includes('Ẩm thực') || g.tags?.includes('ẩm thực')).length, color: '#f59e0b' },
+    { name: 'Camping', value: groups.filter(g => g.tags?.includes('Camping') || g.tags?.includes('camping')).length, color: '#22c55e' },
+    { name: 'Khác', value: groups.filter(g => !g.tags || g.tags === '').length, color: '#6b7280' },
+  ];
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -51,12 +123,25 @@ const AdminGroupManagementPage = () => {
     }
   };
 
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="animate-spin w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full"></div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-800">Quản lý nhóm</h1>
-          <p className="text-gray-500 text-sm mt-1">Quản lý các cộng đồng và nhóm du lịch</p>
+        <div className="flex items-center gap-3">
+          <div className="p-3 bg-blue-50 rounded-xl">
+            <Icon icon="fluent:people-community-24-filled" className="w-7 h-7 text-blue-600" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold text-gray-800">Quản lý nhóm</h1>
+            <p className="text-gray-500 text-sm mt-1">Quản lý các cộng đồng và nhóm du lịch</p>
+          </div>
         </div>
       </div>
 
@@ -68,7 +153,7 @@ const AdminGroupManagementPage = () => {
             <div className="flex justify-between items-start">
               <div>
                 <p className="text-sm font-medium text-gray-500 mb-1">Tổng nhóm</p>
-                <h3 className="text-2xl font-bold text-gray-900">{mockGroups.length}</h3>
+                <h3 className="text-2xl font-bold text-gray-900">{groups.length}</h3>
               </div>
               <div className="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white transition-colors">
                 <Icon icon="fluent:people-community-24-filled" className="w-5 h-5" />
@@ -88,7 +173,7 @@ const AdminGroupManagementPage = () => {
             <div className="flex justify-between items-start">
               <div>
                 <p className="text-sm font-medium text-gray-500 mb-1">Hoạt động</p>
-                <h3 className="text-2xl font-bold text-gray-900">{mockGroups.filter(g => g.status === 'ACTIVE').length}</h3>
+                <h3 className="text-2xl font-bold text-gray-900">{groups.filter(g => g.status === 'ACTIVE').length}</h3>
               </div>
               <div className="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:bg-emerald-600 group-hover:text-white transition-colors">
                 <Icon icon="fluent:checkmark-circle-24-filled" className="w-5 h-5" />
@@ -108,7 +193,7 @@ const AdminGroupManagementPage = () => {
             <div className="flex justify-between items-start">
               <div>
                 <p className="text-sm font-medium text-gray-500 mb-1">Cảnh báo/Khóa</p>
-                <h3 className="text-2xl font-bold text-gray-900">{mockGroups.filter(g => g.status !== 'ACTIVE').length}</h3>
+                <h3 className="text-2xl font-bold text-gray-900">{groups.filter(g => g.status !== 'ACTIVE').length}</h3>
               </div>
               <div className="w-10 h-10 rounded-lg bg-red-50 text-red-600 flex items-center justify-center group-hover:bg-red-600 group-hover:text-white transition-colors">
                 <Icon icon="fluent:warning-24-filled" className="w-5 h-5" />
@@ -186,25 +271,25 @@ const AdminGroupManagementPage = () => {
             </thead>
             <tbody>
               {filteredGroups.map((group) => (
-                <tr key={group.id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
+                <tr key={group.groupId} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
                       <img 
-                        src={group.thumbnail} 
-                        alt={group.name}
+                        src={group.coverImageUrl || avatarDefault} 
+                        alt={group.groupName}
                         className="w-16 h-16 rounded-lg object-cover border border-gray-200"
                       />
                       <div className="flex-1 min-w-0">
-                        <div className="font-medium text-gray-900">{group.name}</div>
+                        <div className="font-medium text-gray-900">{group.groupName}</div>
                         <div className="flex items-center gap-2 mt-1">
-                          <span className="text-xs text-gray-500">Tạo ngày {new Date(group.date).toLocaleDateString('vi-VN')}</span>
-                          <span className="text-xs bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded">{group.category}</span>
+                          <span className="text-xs text-gray-500">Tạo ngày {new Date(group.createdAt).toLocaleDateString('vi-VN')}</span>
+                          {group.tags && <span className="text-xs bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded">{group.tags}</span>}
                         </div>
                       </div>
                     </div>
                   </td>
                   <td className="px-6 py-4 text-gray-600">
-                    {group.members.toLocaleString('vi-VN')}
+                    {group.memberCount.toLocaleString('vi-VN')}
                   </td>
                   <td className="px-6 py-4 text-gray-600">
                     {group.createdBy}
@@ -219,15 +304,30 @@ const AdminGroupManagementPage = () => {
                   </td>
                   <td className="px-6 py-4 text-right">
                     <div className="flex items-center justify-end gap-2">
-                      <button className="p-2 text-gray-400 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors" title="Xem chi tiết">
+                      <button 
+                        onClick={() => handleViewGroup(group.groupId)}
+                        className="p-2 text-gray-400 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors cursor-pointer" 
+                        title="Xem chi tiết"
+                      >
                         <Icon icon="fluent:eye-24-regular" className="w-5 h-5" />
                       </button>
-                      <button className="p-2 text-gray-400 hover:bg-amber-50 hover:text-amber-600 rounded-lg transition-colors" title="Cảnh báo">
-                        <Icon icon="fluent:warning-24-regular" className="w-5 h-5" />
-                      </button>
-                      <button className="p-2 text-gray-400 hover:bg-red-50 hover:text-red-600 rounded-lg transition-colors" title="Khóa nhóm">
-                        <Icon icon="fluent:lock-closed-24-regular" className="w-5 h-5" />
-                      </button>
+                      {group.isLocked ? (
+                        <button 
+                          onClick={() => handleUnlock(group)}
+                          className="p-2 text-gray-400 hover:bg-green-50 hover:text-green-600 rounded-lg transition-colors cursor-pointer" 
+                          title="Mở khóa nhóm"
+                        >
+                          <Icon icon="fluent:lock-open-24-regular" className="w-5 h-5" />
+                        </button>
+                      ) : (
+                        <button 
+                          onClick={() => handleLockClick(group)}
+                          className="p-2 text-gray-400 hover:bg-red-50 hover:text-red-600 rounded-lg transition-colors cursor-pointer" 
+                          title="Khóa nhóm"
+                        >
+                          <Icon icon="fluent:lock-closed-24-regular" className="w-5 h-5" />
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>
@@ -241,6 +341,64 @@ const AdminGroupManagementPage = () => {
           </div>
         )}
       </div>
+
+      {/* Lock Group Modal */}
+      {showLockModal && selectedGroup && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
+            <div className="p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+                  <Icon icon="fluent:lock-closed-24-filled" className="w-6 h-6 text-red-600" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">Khóa nhóm</h3>
+                  <p className="text-sm text-gray-500">{selectedGroup.groupName}</p>
+                </div>
+              </div>
+              
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Lý do khóa nhóm <span className="text-red-500">*</span>
+                </label>
+                <textarea
+                  value={lockReason}
+                  onChange={(e) => setLockReason(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent resize-none"
+                  rows={4}
+                  placeholder="Nhập lý do khóa nhóm này..."
+                />
+              </div>
+
+              <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
+                <p className="text-sm text-red-800">
+                  <Icon icon="fluent:warning-24-filled" className="inline w-4 h-4 mr-1" />
+                  Chủ nhóm sẽ nhận được thông báo về việc nhóm bị khóa
+                </p>
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  onClick={() => {
+                    setShowLockModal(false);
+                    setSelectedGroup(null);
+                    setLockReason('');
+                  }}
+                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  Hủy
+                </button>
+                <button
+                  onClick={handleConfirmLock}
+                  className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                >
+                  Xác nhận khóa
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

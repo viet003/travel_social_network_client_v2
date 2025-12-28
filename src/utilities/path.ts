@@ -59,7 +59,9 @@ export const path = {
     ADMIN_DASHBOARD: "dashboard",
     ADMIN_USERS: "users",
     ADMIN_BLOGS: "blogs",
+    ADMIN_BLOG_DETAIL: "blog/:blogId",
     ADMIN_GROUPS: "groups",
+    ADMIN_GROUP_DETAIL: "group/:groupId",
     ADMIN_REPORTS: "reports",
     ADMIN_SETTINGS: "settings",
     STAR: "*"

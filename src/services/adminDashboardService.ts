@@ -7,6 +7,8 @@ import type {
   RecentUser, 
   RecentActivity 
 } from "../types/adminDashboard.types";
+import type { AdminGroup } from "../types/adminGroup.types";
+import type { AdminBlog } from "../types/adminBlog.types";
 
 /**
  * Get dashboard statistics
@@ -170,3 +172,74 @@ export const apiAdminCreateUser = async (data: AdminCreateUserData): Promise<Reg
       : error;
   }
 };
+
+/**
+ * Get all groups for admin management
+ */
+export const apiGetAllGroups = async (limit: number = 100): Promise<AdminGroup[]> => {
+  try {
+    const response: AxiosResponse<ApiResponse<AdminGroup[]>> = await axiosConfig({
+      method: 'GET',
+      url: '/admin/dashboard/groups',
+      params: { limit }
+    });
+    return response.data.data;
+  } catch (error: unknown) {
+    throw error && typeof error === 'object' && 'response' in error 
+      ? (error as { response: { data: unknown } }).response.data 
+      : error;
+  }
+};
+
+/**
+ * Get all blogs for admin management
+ */
+export const apiGetAllBlogs = async (limit: number = 100): Promise<AdminBlog[]> => {
+  try {
+    const response: AxiosResponse<ApiResponse<AdminBlog[]>> = await axiosConfig({
+      method: 'GET',
+      url: '/admin/dashboard/blogs',
+      params: { limit }
+    });
+    return response.data.data;
+  } catch (error: unknown) {
+    throw error && typeof error === 'object' && 'response' in error 
+      ? (error as { response: { data: unknown } }).response.data 
+      : error;
+  }
+};
+
+/**
+ * Approve a blog (change status to PUBLISHED)
+ */
+export const apiApproveBlog = async (blogId: string): Promise<AdminBlog> => {
+  try {
+    const response: AxiosResponse<ApiResponse<AdminBlog>> = await axiosConfig({
+      method: 'PATCH',
+      url: `/admin/dashboard/blogs/${blogId}/approve`
+    });
+    return response.data.data;
+  } catch (error: unknown) {
+    throw error && typeof error === 'object' && 'response' in error 
+      ? (error as { response: { data: unknown } }).response.data 
+      : error;
+  }
+};
+
+/**
+ * Reject a blog (change status to ARCHIVED)
+ */
+export const apiRejectBlog = async (blogId: string): Promise<AdminBlog> => {
+  try {
+    const response: AxiosResponse<ApiResponse<AdminBlog>> = await axiosConfig({
+      method: 'PATCH',
+      url: `/admin/dashboard/blogs/${blogId}/reject`
+    });
+    return response.data.data;
+  } catch (error: unknown) {
+    throw error && typeof error === 'object' && 'response' in error 
+      ? (error as { response: { data: unknown } }).response.data 
+      : error;
+  }
+};
+

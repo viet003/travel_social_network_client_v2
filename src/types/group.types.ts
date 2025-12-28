@@ -28,6 +28,8 @@ export interface GroupResponse {
   privacy: boolean; // true = private, false = public
   isMember: boolean;
   currentUserRole: string | null; // OWNER, ADMIN, MODERATOR, MEMBER, null if not a member
+  isLocked?: boolean; // true if group is locked by admin
+  moderationReason?: string | null; // reason for locking
   createdAt: string | null; // ISO date string
   lastActivityAt: string | null; // ISO date string
   postsPerDay: number; // Average posts per day in last 30 days

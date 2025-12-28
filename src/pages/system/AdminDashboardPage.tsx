@@ -173,6 +173,17 @@ const AdminDashboardPage = () => {
 
   return (
     <div className="space-y-8">
+      {/* Page Header */}
+      <div className="flex items-center gap-3">
+        <div className="p-3 bg-blue-50 rounded-xl">
+          <Icon icon="fluent:board-24-filled" className="w-7 h-7 text-blue-600" />
+        </div>
+        <div>
+          <h1 className="text-2xl font-bold text-gray-800">Tổng quan hệ thống</h1>
+          <p className="text-gray-500 text-sm mt-1">Thống kê và phân tích hoạt động nền tảng</p>
+        </div>
+      </div>
+
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {statsDisplay.map((stat, index) => (
@@ -257,6 +268,7 @@ const AdminDashboardPage = () => {
             <thead className="text-xs text-gray-500 uppercase bg-gray-50">
               <tr>
                 <th className="px-6 py-4 font-medium">Người dùng</th>
+                <th className="px-6 py-4 font-medium">Vai trò</th>
                 <th className="px-6 py-4 font-medium">Trạng thái</th>
                 <th className="px-6 py-4 font-medium">Ngày tham gia</th>
                 <th className="px-6 py-4 font-medium text-right">Hành động</th>
@@ -277,6 +289,15 @@ const AdminDashboardPage = () => {
                         <div className="text-xs text-gray-500">{user.email}</div>
                       </div>
                     </div>
+                  </td>
+                  <td className="px-6 py-4">
+                    <span className={`px-2.5 py-1 rounded-lg text-xs font-medium border ${
+                      user.role === 'ADMIN' ? 'bg-purple-50 text-purple-600 border-purple-100' :
+                      user.role === 'MODERATOR' ? 'bg-amber-50 text-amber-600 border-amber-100' :
+                      'bg-blue-50 text-blue-600 border-blue-100'
+                    }`}>
+                      {user.role}
+                    </span>
                   </td>
                   <td className="px-6 py-4">
                     <span className={`px-2.5 py-1 rounded-full text-xs font-medium flex items-center gap-1 w-fit ${

@@ -33,6 +33,7 @@ import {
   ExploreLayout,
   AdminLayout,
 } from "./layout";
+import BlogDetailPage from "./pages/public/blog/BlogDetailPage";
 import {
   FriendsHomePage,
   FriendRequestsPage,
@@ -47,6 +48,7 @@ import {
   GroupSuggestionsPage,
   GroupDetailPage,
 } from "./pages/public/groups";
+import { GroupDetailPage as AdminGroupDetailPage } from "./pages/public/groups";
 import {
   GroupAboutPage,
   GroupDiscussionPage,
@@ -68,7 +70,6 @@ import {
   SeasonalTravelGuidePage,
 } from "./pages/public/explore";
 import BlogCreateEditPage from "./pages/public/blog/BlogCreateEditPage";
-import BlogDetailPage from "./pages/public/blog/BlogDetailPage";
 import {
   LoginForm,
   SignUpForm,
@@ -227,6 +228,13 @@ function App() {
           <Route path={path.ADMIN_USERS} element={<AdminUserManagementPage />} />
           <Route path={path.ADMIN_BLOGS} element={<AdminBlogManagementPage />} />
           <Route path={path.ADMIN_GROUPS} element={<AdminGroupManagementPage />} />
+          <Route path={path.ADMIN_BLOG_DETAIL} element={<BlogDetailPage />} />
+          <Route path={path.ADMIN_GROUP_DETAIL} element={<AdminGroupDetailPage />}>
+            <Route index element={<GroupDiscussionPage />} />
+            <Route path={path.GROUP_ABOUT} element={<GroupAboutPage />} />
+            <Route path={path.GROUP_MEMBERS} element={<GroupMembersPage />} />
+            <Route path={path.GROUP_MEDIA} element={<GroupMediaPage />} />
+          </Route>
           <Route path={path.ADMIN_REPORTS} element={<div className="p-8 text-gray-500">Reports Management Module (Coming Soon)</div>} />
           <Route path={path.ADMIN_SETTINGS} element={<div className="p-8 text-gray-500">System Settings Module (Coming Soon)</div>} />
         </Route>

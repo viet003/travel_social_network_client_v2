@@ -1,37 +1,112 @@
-import React, { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Icon } from '@iconify/react';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
-import TravelButton from '../../components/ui/customize/TravelButton';
 import TravelInput from '../../components/ui/customize/TravelInput';
-
-// Realistic Mock Data
-const mockBlogs = [
-  { id: '1', title: 'Kinh nghiệm du lịch Đà Lạt 3 ngày 2 đêm', author: 'Nguyễn Minh Tuấn', status: 'PUBLISHED', date: '2023-06-01', views: 187, likes: 142, category: 'Kinh nghiệm', thumbnail: 'https://images.unsplash.com/photo-1583417319070-4a69db38a482?w=400' },
-  { id: '2', title: 'Review chuyến đi Sapa mùa lúa chín', author: 'Trần Thị Thu Hà', status: 'PENDING', date: '2023-06-02', views: 0, likes: 0, category: 'Review', thumbnail: 'https://images.unsplash.com/photo-1559592413-7cec4d0cae2b?w=400' },
-  { id: '3', title: 'Top 10 quán cà phê đẹp ở Hà Nội', author: 'Lê Hoàng Nam', status: 'REJECTED', date: '2023-05-28', views: 23, likes: 8, category: 'Ẩm thực', thumbnail: 'https://images.unsplash.com/photo-1559925393-8be0ec4767c8?w=400' },
-  { id: '4', title: 'Hành trình xuyên Việt bằng xe máy', author: 'Phạm Ngọc Anh', status: 'PUBLISHED', date: '2023-05-15', views: 198, likes: 156, category: 'Hành trình', thumbnail: 'https://images.unsplash.com/photo-1552733407-5d5c46c3bb3b?w=400' },
-  { id: '5', title: 'Ẩm thực đường phố Sài Gòn', author: 'Hoàng Văn Đức', status: 'PENDING', date: '2023-06-03', views: 0, likes: 0, category: 'Ẩm thực', thumbnail: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400' },
-  { id: '6', title: 'Check-in sống ảo tại Phú Quốc', author: 'Vũ Thị Mai', status: 'PUBLISHED', date: '2023-06-10', views: 165, likes: 124, category: 'Check-in', thumbnail: 'https://images.unsplash.com/photo-1551244072-5d12893278ab?w=400' },
-  { id: '7', title: 'Leo núi Bà Đen - Tây Ninh', author: 'Đặng Quốc Bảo', status: 'PUBLISHED', date: '2023-06-12', views: 143, likes: 89, category: 'Khám phá', thumbnail: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400' },
-];
-
-const blogCategoryData = [
-  { name: 'Kinh nghiệm', value: 142, color: '#3b82f6' },
-  { name: 'Review', value: 98, color: '#10b981' },
-  { name: 'Ẩm thực', value: 87, color: '#f59e0b' },
-  { name: 'Check-in', value: 76, color: '#a855f7' },
-  { name: 'Khác', value: 53, color: '#6b7280' },
-];
+import { apiGetAllBlogs, apiApproveBlog, apiRejectBlog } from '../../services/adminDashboardService';
+import type { AdminBlog } from '../../types/adminBlog.types';
+import avatarDefault from '../../assets/images/avatar_default.png';
+import ConfirmDeleteModal from '../../components/modal/confirm/ConfirmDeleteModal';
 
 const AdminBlogManagementPage = () => {
-  const [activeTab, setActiveTab] = useState<'ALL' | 'PENDING' | 'PUBLISHED' | 'REJECTED'>('ALL');
+  const navigate = useNavigate();
+  const [blogs, setBlogs] = useState<AdminBlog[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<'ALL' | 'PENDING' | 'PUBLISHED' | 'REJECTED' | 'DRAFT' | 'ARCHIVED'>('ALL');
   const [searchTerm, setSearchTerm] = useState('');
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
+  
+  // Modal states
+  const [confirmModal, setConfirmModal] = useState<{
+    isOpen: boolean;
+    action: 'approve' | 'reject' | null;
+    blogId: string | null;
+    blogTitle: string;
+  }>({
+    isOpen: false,
+    action: null,
+    blogId: null,
+    blogTitle: '',
+  });
 
-  const filteredBlogs = mockBlogs.filter(blog => {
-    const matchesSearch = blog.title.toLowerCase().includes(searchTerm.toLowerCase()) || blog.author.toLowerCase().includes(searchTerm.toLowerCase());
+  useEffect(() => {
+    fetchBlogs();
+  }, []);
+
+  const fetchBlogs = async () => {
+    try {
+      setLoading(true);
+      const data = await apiGetAllBlogs(100);
+      setBlogs(data);
+    } catch (error) {
+      console.error('Error fetching blogs:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleViewBlog = (blogId: string) => {
+    // Navigate to blog detail within admin layout
+    navigate(`/admin/blog/${blogId}`);
+  };
+
+  const handleApproveBlog = async (blogId: string, blogTitle: string) => {
+    setConfirmModal({
+      isOpen: true,
+      action: 'approve',
+      blogId,
+      blogTitle,
+    });
+  };
+
+  const handleRejectBlog = async (blogId: string, blogTitle: string) => {
+    setConfirmModal({
+      isOpen: true,
+      action: 'reject',
+      blogId,
+      blogTitle,
+    });
+  };
+
+  const handleConfirmAction = async () => {
+    if (!confirmModal.blogId || !confirmModal.action) return;
+    
+    try {
+      setActionLoading(confirmModal.blogId);
+      
+      if (confirmModal.action === 'approve') {
+        const updatedBlog = await apiApproveBlog(confirmModal.blogId);
+        setBlogs(blogs.map(blog => blog.blogId === confirmModal.blogId ? updatedBlog : blog));
+        toast.success('Duyệt bài viết thành công!');
+      } else if (confirmModal.action === 'reject') {
+        const updatedBlog = await apiRejectBlog(confirmModal.blogId);
+        setBlogs(blogs.map(blog => blog.blogId === confirmModal.blogId ? updatedBlog : blog));
+        toast.success('Đã từ chối bài viết!');
+      }
+    } catch (error) {
+      console.error('Error performing action:', error);
+      toast.error(`Không thể ${confirmModal.action === 'approve' ? 'duyệt' : 'từ chối'} bài viết!`);
+    } finally {
+      setActionLoading(null);
+      setConfirmModal({ isOpen: false, action: null, blogId: null, blogTitle: '' });
+    }
+  };
+
+  const filteredBlogs = blogs.filter(blog => {
+    const matchesSearch = blog.title.toLowerCase().includes(searchTerm.toLowerCase()) || blog.authorName.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesTab = activeTab === 'ALL' || blog.status === activeTab;
     return matchesSearch && matchesTab;
   });
+
+  // Calculate category data dynamically
+  const blogCategoryData = [
+    { name: 'Kinh nghiệm', value: blogs.filter(b => b.category?.toLowerCase().includes('kinh nghiệm')).length, color: '#3b82f6' },
+    { name: 'Review', value: blogs.filter(b => b.category?.toLowerCase().includes('review')).length, color: '#10b981' },
+    { name: 'Ẩm thực', value: blogs.filter(b => b.category?.toLowerCase().includes('ẩm thực')).length, color: '#f59e0b' },
+    { name: 'Check-in', value: blogs.filter(b => b.category?.toLowerCase().includes('check-in') || b.category?.toLowerCase().includes('checkin')).length, color: '#a855f7' },
+    { name: 'Khác', value: blogs.filter(b => !b.category || b.category === '').length, color: '#6b7280' },
+  ];
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -47,16 +122,31 @@ const AdminBlogManagementPage = () => {
       case 'PUBLISHED': return 'Đã duyệt';
       case 'PENDING': return 'Chờ duyệt';
       case 'REJECTED': return 'Từ chối';
+      case 'DRAFT': return 'Nháp';
+      case 'ARCHIVED': return 'Lưu trữ';
       default: return status;
     }
   };
 
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="animate-spin w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full"></div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-800">Quản lý bài viết</h1>
-          <p className="text-gray-500 text-sm mt-1">Kiểm duyệt và quản lý nội dung cộng đồng</p>
+        <div className="flex items-center gap-3">
+          <div className="p-3 bg-blue-50 rounded-xl">
+            <Icon icon="fluent:document-text-24-filled" className="w-7 h-7 text-blue-600" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold text-gray-800">Quản lý bài viết</h1>
+            <p className="text-gray-500 text-sm mt-1">Kiểm duyệt và quản lý nội dung cộng đồng</p>
+          </div>
         </div>
       </div>
 
@@ -68,7 +158,7 @@ const AdminBlogManagementPage = () => {
             <div className="flex justify-between items-start">
               <div>
                 <p className="text-sm font-medium text-gray-500 mb-1">Tổng bài viết</p>
-                <h3 className="text-2xl font-bold text-gray-900">{mockBlogs.length}</h3>
+                <h3 className="text-2xl font-bold text-gray-900">{blogs.length}</h3>
               </div>
               <div className="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white transition-colors">
                 <Icon icon="fluent:document-text-24-filled" className="w-5 h-5" />
@@ -88,7 +178,7 @@ const AdminBlogManagementPage = () => {
             <div className="flex justify-between items-start">
               <div>
                 <p className="text-sm font-medium text-gray-500 mb-1">Chờ duyệt</p>
-                <h3 className="text-2xl font-bold text-gray-900">{mockBlogs.filter(b => b.status === 'PENDING').length}</h3>
+                <h3 className="text-2xl font-bold text-gray-900">{blogs.filter(b => b.status === 'PENDING').length}</h3>
               </div>
               <div className="w-10 h-10 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center group-hover:bg-amber-600 group-hover:text-white transition-colors">
                 <Icon icon="fluent:clock-24-filled" className="w-5 h-5" />
@@ -107,7 +197,7 @@ const AdminBlogManagementPage = () => {
             <div className="flex justify-between items-start">
               <div>
                 <p className="text-sm font-medium text-gray-500 mb-1">Đã xuất bản</p>
-                <h3 className="text-2xl font-bold text-gray-900">{mockBlogs.filter(b => b.status === 'PUBLISHED').length}</h3>
+                <h3 className="text-2xl font-bold text-gray-900">{blogs.filter(b => b.status === 'PUBLISHED').length}</h3>
               </div>
               <div className="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:bg-emerald-600 group-hover:text-white transition-colors">
                 <Icon icon="fluent:checkmark-circle-24-filled" className="w-5 h-5" />
@@ -157,7 +247,7 @@ const AdminBlogManagementPage = () => {
             ].map((tab) => (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id as any)}
+                onClick={() => setActiveTab(tab.id as 'ALL' | 'PENDING' | 'PUBLISHED' | 'REJECTED' | 'DRAFT' | 'ARCHIVED')}
                 className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors whitespace-nowrap ${
                   activeTab === tab.id
                     ? 'bg-blue-50 text-blue-600'
@@ -192,25 +282,25 @@ const AdminBlogManagementPage = () => {
             </thead>
             <tbody>
               {filteredBlogs.map((blog) => (
-                <tr key={blog.id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
+                <tr key={blog.blogId} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
                       <img 
-                        src={blog.thumbnail} 
+                        src={blog.thumbnailUrl || avatarDefault} 
                         alt={blog.title}
                         className="w-16 h-16 rounded-lg object-cover border border-gray-200"
                       />
                       <div className="flex-1 min-w-0">
                         <div className="font-medium text-gray-900 line-clamp-1" title={blog.title}>{blog.title}</div>
                         <div className="flex items-center gap-2 mt-1">
-                          <span className="text-xs text-gray-500">{new Date(blog.date).toLocaleDateString('vi-VN')}</span>
-                          <span className="text-xs bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded">{blog.category}</span>
+                          <span className="text-xs text-gray-500">{new Date(blog.createdAt).toLocaleDateString('vi-VN')}</span>
+                          {blog.category && <span className="text-xs bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded">{blog.category}</span>}
                         </div>
                       </div>
                     </div>
                   </td>
                   <td className="px-6 py-4 text-gray-600">
-                    {blog.author}
+                    {blog.authorName}
                   </td>
                   <td className="px-6 py-4">
                     <span className={`px-2.5 py-1 rounded-lg text-xs font-medium border ${getStatusColor(blog.status)}`}>
@@ -221,32 +311,63 @@ const AdminBlogManagementPage = () => {
                     <div className="flex items-center gap-4 text-gray-500 text-xs">
                       <span className="flex items-center gap-1">
                         <Icon icon="fluent:eye-24-regular" className="w-4 h-4" />
-                        {blog.views}
+                        {blog.viewCount}
                       </span>
-                      <span className="flex items-center gap-1">
-                        <Icon icon="fluent:heart-24-regular" className="w-4 h-4" />
-                        {blog.likes}
+                      <span className="flex items-center gap-1" title={`${blog.averageRating?.toFixed(1)} ★ (${blog.totalRatings} đánh giá)`}>
+                        <Icon icon="fluent:star-24-filled" className="w-4 h-4" />
+                        {blog.totalRatings}
                       </span>
                     </div>
                   </td>
                   <td className="px-6 py-4 text-right">
                     <div className="flex items-center justify-end gap-2">
-                      <button className="p-2 text-gray-400 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors" title="Xem chi tiết">
+                      <button 
+                        onClick={() => handleViewBlog(blog.blogId)}
+                        className="p-2 text-gray-400 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors cursor-pointer" 
+                        title="Xem chi tiết"
+                      >
                         <Icon icon="fluent:eye-24-regular" className="w-5 h-5" />
                       </button>
                       {blog.status === 'PENDING' && (
                         <>
-                          <button className="p-2 text-gray-400 hover:bg-emerald-50 hover:text-emerald-600 rounded-lg transition-colors" title="Duyệt bài">
-                            <Icon icon="fluent:checkmark-24-regular" className="w-5 h-5" />
+                          <button 
+                            onClick={() => handleApproveBlog(blog.blogId, blog.title)}
+                            disabled={actionLoading === blog.blogId}
+                            className="p-2 text-gray-400 hover:bg-emerald-50 hover:text-emerald-600 rounded-lg transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed" 
+                            title="Duyệt bài"
+                          >
+                            {actionLoading === blog.blogId ? (
+                              <div className="animate-spin w-5 h-5 border-2 border-emerald-600 border-t-transparent rounded-full" />
+                            ) : (
+                              <Icon icon="fluent:checkmark-24-regular" className="w-5 h-5" />
+                            )}
                           </button>
-                          <button className="p-2 text-gray-400 hover:bg-red-50 hover:text-red-600 rounded-lg transition-colors" title="Từ chối">
-                            <Icon icon="fluent:dismiss-24-regular" className="w-5 h-5" />
+                          <button 
+                            onClick={() => handleRejectBlog(blog.blogId, blog.title)}
+                            disabled={actionLoading === blog.blogId}
+                            className="p-2 text-gray-400 hover:bg-red-50 hover:text-red-600 rounded-lg transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed" 
+                            title="Từ chối"
+                          >
+                            {actionLoading === blog.blogId ? (
+                              <div className="animate-spin w-5 h-5 border-2 border-red-600 border-t-transparent rounded-full" />
+                            ) : (
+                              <Icon icon="fluent:dismiss-24-regular" className="w-5 h-5" />
+                            )}
                           </button>
                         </>
                       )}
                       {blog.status === 'PUBLISHED' && (
-                        <button className="p-2 text-gray-400 hover:bg-red-50 hover:text-red-600 rounded-lg transition-colors" title="Gỡ bài">
-                          <Icon icon="fluent:delete-24-regular" className="w-5 h-5" />
+                        <button 
+                          onClick={() => handleRejectBlog(blog.blogId, blog.title)}
+                          disabled={actionLoading === blog.blogId}
+                          className="p-2 text-gray-400 hover:bg-red-50 hover:text-red-600 rounded-lg transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed" 
+                          title="Gỡ bài"
+                        >
+                          {actionLoading === blog.blogId ? (
+                            <div className="animate-spin w-5 h-5 border-2 border-red-600 border-t-transparent rounded-full" />
+                          ) : (
+                            <Icon icon="fluent:delete-24-regular" className="w-5 h-5" />
+                          )}
                         </button>
                       )}
                     </div>
@@ -262,6 +383,22 @@ const AdminBlogManagementPage = () => {
           </div>
         )}
       </div>
+
+      {/* Confirm Modal */}
+      <ConfirmDeleteModal
+        isOpen={confirmModal.isOpen}
+        onClose={() => setConfirmModal({ isOpen: false, action: null, blogId: null, blogTitle: '' })}
+        onConfirm={handleConfirmAction}
+        type="custom"
+        itemName={confirmModal.blogTitle}
+        customTitle={confirmModal.action === 'approve' ? 'Duyệt bài viết' : 'Từ chối bài viết'}
+        customWarning={
+          confirmModal.action === 'approve'
+            ? 'Bài viết sẽ được xuất bản và hiển thị công khai cho tất cả người dùng.'
+            : 'Bài viết sẽ bị từ chối và chuyển sang trạng thái lưu trữ. Tác giả sẽ nhận được thông báo.'
+        }
+        isDeleting={actionLoading === confirmModal.blogId}
+      />
     </div>
   );
 };

@@ -11,10 +11,11 @@ import { formatTimeAgo } from "../../../../utilities/helper";
 interface OutletContext {
   groupData: GroupResponse | null;
   isMember: boolean;
+  currentUserRole: string | null;
 }
 
 const GroupDiscussionPage: React.FC = () => {
-  const { groupData, isMember } = useOutletContext<OutletContext>();
+  const { groupData, isMember, currentUserRole } = useOutletContext<OutletContext>();
   const { groupId } = useParams<{ groupId: string }>();
   const [posts, setPosts] = useState<PostResponse[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
@@ -165,7 +166,7 @@ const GroupDiscussionPage: React.FC = () => {
 
   return (
     <div className="space-y-4">
-      {!isMember ? (
+      {!isMember && currentUserRole !== 'ADMIN' ? (
         <div className="bg-white rounded-lg shadow-sm p-12 text-center">
           <Icon
             icon="fluent:lock-closed-24-regular"

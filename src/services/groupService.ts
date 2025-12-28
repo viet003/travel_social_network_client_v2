@@ -124,6 +124,7 @@ export const apiCreateGroup = async (groupData: {
   privacy: boolean; // true = private, false = public
   cover?: File;
   avatar?: File;
+  tags?: string;
 }): Promise<ApiResponse<GroupResponse>> => {
   try {
     const formData = new FormData();
@@ -132,6 +133,9 @@ export const apiCreateGroup = async (groupData: {
       formData.append('description', groupData.description);
     }
     formData.append('privacy', String(groupData.privacy));
+    if (groupData.tags) {
+      formData.append('tags', groupData.tags);
+    }
     
     if (groupData.cover) {
       formData.append('cover', groupData.cover);
@@ -381,6 +385,42 @@ export const apiRejectJoinRequest = async (
     const response = await axiosConfig({
       method: 'POST',
       url: `/group/${groupId}/members/${targetUserId}/reject`
+    });
+    return response.data;
+  } catch (error: unknown) {
+    if (error && typeof error === 'object' && 'response' in error) {
+      throw (error as { response: { data: unknown } }).response.data;
+    }
+    throw error;
+  }
+};
+
+export const apiLockGroup = async (
+  groupId: string,
+  reason: string
+): Promise<ApiResponse<null>> => {
+  try {
+    const response = await axiosConfig({
+      method: 'POST',
+      url: `/group/${groupId}/lock`,
+      params: { reason }
+    });
+    return response.data;
+  } catch (error: unknown) {
+    if (error && typeof error === 'object' && 'response' in error) {
+      throw (error as { response: { data: unknown } }).response.data;
+    }
+    throw error;
+  }
+};
+
+export const apiUnlockGroup = async (
+  groupId: string
+): Promise<ApiResponse<null>> => {
+  try {
+    const response = await axiosConfig({
+      method: 'POST',
+      url: `/group/${groupId}/unlock`
     });
     return response.data;
   } catch (error: unknown) {
