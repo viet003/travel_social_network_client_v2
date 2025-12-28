@@ -51,13 +51,18 @@ const AdminBlogManagementPage = () => {
     navigate(`/admin/blog/${blogId}`);
   };
 
-  const handleApproveBlog = async (blogId: string, blogTitle: string) => {
-    setConfirmModal({
-      isOpen: true,
-      action: 'approve',
-      blogId,
-      blogTitle,
-    });
+  const handleApproveBlog = async (blogId: string) => {
+    try {
+      setActionLoading(blogId);
+      const updatedBlog = await apiApproveBlog(blogId);
+      setBlogs(blogs.map(blog => blog.blogId === blogId ? updatedBlog : blog));
+      toast.success('Duyệt bài viết thành công!');
+    } catch (error) {
+      console.error('Error approving blog:', error);
+      toast.error('Không thể duyệt bài viết!');
+    } finally {
+      setActionLoading(null);
+    }
   };
 
   const handleRejectBlog = async (blogId: string, blogTitle: string) => {
@@ -70,23 +75,16 @@ const AdminBlogManagementPage = () => {
   };
 
   const handleConfirmAction = async () => {
-    if (!confirmModal.blogId || !confirmModal.action) return;
+    if (!confirmModal.blogId) return;
     
     try {
       setActionLoading(confirmModal.blogId);
-      
-      if (confirmModal.action === 'approve') {
-        const updatedBlog = await apiApproveBlog(confirmModal.blogId);
-        setBlogs(blogs.map(blog => blog.blogId === confirmModal.blogId ? updatedBlog : blog));
-        toast.success('Duyệt bài viết thành công!');
-      } else if (confirmModal.action === 'reject') {
-        const updatedBlog = await apiRejectBlog(confirmModal.blogId);
-        setBlogs(blogs.map(blog => blog.blogId === confirmModal.blogId ? updatedBlog : blog));
-        toast.success('Đã từ chối bài viết!');
-      }
+      const updatedBlog = await apiRejectBlog(confirmModal.blogId);
+      setBlogs(blogs.map(blog => blog.blogId === confirmModal.blogId ? updatedBlog : blog));
+      toast.success('Đã từ chối bài viết!');
     } catch (error) {
-      console.error('Error performing action:', error);
-      toast.error(`Không thể ${confirmModal.action === 'approve' ? 'duyệt' : 'từ chối'} bài viết!`);
+      console.error('Error rejecting blog:', error);
+      toast.error('Không thể từ chối bài viết!');
     } finally {
       setActionLoading(null);
       setConfirmModal({ isOpen: false, action: null, blogId: null, blogTitle: '' });
@@ -331,7 +329,7 @@ const AdminBlogManagementPage = () => {
                       {blog.status === 'PENDING' && (
                         <>
                           <button 
-                            onClick={() => handleApproveBlog(blog.blogId, blog.title)}
+                            onClick={() => handleApproveBlog(blog.blogId)}
                             disabled={actionLoading === blog.blogId}
                             className="p-2 text-gray-400 hover:bg-emerald-50 hover:text-emerald-600 rounded-lg transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed" 
                             title="Duyệt bài"
@@ -391,12 +389,8 @@ const AdminBlogManagementPage = () => {
         onConfirm={handleConfirmAction}
         type="custom"
         itemName={confirmModal.blogTitle}
-        customTitle={confirmModal.action === 'approve' ? 'Duyệt bài viết' : 'Từ chối bài viết'}
-        customWarning={
-          confirmModal.action === 'approve'
-            ? 'Bài viết sẽ được xuất bản và hiển thị công khai cho tất cả người dùng.'
-            : 'Bài viết sẽ bị từ chối và chuyển sang trạng thái lưu trữ. Tác giả sẽ nhận được thông báo.'
-        }
+        customTitle="Từ chối bài viết"
+        customWarning="Bài viết sẽ bị từ chối và chuyển sang trạng thái lưu trữ. Tác giả sẽ nhận được thông báo."
         isDeleting={actionLoading === confirmModal.blogId}
       />
     </div>

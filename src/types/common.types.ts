@@ -12,18 +12,10 @@ export interface ApiResponse<T = unknown> {
 
 export interface PageableResponse<T> {
   content: T[];
+  pageNumber: number;
+  pageSize: number;
   totalPages: number;
   totalElements: number;
-  size?: number;
-  number?: number;
-  hasNext?: boolean;
-  hasPrevious?: boolean;
-  pageable?: {
-    pageNumber: number;
-    pageSize: number;
-  };
-  last?: boolean;
-  first?: boolean;
-  numberOfElements?: number;
-  empty?: boolean;
+  last: boolean;
+  first: boolean;
 }

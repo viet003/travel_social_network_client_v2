@@ -2,10 +2,9 @@ import axiosConfig from "../configurations/axiosConfig";
 import type { 
   BlogResponse, 
   BlogDto, 
-  PageableResponse,
-  ApiResponse,
   BlogStatus
 } from "../types/blog.types";
+import type { ApiResponse, PageableResponse } from "../types/common.types";
 
 /**
  * Get all published blogs

@@ -1,9 +1,11 @@
 import axiosConfig from "../configurations/axiosConfig";
 import type { ApiResponse } from "../types/common.types";
 
-export enum AiRequestType {
-  GENERATE = 'generate'
-}
+export const AiRequestType = {
+  GENERATE: 'generate'
+} as const;
+
+export type AiRequestType = typeof AiRequestType[keyof typeof AiRequestType];
 
 export interface Activity {
   time: string;
@@ -105,10 +107,13 @@ export const apiApplyAiSuggestions = async (
     );
     
     return {
+      success: true,
       data: results.map(r => r.data.data),
       message: `Created ${results.length} schedules successfully`,
-      code: 200
-    };
+      status: 'SUCCESS',
+      path: '/trips/ai/generate',
+      timestamp: new Date().toISOString()
+    } as ApiResponse<any>;
   } catch (error: unknown) {
     if (error && typeof error === 'object' && 'data' in error) {
       throw (error as { data: unknown }).data;

@@ -20,20 +20,22 @@ export interface NotificationResponse {
   updatedAt: string; // ISO string
 }
 
-export enum NotificationTypeEnum {
-  NEW_POST = "NEW_POST",
-  POST_LIKE = "POST_LIKE",
-  POST_COMMENT = "POST_COMMENT",
-  POST_SHARE = "POST_SHARE",
-  FRIEND_REQUEST = "FRIEND_REQUEST",
-  FRIEND_ACCEPTED = "FRIEND_ACCEPTED",
-  GROUP_INVITE = "GROUP_INVITE",
-  GROUP_JOIN_REQUEST = "GROUP_JOIN_REQUEST",
-  GROUP_JOIN_ACCEPTED = "GROUP_JOIN_ACCEPTED",
-  CHAT_MESSAGE = "CHAT_MESSAGE",
-  MENTION = "MENTION",
-  SYSTEM = "SYSTEM"
-}
+export const NotificationTypeEnum = {
+  NEW_POST: "NEW_POST",
+  POST_LIKE: "POST_LIKE",
+  POST_COMMENT: "POST_COMMENT",
+  POST_SHARE: "POST_SHARE",
+  FRIEND_REQUEST: "FRIEND_REQUEST",
+  FRIEND_ACCEPTED: "FRIEND_ACCEPTED",
+  GROUP_INVITE: "GROUP_INVITE",
+  GROUP_JOIN_REQUEST: "GROUP_JOIN_REQUEST",
+  GROUP_JOIN_ACCEPTED: "GROUP_JOIN_ACCEPTED",
+  CHAT_MESSAGE: "CHAT_MESSAGE",
+  MENTION: "MENTION",
+  SYSTEM: "SYSTEM"
+} as const;
+
+export type NotificationTypeEnum = typeof NotificationTypeEnum[keyof typeof NotificationTypeEnum];
 
 export interface CreateNotificationDto {
   receiverId: string;

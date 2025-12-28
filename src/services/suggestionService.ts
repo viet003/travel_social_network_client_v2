@@ -1,21 +1,22 @@
 import axiosConfig from "../configurations/axiosConfig";
 import type { 
   PostResponse,
-  ApiResponse 
+  ApiResponse,
+  PageableResponse 
 } from "../types/post.types";
 
 /**
  * Get personalized news feed
  * Endpoint: GET /suggestions/newsfeed
  * Description: Get personalized news feed based on user's search history and preferences with Redis caching
- * @param page - Page number (default: 1, 1-based pagination)
- * @param pageSize - Page size (default: 20)
- * @returns Array of post responses
+ * @param page - Page number (default: 0, 0-based pagination)
+ * @param pageSize - Page size (default: 10)
+ * @returns Pageable response with posts and metadata
  */
 export const apiGetNewsFeed = async (
-  page: number = 1,
-  pageSize: number = 20
-): Promise<ApiResponse<PostResponse[]>> => {
+  page: number = 0,
+  pageSize: number = 10
+): Promise<ApiResponse<PageableResponse<PostResponse>>> => {
   try {
     const response = await axiosConfig({
       method: 'GET',
