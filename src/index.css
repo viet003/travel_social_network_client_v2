@@ -1,0 +1,99 @@
+@import "tailwindcss";
+@import './styles/travel-colors.css';
+
+@layer base {
+  * {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+  }
+
+  /* Global scrollbar - chỉ áp dụng cho elements không có class scrollbar-hide */
+  :not(.scrollbar-hide)::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  :not(.scrollbar-hide)::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  :not(.scrollbar-hide)::-webkit-scrollbar-thumb {
+    border-radius: 4px;
+    background: #cbd5e0;
+  }
+
+  .active {
+    color: black;
+    background-color: white;
+  }
+}
+
+/* Custom scrollbar styles */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  /* IE and Edge */
+  scrollbar-width: none;
+  /* Firefox */
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+  /* Chrome, Safari and Opera */
+}
+
+/* Khi hover, hiển thị scrollbar */
+.scrollbar-hide:hover {
+  -ms-overflow-style: auto;
+  scrollbar-width: auto;
+}
+
+.scrollbar-hide:hover::-webkit-scrollbar {
+  display: block;
+  width: 10px;
+  height: 30px;
+}
+
+.scrollbar-hide:hover::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-hide:hover::-webkit-scrollbar-thumb {
+  background: #cbd5e0;
+  border-radius: 4px;
+}
+
+.scrollbar-hide:hover::-webkit-scrollbar-thumb:hover {
+  background: #a0aec0;
+}
+
+.ant-select-focused .ant-select-selector,
+.ant-select-selector:focus,
+.ant-select-selector:active,
+.ant-select-open .ant-select-selector {
+  border-color: var(--travel-primary-600) !important;
+  box-shadow: none !important;
+}
+
+/* Like button animation */
+@keyframes likeAnimation {
+  0% {
+    transform: scale(1);
+  }
+  15% {
+    transform: scale(1.3) rotate(-10deg);
+  }
+  30% {
+    transform: scale(0.9) rotate(10deg);
+  }
+  45% {
+    transform: scale(1.2) rotate(-5deg);
+  }
+  60% {
+    transform: scale(0.95) rotate(5deg);
+  }
+  75% {
+    transform: scale(1.05) rotate(0deg);
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+  }
+}

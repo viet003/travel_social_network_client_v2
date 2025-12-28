@@ -1,0 +1,82 @@
+/* Swiper styles */
+@import 'swiper/css';
+@import 'swiper/css/navigation';
+@import 'swiper/css/pagination';
+@import 'swiper/css/effect-fade';
+
+/* Override Swiper container default styles */
+.post-swiper {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  overflow: hidden;
+}
+
+.post-swiper .swiper-wrapper {
+  align-items: center;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+}
+
+.post-swiper .swiper-slide {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: auto;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  overflow: hidden;
+}
+
+.post-swiper .swiper-slide img,
+.post-swiper .swiper-slide .ant-image,
+.post-swiper .swiper-slide .ant-image-img {
+  border-radius: 12px;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  height: auto;
+  object-fit: contain;
+}
+
+.post-swiper .swiper-button-prev,
+.post-swiper .swiper-button-next {
+  width: clamp(28px, 5vw, 36px);
+  height: clamp(28px, 5vw, 36px);
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 50%;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white !important;
+}
+
+.post-swiper .swiper-button-prev:hover,
+.post-swiper .swiper-button-next:hover {
+  background: rgba(0, 0, 0, 0.7);
+  transform: scale(1.1);
+}
+
+.post-swiper .swiper-button-prev:after,
+.post-swiper .swiper-button-next:after {
+  font-size: clamp(10px, 2vw, 14px);
+  color: white !important;
+  font-weight: bold;
+}
+
+.post-swiper .swiper-pagination-bullet {
+  width: clamp(6px, 1.5vw, 10px);
+  height: clamp(6px, 1.5vw, 10px);
+  background: white;
+  opacity: 0.5;
+  transition: all 0.3s ease;
+}
+
+.post-swiper .swiper-pagination-bullet-active {
+  opacity: 1;
+  width: clamp(20px, 4vw, 28px);
+  border-radius: 4px;
+}

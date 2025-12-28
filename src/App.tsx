@@ -1,0 +1,249 @@
+import { Route, Routes, Navigate } from "react-router-dom";
+import { path } from "./utilities/path";
+import {
+  HomePage,
+  FeaturesPage,
+  PrivacyPage,
+  DesktopAppPage,
+  FAQPage,
+  WatchPage,
+  ExplorePage,
+  TripDetailPage,
+  VideoDetailPage,
+  MediaPostDetailPage,
+  MediaWatchDetailPage,
+  UserProfilePage,
+  UserProfilePostsPage,
+  UserProfilePhotosPage,
+  UserProfileVideosPage,
+  UserProfileReviewsPage,
+  UserProfileFriendsPage,
+  AdminDashboardPage,
+  AdminUserManagementPage,
+  AdminBlogManagementPage,
+  AdminGroupManagementPage,
+} from "./pages";
+import SearchResultPage from "./pages/public/SearchGlobalPage";
+import SearchExplorePage from "./pages/public/SearchExplorePage";
+import {
+  MainLayout,
+  LandingLayout,
+  FriendsLayout,
+  GroupLayout,
+  ExploreLayout,
+  AdminLayout,
+} from "./layout";
+import BlogDetailPage from "./pages/public/blog/BlogDetailPage";
+import {
+  FriendsHomePage,
+  FriendRequestsPage,
+  FriendSuggestionsPage,
+  AllFriendsPage,
+  BirthdaysPage,
+  CustomListsPage,
+} from "./pages/public/friends";
+import {
+  GroupFeedsPage,
+  YourGroupsPage,
+  GroupSuggestionsPage,
+  GroupDetailPage,
+} from "./pages/public/groups";
+import { GroupDetailPage as AdminGroupDetailPage } from "./pages/public/groups";
+import {
+  GroupAboutPage,
+  GroupDiscussionPage,
+  GroupMembersPage,
+  GroupMediaPage,
+} from "./pages/public/groups/groupdetail";
+import {
+  WatchFeedPage,
+  MyVideosPage,
+  WatchTrendingPage,
+  WatchSavedPage,
+  WatchHistoryPage,
+} from "./pages/public/watch";
+import {
+  ExperiencesPage,
+  UserBlogsPage,
+  UserItinerariesPage,
+  GuidesPage,
+  SeasonalTravelGuidePage,
+} from "./pages/public/explore";
+import BlogCreateEditPage from "./pages/public/blog/BlogCreateEditPage";
+import {
+  LoginForm,
+  SignUpForm,
+  ForgotPasswordForm,
+  ResetPasswordForm,
+} from "./components/auth";
+import { ToastContainer } from "react-toastify";
+import { ProtectedRoute, ProtectedResetRoute, AdminProtectedRoute } from "./components/index";
+import "./index.css";
+
+function App() {
+  return (
+    <>
+      <Routes>
+        {/* Landing layout with nested routes */}
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute isPublic={true}>
+              <LandingLayout />
+            </ProtectedRoute>
+          }
+        >
+          <Route index element={<LoginForm />} />
+          <Route path={path.SIGNUP} element={<SignUpForm />} />
+          <Route path={path.FORGOTPASS} element={<ForgotPasswordForm />} />
+          <Route path={path.FEATURES} element={<FeaturesPage />} />
+          <Route path={path.PRIVACY} element={<PrivacyPage />} />
+          <Route path={path.DESKTOP_APP} element={<DesktopAppPage />} />
+          <Route path={path.HELP} element={<FAQPage />} />
+          <Route
+            path={path.RESETPASS}
+            element={
+              <ProtectedResetRoute>
+                <ResetPasswordForm />
+              </ProtectedResetRoute>
+            }
+          />
+        </Route>
+        <Route
+          path={path.HOME}
+          element={
+            <ProtectedRoute isPublic={false}>
+              <MainLayout />
+            </ProtectedRoute>
+          }
+        >
+          <Route index element={<HomePage />} />
+          <Route path={path.FRIENDS} element={<FriendsLayout />}>
+            <Route index element={<FriendsHomePage />} />
+            <Route
+              path={path.FRIENDS_REQUESTS}
+              element={<FriendRequestsPage />}
+            />
+            <Route
+              path={path.FRIENDS_SUGGESTIONS}
+              element={<FriendSuggestionsPage />}
+            />
+            <Route path={path.FRIENDS_ALL} element={<AllFriendsPage />} />
+            <Route path={path.FRIENDS_BIRTHDAYS} element={<BirthdaysPage />} />
+            <Route
+              path={path.FRIENDS_CUSTOM_LISTS}
+              element={<CustomListsPage />}
+            />
+          </Route>
+          <Route path={path.GROUPS} element={<GroupLayout />}>
+            <Route index element={<Navigate to={path.GROUPS_FEEDS} />} />
+            <Route path={path.GROUPS_FEEDS} element={<GroupFeedsPage />} />
+            <Route path={path.YOUR_GROUPS} element={<YourGroupsPage />} />
+            <Route
+              path={path.GROUPS_DISCOVER}
+              element={<GroupSuggestionsPage />}
+            />
+          </Route>
+          <Route
+            path={`${path.GROUPS}/${path.GROUP_DETAIL}`}
+            element={<GroupDetailPage />}
+          >
+            <Route index element={<GroupDiscussionPage />} />
+            <Route path={path.GROUP_ABOUT} element={<GroupAboutPage />} />
+            <Route path={path.GROUP_MEMBERS} element={<GroupMembersPage />} />
+            <Route path={path.GROUP_MEDIA} element={<GroupMediaPage />} />
+          </Route>
+          <Route path={path.WATCH} element={<WatchPage />}>
+            <Route index element={<WatchFeedPage />} />
+            <Route path={path.WATCH_TRENDING} element={<WatchTrendingPage />} />
+            <Route path={path.WATCH_SAVED} element={<WatchSavedPage />} />
+            <Route path={path.WATCH_HISTORY} element={<WatchHistoryPage />} />
+            <Route path={path.MY_VIDEOS} element={<MyVideosPage />} />
+          </Route>
+          <Route path={path.EXPLORE} element={<ExploreLayout />}>
+            <Route index element={<Navigate to={path.EXPLORE_FEATURED} />} />
+            <Route path={path.EXPLORE_FEATURED} element={<ExplorePage />} />
+            <Route
+              path={path.EXPLORE_EXPERIENCES}
+              element={<ExperiencesPage />}
+            />
+            <Route path={path.EXPLORE_USER_POSTS} element={<UserBlogsPage />} />
+            <Route
+              path={path.EXPLORE_USER_ITINERARIES}
+              element={<UserItinerariesPage />}
+            />
+            <Route path={path.EXPLORE_GUIDES} element={<GuidesPage />} />
+            <Route
+              path={path.EXPLORE_SEASONAL}
+              element={<SeasonalTravelGuidePage />}
+            />
+          </Route>
+          <Route path={path.SEARCH} element={<SearchResultPage />} />
+          <Route path={path.EXPLORE_SEARCH} element={<SearchExplorePage />} />
+          <Route path={path.TRIP_DETAIL} element={<TripDetailPage />} />
+          <Route path={path.VIDEO_DETAIL} element={<VideoDetailPage />} />
+          <Route
+            path={path.MEDIA_WATCH_DETAIL}
+            element={<MediaWatchDetailPage />}
+          />
+          <Route
+            path={path.MEDIA_POST_DETAIL}
+            element={<MediaPostDetailPage />}
+          />
+          <Route path={path.POST_DETAIL} element={<MediaPostDetailPage />} />
+          <Route path={path.BLOG_DETAIL} element={<BlogDetailPage />} />
+          <Route path={path.BLOG_CREATE} element={<BlogCreateEditPage />} />
+          <Route path={path.BLOG_EDIT} element={<BlogCreateEditPage />} />
+          <Route path={path.USER} element={<UserProfilePage />}>
+            <Route index element={<UserProfilePostsPage />} />
+            <Route
+              path={path.USER_PHOTOS}
+              element={<UserProfilePhotosPage />}
+            />
+            <Route
+              path={path.USER_VIDEOS}
+              element={<UserProfileVideosPage />}
+            />
+            <Route
+              path={path.USER_REVIEWS}
+              element={<UserProfileReviewsPage />}
+            />
+            <Route
+              path={path.USER_FRIENDS}
+              element={<UserProfileFriendsPage />}
+            />
+          </Route>
+          <Route path={path.SETTINGS} element={<PrivacyPage />} />
+          <Route path={path.FEEDBACK} element={<FAQPage />} />
+        </Route>
+
+        {/* Admin Routes */}
+        <Route path={path.ADMIN} element={
+          <AdminProtectedRoute>
+            <AdminLayout />
+          </AdminProtectedRoute>
+        }>
+          <Route index element={<Navigate to={path.ADMIN_DASHBOARD} replace />} />
+          <Route path={path.ADMIN_DASHBOARD} element={<AdminDashboardPage />} />
+          <Route path={path.ADMIN_USERS} element={<AdminUserManagementPage />} />
+          <Route path={path.ADMIN_BLOGS} element={<AdminBlogManagementPage />} />
+          <Route path={path.ADMIN_GROUPS} element={<AdminGroupManagementPage />} />
+          <Route path={path.ADMIN_BLOG_DETAIL} element={<BlogDetailPage />} />
+          <Route path={path.ADMIN_GROUP_DETAIL} element={<AdminGroupDetailPage />}>
+            <Route index element={<GroupDiscussionPage />} />
+            <Route path={path.GROUP_ABOUT} element={<GroupAboutPage />} />
+            <Route path={path.GROUP_MEMBERS} element={<GroupMembersPage />} />
+            <Route path={path.GROUP_MEDIA} element={<GroupMediaPage />} />
+          </Route>
+          <Route path={path.ADMIN_REPORTS} element={<div className="p-8 text-gray-500">Reports Management Module (Coming Soon)</div>} />
+          <Route path={path.ADMIN_SETTINGS} element={<div className="p-8 text-gray-500">System Settings Module (Coming Soon)</div>} />
+        </Route>
+
+        <Route path={path.STAR} element={<Navigate to="/" replace />} />
+      </Routes>
+      <ToastContainer />
+    </>
+  );
+}
+
+export default App;
